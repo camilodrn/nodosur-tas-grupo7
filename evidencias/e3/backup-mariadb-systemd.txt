@@ -1,0 +1,18 @@
+=== RESPALDO MARIADB DOCKER VIA SYSTEMD ===
+Result=success
+ExecMainStatus=0
+
+=== ULTIMA EJECUCION ===
+Starting nodosur-db-stage-backup.service - Nodo Sur - Respaldo MariaDB Docker staging...
+RESPALDO STAGING: OK
+Tablas: 52
+Archivo: /var/backups/nodosur/staging/nodo_sur_final-staging-20261020T170236Z.sql.gz
+200K	/var/backups/nodosur/staging/nodo_sur_final-staging-20261020T170236Z.sql.gz
+nodosur-db-stage-backup.service: Deactivated successfully.
+Finished nodosur-db-stage-backup.service - Nodo Sur - Respaldo MariaDB Docker staging.
+
+=== BASE PRODUCTIVA ===
+active
+
+=== MARIADB DOCKER ===
+Salud=healthy
