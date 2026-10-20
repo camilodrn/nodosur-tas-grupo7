@@ -1,0 +1,23 @@
+[Unit]
+Description=Nodo Sur - MariaDB Docker produccion
+Wants=network-online.target
+After=network-online.target docker.service nodosur-db-prod-firewall.service
+Requires=docker.service nodosur-db-prod-firewall.service
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/tas_revision/nodosur-tas-grupo7
+
+# No arrancar Docker productivo mientras MariaDB nativa esté activa.
+ExecStartPre=/usr/bin/bash -c '! systemctl is-active --quiet mariadb.service'
+
+ExecStart=/usr/bin/docker compose -f compose/db-stage/compose.prod.yaml up -d --wait --wait-timeout 120
+ExecStop=/usr/bin/docker compose -f compose/db-stage/compose.prod.yaml stop -t 30
+
+TimeoutStartSec=180
+TimeoutStopSec=90
+
+[Install]
+WantedBy=multi-user.target
