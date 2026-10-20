@@ -1,0 +1,6 @@
+Producto de prueba: figuras de madera (ID 43)
+1. Carrito vacío creado en web1: OK
+2. Producto agregado en web1: OK
+3. Producto visible desde web2: OK
+4. Carrito limpiado mediante web2: OK
+RESULTADO: COHERENCIA DEL CARRITO CONFIRMADA
