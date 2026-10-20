@@ -16,7 +16,7 @@ apply_nodosur_rules() {
     done
     printf -- '-A %s -j DROP\n' "$chain"
     for port in $ports; do
-      match=(-p tcp -m conntrack --ctdir ORIGINAL --ctorigdst "$ip" --ctorigdstport "$port" -g "$chain")
+      match=(-p tcp -m conntrack --ctdir ORIGINAL --ctorigdst "$ip" --ctorigdstport "$port" -j "$chain")
       if iptables -w 5 -C DOCKER-USER "${match[@]}" 2>/dev/null; then
         printf -- '-D DOCKER-USER %s\n' "${match[*]}"
       fi
@@ -24,6 +24,7 @@ apply_nodosur_rules() {
     done
     printf 'COMMIT\n'
   } | iptables-restore --wait 5 --noflush
-  # GOTO + RETURN devuelve lo permitido a FORWARD y a las reglas Docker.
+  # JUMP + RETURN reanuda DOCKER-USER: se conservan otras reglas de seguridad.
   # El filtro cubre cualquier interfaz de ingreso, después del DNAT.
+  # No usar GOTO: saltaría reglas adicionales de DOCKER-USER para clientes permitidos.
 }
