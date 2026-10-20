@@ -7,7 +7,7 @@ services:
     restart: "no"
 
     ports:
-      - "127.0.0.1:18081:80"
+      - "10.33.199.58:18081:80"
 
     volumes:
       - type: bind
@@ -19,7 +19,6 @@ services:
       - type: bind
         source: /srv/nodosur/nfs/uploads
         target: /var/www/html/wp-content/uploads
-        read_only: true
         bind:
           create_host_path: false
 
