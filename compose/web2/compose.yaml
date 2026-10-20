@@ -1,0 +1,32 @@
+name: nodosur-web2
+
+services:
+  wordpress:
+    image: wordpress:7.1.2-php8.3-apache
+    container_name: nodosur-web2
+    restart: unless-stopped
+
+    ports:
+      # Acceso local hasta integrar NFS y HAProxy
+      - "127.0.0.1:18080:80"
+
+    environment:
+      WORDPRESS_DB_HOST: "10.33.199.60:3306"
+      WORDPRESS_DB_NAME: "nodo_sur_final"
+      WORDPRESS_DB_USER: "cms_web62"
+
+    secrets:
+      - db_password
+
+    volumes:
+      - /srv/nodosur/web2/html:/var/www/html
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+secrets:
+  db_password:
+    file: /etc/nodosur/secrets/cms_web62.password
