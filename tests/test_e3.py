@@ -164,13 +164,29 @@ class FirewallTests(Sandbox):
         return self.run_script(path, *args)
 
     def decision(self, source, destination, port):
+        """Simula el retorno a DOCKER-USER tras un jump, no un goto."""
         state = json.loads(self.state.read_text())
         for rule in state['DOCKER-USER']:
-            if '-g' not in rule: continue
-            if destination != rule[rule.index('--ctorigdst')+1] or str(port) != rule[rule.index('--ctorigdstport')+1]: continue
-            for item in state[rule[-1]]:
-                if '-s' not in item or ipaddress.ip_address(source) in ipaddress.ip_network(item[item.index('-s')+1]):
-                    return 'DOCKER' if item[-1] == 'RETURN' else item[-1]
+            if '--ctorigdst' in rule:
+                if destination != rule[rule.index('--ctorigdst')+1]:
+                    continue
+                if str(port) != rule[rule.index('--ctorigdstport')+1]:
+                    continue
+                for item in state[rule[-1]]:
+                    allowed = '-s' not in item or ipaddress.ip_address(source) in ipaddress.ip_network(item[item.index('-s')+1])
+                    if not allowed:
+                        continue
+                    if item[-1] == 'DROP':
+                        return 'DROP'
+                    if item[-1] == 'RETURN':
+                        if '-g' in rule:
+                            return 'DOCKER'
+                        break  # -j: continuar con la siguiente regla DOCKER-USER
+                continue
+            if rule[-2:] == ['-j', 'DROP']:
+                return 'DROP'
+            if rule[-2:] == ['-j', 'RETURN']:
+                return 'DOCKER'
         return 'DOCKER'
 
     def test_db_allow_deny_and_idempotence(self):
@@ -186,6 +202,15 @@ class FirewallTests(Sandbox):
         self.assertEqual(self.decision('10.33.199.61', '10.33.199.60', 22), 'DOCKER')
         self.assertEqual(first['OTHER'], self.initial['OTHER'])
         self.assertNotIn('-i', str(first))
+
+    def test_allowed_source_obeys_subsequent_docker_user_rules(self):
+        # Un goto saltaría este DROP heredado incluso con origen permitido.
+        self.initial['DOCKER-USER'] = [['-j', 'DROP']]
+        self.state.write_text(json.dumps(self.initial))
+        self.assertEqual(self.apply('nodosur-db-prod-firewall.sh').returncode, 0)
+        self.assertEqual(
+            self.decision('10.33.199.58', '10.33.199.60', 3306), 'DROP'
+        )
 
     def test_proxy_both_ports_and_sources(self):
         self.assertEqual(self.apply('nodosur-proxy-firewall.sh').returncode, 0)
