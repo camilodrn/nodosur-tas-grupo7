@@ -11,8 +11,18 @@ services:
       - "10.33.195.194:443:8443"
 
     volumes:
-      - ./haproxy.prod.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-      - /etc/nodosur/tls/haproxy-www.pem:/usr/local/etc/haproxy/certs/haproxy.pem:ro
+      - type: bind
+        source: ./haproxy.prod.cfg
+        target: /usr/local/etc/haproxy/haproxy.cfg
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /etc/nodosur/tls/haproxy-www.pem
+        target: /usr/local/etc/haproxy/certs/haproxy.pem
+        read_only: true
+        bind:
+          create_host_path: false
 
     logging:
       driver: json-file

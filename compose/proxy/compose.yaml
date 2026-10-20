@@ -1,18 +1,28 @@
-name: nodosur-proxy
+name: nodosur-proxy-lab
 
 services:
   haproxy:
     image: haproxy:3.2.23-alpine
-    container_name: nodosur-haproxy
-    restart: unless-stopped
+    container_name: nodosur-haproxy-lab
+    restart: "no"
 
     ports:
       - "127.0.0.1:18088:8080"
       - "127.0.0.1:18443:8443"
 
     volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-      - /etc/nodosur/tls/haproxy.pem:/usr/local/etc/haproxy/certs/haproxy.pem:ro
+      - type: bind
+        source: ./haproxy.cfg
+        target: /usr/local/etc/haproxy/haproxy.cfg
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /etc/nodosur/tls/haproxy.pem
+        target: /usr/local/etc/haproxy/certs/haproxy.pem
+        read_only: true
+        bind:
+          create_host_path: false
 
     logging:
       driver: json-file

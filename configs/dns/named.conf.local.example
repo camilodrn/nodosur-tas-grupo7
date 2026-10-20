@@ -1,0 +1,6 @@
+// Integrar con las otras zonas del servidor; no reemplazar a ciegas.
+zone "nodosur07.tas" {
+    type master;
+    file "/etc/bind/db.nodosur07.tas";
+    allow-transfer { none; };
+};

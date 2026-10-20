@@ -1,0 +1,3 @@
+# Consulta fija sin argumentos. No autorizar docker ni una shell genérica.
+Cmnd_Alias NODOSUR_DB_E3 = /usr/local/sbin/nodosur-db-check-e3 ""
+%nodosur-ops ALL=(root) NODOSUR_DB_E3

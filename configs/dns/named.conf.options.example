@@ -12,6 +12,8 @@ options {
     directory "/var/cache/bind";
 
     recursion no;
+    allow-transfer { none; };
+    listen-on-v6 { none; };
     allow-query { nodosur-clients; };
 
     listen-on {

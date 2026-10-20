@@ -1,0 +1,11 @@
+[Unit]
+Description=Nodo Sur - Respaldo diario (propuesta, confirmar horario existente)
+
+[Timer]
+OnCalendar=*-*-* 03:00:00 UTC
+Persistent=true
+RandomizedDelaySec=5min
+Unit=nodosur-db-backup.service
+
+[Install]
+WantedBy=timers.target

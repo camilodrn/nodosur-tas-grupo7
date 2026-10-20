@@ -7,19 +7,30 @@ services:
     restart: "no"
 
     ports:
-      # Acceso local hasta integrar NFS y HAProxy
+      # Solo HAProxy, restringido mediante DOCKER-USER.
       - "10.33.199.62:18080:80"
 
     environment:
       WORDPRESS_DB_HOST: "10.33.199.60:3306"
       WORDPRESS_DB_NAME: "nodo_sur_final"
       WORDPRESS_DB_USER: "cms_web62"
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_password
 
     secrets:
       - db_password
 
     volumes:
-      - /srv/nodosur/web2/html:/var/www/html
+      - type: bind
+        source: ../../configs/apache/nodosur-uploads.conf
+        target: /etc/apache2/conf-enabled/nodosur-uploads.conf
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /srv/nodosur/web2/html
+        target: /var/www/html
+        bind:
+          create_host_path: false
       - type: bind
         source: /srv/nodosur/nfs/uploads
         target: /var/www/html/wp-content/uploads
