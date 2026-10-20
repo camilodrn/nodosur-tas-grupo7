@@ -1,0 +1,21 @@
+[Unit]
+Description=Nodo Sur - HAProxy Docker produccion
+Wants=network-online.target
+Requires=docker.service nodosur-proxy-firewall.service
+After=network-online.target docker.service nodosur-proxy-firewall.service
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/nodosur-g7-proxy/nodosur-tas-grupo7
+
+ExecStartPre=/usr/bin/docker compose -f compose/proxy/compose.prod.yaml config --quiet
+ExecStart=/usr/bin/docker compose -f compose/proxy/compose.prod.yaml up -d --wait --wait-timeout 90
+ExecStop=/usr/bin/docker compose -f compose/proxy/compose.prod.yaml stop -t 20
+
+TimeoutStartSec=150
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target
