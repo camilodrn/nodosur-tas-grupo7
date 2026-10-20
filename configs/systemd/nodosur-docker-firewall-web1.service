@@ -1,0 +1,13 @@
+[Unit]
+Description=Nodo Sur - Firewall Docker Backend 1
+Requires=docker.service
+After=docker.service
+Before=nodosur-web1.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/nodosur-docker-firewall.sh 10.33.199.58 18081
+
+[Install]
+WantedBy=multi-user.target
