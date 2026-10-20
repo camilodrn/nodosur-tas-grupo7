@@ -4,7 +4,7 @@ services:
   wordpress:
     image: wordpress:7.1.2-php8.3-apache
     container_name: nodosur-web2
-    restart: unless-stopped
+    restart: "no"
 
     ports:
       # Acceso local hasta integrar NFS y HAProxy
@@ -20,6 +20,11 @@ services:
 
     volumes:
       - /srv/nodosur/web2/html:/var/www/html
+      - type: bind
+        source: /srv/nodosur/nfs/uploads
+        target: /var/www/html/wp-content/uploads
+        bind:
+          create_host_path: false
 
     logging:
       driver: json-file
