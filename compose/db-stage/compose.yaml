@@ -1,0 +1,41 @@
+name: nodosur-db-staging
+
+services:
+  mariadb:
+    image: mariadb:10.11
+    container_name: nodosur-db-staging
+    restart: "no"
+
+    environment:
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/root_password
+      MARIADB_ROOT_HOST: localhost
+      MARIADB_DATABASE: nodo_sur_final
+
+    ports:
+      - "10.33.199.60:13307:3306"
+
+    secrets:
+      - root_password
+
+    volumes:
+      - db_stage_data:/var/lib/mysql
+
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  db_stage_data:
+
+secrets:
+  root_password:
+    file: /etc/nodosur/secrets/db-stage-root.password
