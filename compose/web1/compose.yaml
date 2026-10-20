@@ -1,0 +1,30 @@
+name: nodosur-web1
+
+services:
+  wordpress:
+    image: wordpress:7.1.2-php8.3-apache
+    container_name: nodosur-web1
+    restart: "no"
+
+    ports:
+      - "127.0.0.1:18081:80"
+
+    volumes:
+      - type: bind
+        source: /srv/nodosur/web1/html
+        target: /var/www/html
+        bind:
+          create_host_path: false
+
+      - type: bind
+        source: /srv/nodosur/nfs/uploads
+        target: /var/www/html/wp-content/uploads
+        read_only: true
+        bind:
+          create_host_path: false
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
