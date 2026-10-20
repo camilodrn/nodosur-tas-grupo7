@@ -8,9 +8,11 @@ services:
 
     ports:
       - "127.0.0.1:18088:8080"
+      - "127.0.0.1:18443:8443"
 
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - /etc/nodosur/tls/haproxy.pem:/usr/local/etc/haproxy/certs/haproxy.pem:ro
 
     logging:
       driver: json-file
