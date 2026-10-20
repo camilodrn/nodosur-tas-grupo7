@@ -1,0 +1,26 @@
+=== Prueba failover ===
+2026-10-20T03:51:30+00:00
+Peticion 1
+HTTP/1.1 200 OK
+x-nodosur-backend: web1
+Peticion 2
+HTTP/1.1 200 OK
+x-nodosur-backend: web1
+Peticion 3
+HTTP/1.1 200 OK
+x-nodosur-backend: web1
+Peticion 4
+HTTP/1.1 200 OK
+x-nodosur-backend: web1
+Peticion 5
+HTTP/1.1 200 OK
+x-nodosur-backend: web1
+Peticion 6
+HTTP/1.1 200 OK
+x-nodosur-backend: web1
+Peticion 7
+HTTP/1.1 200 OK
+x-nodosur-backend: web1
+Peticion 8
+HTTP/1.1 200 OK
+x-nodosur-backend: web1
