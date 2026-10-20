@@ -1,0 +1,16 @@
+=== MARIA DB DOCKER: FIREWALL TRAS REINICIO ===
+
+=== BACKEND 1 ===
+10.33.199.60 dev ens19 src 10.33.199.58 uid 1001 
+    cache 
+WEB1: TCP OK
+
+=== BACKEND 2 ===
+10.33.199.60 dev ens19 src 10.33.199.62 uid 1000 
+    cache 
+WEB2: TCP OK
+
+=== HAPROXY ===
+10.33.199.60 dev ens19 src 10.33.199.61 uid 1000 
+    cache 
+PROXY: SIN CONEXION
