@@ -1,0 +1,21 @@
+name: nodosur-proxy
+
+services:
+  haproxy:
+    image: haproxy:3.2.23-alpine
+    container_name: nodosur-haproxy
+    restart: unless-stopped
+
+    ports:
+      - "127.0.0.1:18088:8080"
+      - "127.0.0.1:18443:8443"
+
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - /etc/nodosur/tls/haproxy.pem:/usr/local/etc/haproxy/certs/haproxy.pem:ro
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
