@@ -49,6 +49,7 @@ Estas observaciones proceden de salidas de terminal aportadas por el equipo **de
 - VM308: `nodosur-proxy.service` activo desde `/home/nodosur-g7-proxy/nodosur-tas-grupo7`; HAProxy en Docker publica 80/443 en `.194`; reglas `DOCKER-USER` de origen VPN/laboratorio presentes.
 - VM263 y VM310: montaje NFSv4.1 RW, mismo export de VM268; ambos servicios WordPress `active`, `nodosur-docker-firewall.service` `loaded/active`, dependencias en drop-ins y reglas `DOCKER-USER` restrictivas. Las unidades específicas propuestas no están instaladas, lo que **no constituye por sí solo una falla de los firewalls existentes**.
 - VM268: export NFS RW a `.58` y `.62`, con `root_squash`; `/srv/nodosur` está en un volumen ext4. Sigue pendiente un ensayo controlado de escritura cruzada.
+- Pruebas TCP posteriores ([salidas archivadas](../evidencias/e3/acceso-proxy-backends-20261020.txt)): desde VM308 el puerto web1 `18081` y web2 `18080` aceptó conexiones; desde VM279 ambos intentos agotaron el tiempo de espera. Esto concuerda con la política `DOCKER-USER` observada en las VMs web, pero el timeout por sí solo no demuestra que el firewall sea la causa exclusiva.
 - En la rama auditada se corrigió el uso de `-g` a `-j` en la biblioteca del firewall y se añadió una regresión para reglas posteriores de `DOCKER-USER`; **la nueva prueba no se ha ejecutado ni el cambio adoptado en VMs**.
 
 ## Pruebas locales realizadas
