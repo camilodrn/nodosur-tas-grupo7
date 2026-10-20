@@ -1,5 +1,7 @@
 # Prueba reproducible — DNS autoritativo
 
+> Registro histórico E2 (septiembre de 2026). Para la arquitectura y las pruebas E3, consultar [operación E3](../docs/OPERACION-E3.md). Los resultados de este archivo no certifican el estado actual de las cinco VMs.
+
 ## Objetivo
 
 Comprobar que BIND9 en `.59` responde por UDP/TCP 53 para la zona `nodosur07.tas` y entrega los registros usados por la arquitectura.

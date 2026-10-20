@@ -1,0 +1,103 @@
+AUDITORÍA LOCAL E3 — sin acceso a VMs ni modificación de servicios
+Fecha del entorno: 2026-10-20T21:23:31.502227+00:00
+Base: 279466d; cambios locales aún no desplegados. Los tests simulan Docker/iptables.
+Git add en workspace: bloqueado por .git de solo lectura (index.lock).
+
+COMANDO: git branch --show-current
+EXIT: 0
+audit/e3-codex
+
+
+COMANDO: git rev-parse HEAD e3/integracion
+EXIT: 0
+279466d076bc611d241705aa5da787bb1527171a
+279466d076bc611d241705aa5da787bb1527171a
+
+
+COMANDO: git merge-base --is-ancestor e3/integracion HEAD
+EXIT: 0
+
+
+
+COMANDO: docker compose version
+EXIT: 0
+Docker Compose version v5.5.1
+
+
+COMANDO: bash scripts/validate-repository.sh
+EXIT: 0
+PASS: sintaxis Bash
+PASS: sintaxis Python
+PASS: seis Compose (cliente; sin daemon ni validación de imágenes)
+zone nodosur07.tas/IN: loaded serial 2026102001
+OK
+configs/sudo/db-e3.sudoers.example: parsed OK
+configs/sudo/db.sudoers.example: parsed OK
+configs/sudo/dns.sudoers.example: parsed OK
+configs/sudo/web.sudoers.example: parsed OK
+SKIP: falta PHP para lint de fragmentos
+PASS: whitespace diff
+ALCANCE: no valida runtime HAProxy/Apache/BIND, systemd instalado ni red; ver auditoría.
+
+
+COMANDO: python3 -m unittest discover -s tests -v
+EXIT: 0
+
+test_client_password_escaping (test_e3.BackupTests.test_client_password_escaping) ... ok
+test_concurrent_lock_rejected (test_e3.BackupTests.test_concurrent_lock_rejected) ... ok
+test_empty_dump_rejected (test_e3.BackupTests.test_empty_dump_rejected) ... ok
+test_partial_failed_dump_never_published (test_e3.BackupTests.test_partial_failed_dump_never_published) ... ok
+test_schema_growth_preserves_backup_with_warning (test_e3.BackupTests.test_schema_growth_preserves_backup_with_warning) ... ok
+test_success_checksum_and_permissions (test_e3.BackupTests.test_success_checksum_and_permissions) ... ok
+test_unhealthy_never_published (test_e3.BackupTests.test_unhealthy_never_published) ... ok
+test_corruption_rejected (test_e3.BackupVerifierTests.test_corruption_rejected) ... ok
+test_integrity_and_table_count (test_e3.BackupVerifierTests.test_integrity_and_table_count) ... ok
+test_manifest_other_path_rejected (test_e3.BackupVerifierTests.test_manifest_other_path_rejected) ... ok
+test_compose_validation_and_data_isolation (test_e3.ConfigurationTests.test_compose_validation_and_data_isolation) ... ok
+test_systemd_local_dependencies_resolve (test_e3.ConfigurationTests.test_systemd_local_dependencies_resolve) ... ok
+test_db_allow_deny_and_idempotence (test_e3.FirewallTests.test_db_allow_deny_and_idempotence) ... ok
+test_missing_docker_jump_stops_without_changes (test_e3.FirewallTests.test_missing_docker_jump_stops_without_changes) ... ok
+test_proxy_both_ports_and_sources (test_e3.FirewallTests.test_proxy_both_ports_and_sources) ... ok
+test_restore_failure_preserves_active_policy (test_e3.FirewallTests.test_restore_failure_preserves_active_policy) ... ok
+test_web_and_invalid_arguments (test_e3.FirewallTests.test_web_and_invalid_arguments) ... ok
+test_cart_requires_explicit_mutation_flag (test_e3.ValidatorTests.test_cart_requires_explicit_mutation_flag) ... ok
+test_dns_expected_records (test_e3.ValidatorTests.test_dns_expected_records) ... ok
+test_dns_wrong_address_propagates (test_e3.ValidatorTests.test_dns_wrong_address_propagates) ... ok
+test_http_failure_propagates (test_e3.ValidatorTests.test_http_failure_propagates) ... ok
+test_http_healthy_and_redirect (test_e3.ValidatorTests.test_http_healthy_and_redirect) ... ok
+test_http_network_failure (test_e3.ValidatorTests.test_http_network_failure) ... ok
+test_storage_rejects_local_mount (test_e3.ValidatorTests.test_storage_rejects_local_mount) ... ok
+test_storage_rejects_readonly_or_wrong_server (test_e3.ValidatorTests.test_storage_rejects_readonly_or_wrong_server) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 1.288s
+
+OK
+
+COMANDO: python3 scripts/audit-secrets.py
+EXIT: 0
+Archivos árbol=104; blobs alcanzables --all=105; candidatos=0
+Heurístico: no demuestra ausencia absoluta; excluye .git físico, objetos inalcanzables y contenido remoto.
+
+
+COMANDO: docker version --format {{.Client.Version}}
+EXIT: 1
+29.9.1
+permission denied while trying to connect to the docker API at unix:///var/run/docker.sock
+
+COMANDO: systemd-analyze verify configs/systemd/nodosur-db-backup.service configs/systemd/nodosur-db-prod-firewall.service configs/systemd/nodosur-db-prod.service configs/systemd/nodosur-db-stage-backup.service configs/systemd/nodosur-db-stage-firewall.service configs/systemd/nodosur-db-stage.service configs/systemd/nodosur-docker-firewall-web1.service configs/systemd/nodosur-docker-firewall-web2.service configs/systemd/nodosur-proxy-firewall.service configs/systemd/nodosur-proxy.service configs/systemd/nodosur-web1.service configs/systemd/nodosur-web2.service configs/systemd/nodosur-db-backup.timer
+EXIT: 1
+
+Failed to turn off SO_PASSRIGHTS on user lookup socket, ignoring: Operation not permitted
+Failed to enable SO_PASSCRED on handoff timestamp socket: Operation not permitted
+
+PASS: seis archivos históricos E2 idénticos a 0f4cfe2 y nueve evidencias originales E3 sin cambios.
+PASS: enlaces Markdown relativos existentes (no valida sitios externos).
+HERRAMIENTA php: NO DISPONIBLE
+HERRAMIENTA haproxy: NO DISPONIBLE
+HERRAMIENTA apache2ctl: NO DISPONIBLE
+HERRAMIENTA named-checkconf: NO DISPONIBLE
+HERRAMIENTA shellcheck: NO DISPONIBLE
+LIMITES: Docker daemon sin permiso; systemd verify bloqueado por sockets del entorno; no runtime/nativas faltantes ni VMs. No cuenta como prueba de producción.
+
+Revalidación tras revisar transacción firewall: 2026-10-20T21:24:45.047530+00:00

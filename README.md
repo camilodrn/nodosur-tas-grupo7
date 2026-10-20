@@ -1,105 +1,54 @@
-# Nodo Sur — Taller de Administración de Sistemas
+# Nodo Sur — Grupo 7, Taller de Administración de Sistemas USM
 
-Proyecto académico del **Grupo 7** para el Taller de Administración de Sistemas, USM, segundo semestre 2026.
+Entrega 3: **23 de octubre de 2026**. Arquitectura implementada de cinco VMs, según los registros del equipo del 20 de octubre. Esta rama contiene correcciones locales de auditoría; **no se han desplegado en las VMs**.
 
-## Estado actual
+| VM | Rol E3 | Administración | Red interna |
+|---|---|---|---|
+| 268 | BIND9, NFS, receptor de respaldos | 10.33.195.205 | 10.33.199.59 |
+| 263 | WordPress/WooCommerce web1 Docker | 10.33.195.202 | 10.33.199.58 |
+| 310 | WordPress/WooCommerce web2 Docker | 10.33.195.208 | 10.33.199.62 |
+| 279 | MariaDB Docker | 10.33.195.226 | 10.33.199.60 |
+| 308 | HAProxy Docker, terminación HTTPS | 10.33.195.194 | 10.33.199.61 |
 
-Arquitectura distribuida validada para la entrega:
+`Cliente → HAProxy → web1/web2 → MariaDB`; BIND resuelve `nodosur07.tas` y `www` al proxy. Ambos backends montan uploads desde NFS en VM268. La tolerancia a fallos cubre un backend web; DNS, NFS, proxy y DB siguen siendo puntos únicos de fallo.
 
-- **VM .59 — DNS autoritativo / BIND9**
-  - Administración/laboratorio: `10.33.195.205`
-  - Red interna: `10.33.199.59`
-  - Zona: `nodosur07.tas`
-- **VM .58 — Web/CMS**
-  - Administración/laboratorio: `10.33.195.202`
-  - Red interna: `10.33.199.58`
-  - Apache + PHP-FPM + WordPress + WooCommerce
-- **VM .60 — Base de datos**
-  - Administración/SSH: `10.33.195.226`
-  - Red interna: `10.33.199.60`
-  - MariaDB escucha en `10.33.199.60:3306`
+## Documentación de entrega
 
-Flujo principal:
+- [Entrega 3 y alcance de las evidencias](docs/ENTREGA3.md).
+- [Arquitectura y flujos](ARQUITECTURA.md), [inventario](INVENTARIO.md) y [decisiones](docs/decisiones-arquitectura.md).
+- [Instalación y adopción de las correcciones](docs/INSTALACION-E3.md).
+- [Operación, pruebas y diagnóstico](docs/OPERACION-E3.md).
+- [Respaldos, recuperación y reversión](docs/RECUPERACION-E3.md).
+- [Matriz de cumplimiento y evidencia pendiente](docs/MATRIZ-E3.md).
+- [Informe de auditoría P0/P1/P2](docs/AUDITORIA-E3.md) y [bitácora](BITACORA.md).
 
-`Cliente → DNS .59 → Web .58 → MariaDB .60`
-
-## Controles implementados
-
-- DNS autoritativo para `nodosur07.tas`.
-- HTTP redirigido a HTTPS.
-- Certificado TLS autofirmado para laboratorio.
-- MariaDB separada de la VM web.
-- Almacenamiento LVM dedicado para `wp-content/uploads` en la VM .58.
-- UFW con accesos por origen y rol.
-- SSH restringido a redes VPN/laboratorio y a miembros de `ssh-nodosur`.
-- `PermitRootLogin no`.
-- Cuentas nominativas para los integrantes del equipo.
-- **Sudo limitado por rol** para las cuentas operativas mediante `nodosur-ops`.
-- Acceso a logs mediante `systemd-journal` sin entregar root irrestricto.
-- Una cuenta bootstrap/recovery por VM con sudo completo.
-- Cuenta temporal `tas_revision` con sudo completo exclusivamente para revisión docente.
-- Logs y pruebas reproducibles para web, DNS, SSH y MariaDB.
-- VMs actualizadas y validadas después del mantenimiento.
-- Flujo WooCommerce validado mediante el pedido de prueba `#71`, correlacionado con MariaDB `.60`.
-- Contribuciones del equipo registradas en `CONTRIBUCIONES.md` sin inventar reparto retrospectivo.
-
-## Redes relevantes
-
-- VPN USM: `10.30.248.0/24`
-- Laboratorio: `10.33.21.0/24`
-- Red interna Grupo 7: `10.33.199.56/29`
-
-## Estructura del repositorio
-
-- `configs/`: ejemplos saneados de configuración.
-- `configs/sudo/`: política reproducible de privilegios por rol.
-- `scripts/`: validaciones no destructivas.
-- `pruebas/`: procedimientos reproducibles y resultados esperados.
-- `evidencias/`: guía para capturas/logs de evidencia.
-- `docs/`: decisiones de arquitectura.
-- `BITACORA.md`: incidentes técnicos reales y su resolución.
-- `CONTRIBUCIONES.md`: registro de trabajo real por integrante y evidencia disponible.
-- `CHECKLIST_ENTREGA2.md`: estado consolidado y pendientes antes de entregar.
-
-## Seguridad
-
-**Este repositorio no debe contener credenciales, contraseñas, salts, claves privadas, dumps con datos sensibles ni archivos `wp-config.php` reales.**
-
-Las configuraciones incluidas están saneadas y usan placeholders cuando corresponde. El barrido pre-publicación verificó además que el árbol actual no contiene archivos `.env`, dumps SQL, claves privadas TLS/SSH ni respaldos sensibles.
-
-## Acceso de revisión
-
-La cuenta temporal `tas_revision` dispone de privilegios administrativos completos en las tres VMs para facilitar la evaluación docente. Sus credenciales se documentan **fuera del repositorio** y deben revocarse al finalizar la evaluación.
-
-Las cuentas del equipo usan privilegios limitados según el rol de cada VM. Los accesos completos de contingencia permanecen en las cuentas bootstrap/recovery y no se consideran cuentas operativas diarias.
-
-## Validación rápida
-
-Desde un cliente de las redes autorizadas:
+## Verificación local sin VMs
 
 ```bash
-bash scripts/validate-web.sh
+bash scripts/validate-repository.sh
+python3 -m unittest discover -s tests -v
+python3 scripts/audit-secrets.py
+```
+
+El validador local requiere Bash y Python 3; Compose, `named-checkzone` y `visudo` se usan si están disponibles y su ausencia se informa como **SKIP**, nunca como aprobación. Las pruebas de regresión requieren el cliente Compose, pero simulan Docker e iptables sin acceder al daemon, red ni servicios del host.
+
+Desde un cliente autorizado, con el certificado público autofirmado validado por un canal confiable:
+
+```bash
+NODOSUR_CA_CERT=/ruta/segura/nodosur07.crt bash scripts/validate-web.sh
 bash scripts/validate-dns.sh
 ```
 
-En `.60`, las cuentas operativas pueden ejecutar:
+`NODOSUR_INSECURE=1` permite diagnóstico explícito sin validar confianza TLS. No demuestra autenticidad del servidor. La prueba de carrito escribe temporalmente en la aplicación y requiere una ventana de pruebas; no forma parte del chequeo local.
 
-```bash
-bash scripts/validate-db-local.sh
-```
+## Estado y límites
 
-El script utiliza `/usr/local/sbin/nodosur-db-check`, autorizado por la política de sudo limitada, y no entrega una consola MariaDB ejecutada arbitrariamente como root.
+Los archivos originales conservan balanceo 4/4, failover con ocho respuestas de web1, recuperación 4/4, HTTPS 3/3, carrito compartido y restauración aislada de 52 tablas. El equipo además reportó balanceo 5/5 y copia remota SHA-256/GZIP de 52 tablas; falta versionar la salida saneada de esas comprobaciones. Ver [matriz](docs/MATRIZ-E3.md).
 
-La validación completa de la configuración de SSH mediante:
+Las correcciones cierran errores del repositorio, pero requieren adopción y verificación en laboratorio. Faltan la configuración real de exportaciones NFS y de réplica/mantenimiento remoto, los digests de imágenes, pruebas de arranque de las cinco VMs y la rúbrica oficial. No se asigna una nota ni se declara cumplimiento total sin esos elementos.
 
-```bash
-bash scripts/validate-ssh-config.sh
-```
+## Historia y seguridad
 
-requiere `tas_revision` o la cuenta bootstrap/recovery de la VM, porque `sshd -t/-T` necesita privilegios que deliberadamente no se entregan a las cuentas operativas.
+E1/E2 se conservan en el historial Git, [documentos históricos](docs/historia/README.md), `pruebas/*.md`, [checklist E2](CHECKLIST_ENTREGA2.md) y [contribuciones](CONTRIBUCIONES.md). En E2 había tres VMs, Apache/PHP-FPM nativo y LVM local; esa arquitectura no describe E3.
 
-Las pruebas detalladas están documentadas en `pruebas/`.
-
-## Pendientes de cierre
-
-El flujo empresarial WooCommerce, el registro de contribuciones y el barrido pre-publicación ya están cerrados. El pendiente académico restante es preparar la defensa individual.
+No versionar credenciales, salts, claves privadas, `wp-config.php` real ni SQL. Consultar [SECURITY.md](SECURITY.md). Las cuentas docentes y los permisos sudo de las nuevas VMs deben verificarse sin publicar credenciales.

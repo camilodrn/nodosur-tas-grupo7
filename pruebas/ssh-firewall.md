@@ -1,5 +1,7 @@
 # Prueba reproducible — SSH, firewall y sudo limitado
 
+> Registro histórico E2 (septiembre de 2026). Para la arquitectura y las pruebas E3, consultar [operación E3](../docs/OPERACION-E3.md). Los resultados de este archivo no certifican el estado actual de las cinco VMs.
+
 ## Objetivo
 
 Comprobar que el acceso administrativo es nominativo, que root no entra directamente por SSH, que UFW restringe el puerto 22 a VPN/laboratorio y que las cuentas operativas del equipo usan sudo limitado por rol.

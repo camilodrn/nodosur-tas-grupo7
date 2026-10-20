@@ -1,5 +1,7 @@
 # Evidencias de la entrega
 
+Para E3 consultar [matriz y alcance](../docs/MATRIZ-E3.md). Los `.txt` originales de `e3/` se conservan sin cambios. `e3/auditoria-local.txt` registra únicamente comprobaciones locales. El resto de esta guía procede de E2 y no acredita estado actual de las cinco VMs.
+
 Esta carpeta documenta **qué evidencia debe conservarse**, pero no almacena secretos ni capturas con credenciales visibles.
 
 ## Evidencias recomendadas

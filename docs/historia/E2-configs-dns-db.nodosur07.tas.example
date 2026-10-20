@@ -1,0 +1,23 @@
+$TTL 300
+@       IN SOA ns1.nodosur07.tas. admin.nodosur07.tas. (
+            2026090701 ; serial
+            3600       ; refresh
+            900        ; retry
+            604800     ; expire
+            300 )      ; minimum
+
+@       IN NS ns1.nodosur07.tas.
+ns1     IN A  10.33.195.205
+
+@       IN A  10.33.195.202
+www     IN A  10.33.195.202
+app     IN CNAME www.nodosur07.tas.
+
+db      IN A  10.33.199.60
+
+cms     IN A  10.33.195.205
+mail    IN A  10.33.195.205
+@       IN MX 10 mail.nodosur07.tas.
+@       IN TXT "nodosur07-tas-validado"
+portal  IN A  10.33.195.205
+soporte IN A  10.33.195.205

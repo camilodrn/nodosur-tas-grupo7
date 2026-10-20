@@ -1,5 +1,7 @@
 # Flujo empresarial WooCommerce — validado
 
+> Registro histórico E2 (septiembre de 2026). Para la arquitectura y las pruebas E3, consultar [operación E3](../docs/OPERACION-E3.md). Los resultados de este archivo no certifican el estado actual de las cinco VMs.
+
 ## Objetivo
 
 Demostrar una transacción identificable de extremo a extremo en la aplicación y localizar el mismo pedido en la base de datos MariaDB separada.

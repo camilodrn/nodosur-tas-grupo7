@@ -1,5 +1,7 @@
 # Prueba reproducible — Base de datos separada
 
+> Registro histórico E2 (septiembre de 2026). Para la arquitectura y las pruebas E3, consultar [operación E3](../docs/OPERACION-E3.md). Los resultados de este archivo no certifican el estado actual de las cinco VMs.
+
 ## Objetivo
 
 Comprobar que MariaDB productiva reside en `.60`, escucha por la red interna y que la VM web puede alcanzarla sin exponer credenciales en el repositorio.

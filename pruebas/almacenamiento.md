@@ -1,5 +1,7 @@
 # Prueba reproducible — Almacenamiento WordPress
 
+> Registro histórico E2 (septiembre de 2026). Para la arquitectura y las pruebas E3, consultar [operación E3](../docs/OPERACION-E3.md). Los resultados de este archivo no certifican el estado actual de las cinco VMs.
+
 ## Objetivo
 
 Comprobar que `wp-content/uploads` utiliza un volumen LVM dedicado, persiste mediante `/etc/fstab` y mantiene permisos adecuados para WordPress.

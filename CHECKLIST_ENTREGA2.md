@@ -1,5 +1,7 @@
 # Checklist Entrega 2
 
+> Registro histórico de E2. El cierre E3 y sus pendientes están en [docs/ENTREGA3.md](docs/ENTREGA3.md); no extrapolar estas validaciones de tres VMs a cinco.
+
 Estado técnico consolidado del repositorio. No reemplaza la rúbrica oficial.
 
 | Área | Estado | Evidencia principal |

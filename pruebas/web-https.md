@@ -1,5 +1,7 @@
 # Prueba reproducible — Web y HTTPS
 
+> Registro histórico E2 (septiembre de 2026). Para la arquitectura y las pruebas E3, consultar [operación E3](../docs/OPERACION-E3.md). Los resultados de este archivo no certifican el estado actual de las cinco VMs.
+
 ## Objetivo
 
 Comprobar resolución, redirección HTTP→HTTPS, respuesta de la aplicación y trazabilidad en logs.
