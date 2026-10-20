@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -u
+set -euo pipefail
 
 printf '== Nodo Sur: validación SSH local ==\n'
 printf '%s\n' 'Nota: la validación efectiva de sshd requiere tas_revision o la cuenta bootstrap/recovery de la VM.'
