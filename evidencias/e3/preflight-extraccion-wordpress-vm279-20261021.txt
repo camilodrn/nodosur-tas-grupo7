@@ -1,0 +1,18 @@
+# E3 — Inspección estructural TAR web recibido en VM279 (21/10/2026)
+# Transcripción aportada por el equipo. Solo inspección tarfile; SIN extracción.
+# Archivo confidencial: /var/backups/nodosur/web-secondary/wordpress-files-20261019-205742.tar.gz
+#
+=== VALIDACION DEL RESPALDO WEB ===
+Archivos regulares: 10313
+Directorios: 1516
+Enlaces: 0
+Archivos especiales: 0
+Rutas peligrosas: 0
+Tamaño descomprimido: 178.2 MiB
+RESULTADO: APTO PARA ENSAYO
+#
+# Alcance: recuento de entradas tar e inspección de rutas absolutas y '..'.
+# Aún no prueba extracción exitosa, permisos de archivos restaurados,
+# ausencia de PAX/xattrs riesgosos o arranque funcional WordPress.
+# La extracción, si se hace, debe permanecer en directorio root-only NUEVO
+# y no restaurar dueño/permisos anteriores ni iniciar servicios.
