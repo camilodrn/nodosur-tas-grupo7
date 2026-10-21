@@ -70,7 +70,7 @@ docker exec "$restore_name" mariadb --defaults-extra-file=/run/secrets/client.cn
 
 La captura histórica dio 52 tablas, 51 posts, 512 opciones y 4 usuarios. Esos conteos pertenecen a esa copia y pueden cambiar. No publicar filas, correos ni sesiones. Registrar tiempos y código de importación. Parar el ensayo después de validar; conservar volumen y evidencia según la política acordada. Esta guía no ordena borrar datos ni ejecutar `down -v`/`prune`.
 
-## Recuperación integral y criterios de aceptación
+## Ensayo aislado de extracción WordPress en VM279 (realizado)\n\nSe extrajo el TAR privado a `/var/backups/nodosur/restore-web-check-20261021`, directorio nuevo `root:root 0700`, sin restaurar propietarios ni permisos originales. La verificación contó **10.313 archivos WordPress y 126 archivos uploads**, y confirmó la presencia de `wp-config.php` ([evidencia](../evidencias/e3/extraccion-aislada-wordpress-vm279-20261021.txt)). No se ejecutó WordPress ni se conectó al contenedor de recuperación MariaDB; el ensayo acredita recuperación de archivos, no funcionamiento integrado de la tienda. El directorio conserva archivos potencialmente sensibles: restringir acceso y acordar su retención; no compartir contenido ni contraseñas.\n\n## Recuperación integral y criterios de aceptación
 
 Tras una pérdida real, recuperar primero datos en infraestructura aislada, sin sobrescribir la original:
 
