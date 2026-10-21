@@ -40,3 +40,15 @@ Dueño: root | Grupo: root | Permisos: 600 | Tamaño: 60869111 bytes
 # - NO demuestra restauración funcional de WordPress + MariaDB ni protección fuera del clúster.
 # - Sin cifrado adicional en reposo: SSH cifra tránsito; 0600/0700 limitan lectura.
 # - La redundancia está en otra VM del mismo laboratorio, no fuera del clúster.
+
+# CIERRE DE TEMPORALES — confirmaciones interactivas del operador (21/10/2026)
+# En VM268: se comparó SHA-256 del temporal con el original root-only.
+Respaldo original verificado. Se puede retirar el temporal.
+# Confirmación rm -i por operador:
+y
+# En VM279: se comparó SHA-256 del temporal con el respaldo definitivo root-only.
+Copia definitiva verificada. Se puede retirar el temporal.
+# Confirmación rm -i por operador:
+y
+# Los comandos no informaron errores; se debe volver a comprobar existencia de definitivos
+# antes del ensayo de restauración. No se eliminaron respaldos definitivos.
