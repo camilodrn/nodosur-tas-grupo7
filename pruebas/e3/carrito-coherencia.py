@@ -1,5 +1,5 @@
 import json
-from pathlib import Path
+import argparse
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 
@@ -34,9 +34,14 @@ def api(server, path, token=None, payload=None):
     except HTTPError as e:
         raise RuntimeError(f"{server}: HTTP {e.code}") from e
 
-products = json.loads(
-    Path("/tmp/nodosur-products-web1.json").read_text()
-)
+parser = argparse.ArgumentParser(description="Prueba con escritura temporal de carrito; ejecutar solo desde VM308 en ventana autorizada.")
+parser.add_argument("--permitir-escritura", action="store_true", help="autoriza crear y limpiar un carrito de prueba")
+parser.add_argument("--producto", type=int, help="ID de producto simple aprobado para la prueba")
+args = parser.parse_args()
+if not args.permitir_escritura or not args.producto:
+    parser.error("se requieren --permitir-escritura y --producto ID")
+product_data, _ = api("web1", f"/products/{args.producto}")
+products = [product_data]
 
 eligible = [
     p for p in products
@@ -59,13 +64,14 @@ print("1. Carrito vacío creado en web1: OK")
 
 added = False
 verified = False
+cleaned = False
 
 try:
+    added = True  # Limpiar incluso si la respuesta se pierde después de escribir.
     cart, _ = api(
         "web1", "/cart/add-item", token,
         {"id": product["id"], "quantity": 1}
     )
-    added = True
 
     matches = [
         x for x in cart.get("items", [])
