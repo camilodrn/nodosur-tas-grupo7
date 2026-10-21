@@ -1,0 +1,29 @@
+# Evidencia E3 — contenido resumido de respaldo web en VM268 (20/10/2026)
+# Transcripción de consulta ejecutada y proporcionada por el equipo.
+# No se publica ni extrae el contenido del tar: contiene wp-config.php (posibles secretos).
+#
+# Ruta local en VM268:
+# /var/backups/nodosur-remote/web/wordpress-files-20261019-205742.tar.gz
+# sudo ls -lh /var/backups/nodosur-remote/web/
+# total 59M
+# -rw------- 1 root root 59M Oct 19 21:23 wordpress-files-20261019-205742.tar.gz
+#
+# sudo gzip -t "$archivo" && echo "GZIP: CORRECTO"
+GZIP: CORRECTO
+#
+# sudo tar -tzf "$archivo" | awk '(conteo por categoria)'
+Entradas totales: 11829
+Entradas en uploads: 137
+Entradas en wp-content: 8077
+Archivos wp-config.php: 1
+Entradas en plugins: 7204
+Entradas en themes: 719
+#
+# LIMITACIONES
+# - Son entradas del TAR, incluyendo posibles directorios, NO tamaños ni conteos de archivos únicos.
+# - La coincidencia de "uploads" es por nombre en la ruta, sin contraste con NFS actual.
+# - Esto evidencia presencia de contenidos de uploads, wp-content y configuración sensible,
+#   pero NO cobertura temporal completa, autenticidad, funcionalidad del WordPress ni restauración exitosa.
+# - Fecha del backup: 19/10/2026, no necesariamente la última versión de uploads/WordPress.
+# - Mantener tar y su wp-config fuera de GitHub, fuera de accesos públicos y con permisos restringidos.
+# - Respaldo web y NFS actual residen en VM268; necesitan protección frente al fallo total de VM268.
