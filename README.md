@@ -4,7 +4,7 @@
 
 Proyecto de infraestructura para una plataforma WordPress/WooCommerce con dos servidores web, balanceo de carga y estado compartido. Esta es la implementación correspondiente a la **Entrega 3: publicación resiliente, contenedores y seguridad**.
 
-**Estado de las comprobaciones: 21 de octubre de 2026.** El sistema está desplegado en el laboratorio iLab y se accede desde redes autorizadas. Los cambios adicionales propuestos por Codex en la [auditoría separada](https://github.com/camilodrn/nodosur-tas-grupo7/pull/1) **no están desplegados**.
+**Estado de las comprobaciones: 21 de octubre de 2026.** El sistema está desplegado en el laboratorio iLab y se accede desde redes autorizadas. La mayoría de los cambios propuestos por Codex en la [auditoría separada](https://github.com/camilodrn/nodosur-tas-grupo7/pull/1) **no están desplegados**. Excepción comprobada: la protección Apache de `uploads` ya está activa en **web2 (VM310)**; **web1 sigue pendiente** ([evidencia](evidencias/e3/apache-uploads-web2-productivo-20261021.txt)).
 
 ## Arquitectura implementada
 
