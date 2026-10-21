@@ -53,7 +53,7 @@ Las evidencias se presentan con su alcance real: las capturas históricas no inc
 - [`pruebas/`](pruebas/README.md): índice de procedimientos, con la prueba de carrito protegida por autorización explícita y la separación E2/E3.
 - `evidencias/e3/`: resultados verificables de pruebas.
 - [Estado y pruebas E3](docs/ENTREGA3.md), [matriz de flujos](docs/MATRIZ-FLUJOS-E3.md), [autoevaluación de rúbrica](docs/RUBRICA-E3.md) y [decisiones](docs/decisiones-arquitectura.md).
-- [Guía de reconstrucción y prerequisitos](docs/DESPLIEGUE-REPRODUCIBLE-E3.md) y [plan de demostración de 12–15 minutos](docs/PLAN-DEMOSTRACION-E3.md).
+- [Guía de reconstrucción y prerequisitos](docs/DESPLIEGUE-REPRODUCIBLE-E3.md), [plan de alineación controlada de WordPress](docs/PLAN-ALINEACION-WORDPRESS-E3.md) y [demostración de 12–15 minutos](docs/PLAN-DEMOSTRACION-E3.md).
 - [Revisión selectiva de mejoras de Codex](docs/REVISION-CODEX-E3.md): qué se incorporó, qué requiere pruebas y qué no se debe desplegar todavía.
 - [Historial de Entrega 2](docs/historia/CHECKLIST_ENTREGA2.md): checklist original conservado fuera de la raíz, para no confundir E2 con E3.
 
