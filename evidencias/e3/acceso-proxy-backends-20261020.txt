@@ -1,0 +1,22 @@
+# Evidencia E3 — matriz de acceso TCP a WordPress (20-10-2026)
+# Transcripción de salidas compartidas por el equipo desde consolas de las VMs.
+# No es una prueba ejecutada por el auditor. No hay credenciales ni datos de usuarios.
+# Método: nc -zvw3 desde proxy; nc -zvw4 desde DB.
+# Contexto: reglas DOCKER-USER de ambos web observadas en la misma revisión.
+# Alcance: conexión TCP, no prueba de capa HTTP, carga ni firewall ante reinicio.
+#
+# VM279 — svr-db-nodosur07 — origen 10.33.199.60
+$ nc -zvw4 10.33.199.58 18081
+nc: connect to 10.33.199.58 port 18081 (tcp) timed out: Operation now in progress
+$ nc -zvw4 10.33.199.62 18080
+nc: connect to 10.33.199.62 port 18080 (tcp) timed out: Operation now in progress
+#
+# VM308 — nodosur-g7-proxy — origen autorizado esperado 10.33.199.61
+$ nc -zvw3 10.33.199.58 18081
+Connection to 10.33.199.58 18081 port [tcp/*] succeeded!
+$ nc -zvw3 10.33.199.62 18080
+Connection to 10.33.199.62 18080 port [tcp/*] succeeded!
+#
+# Interpretación: camino proxy->web1 y proxy->web2 alcanzable;
+# intentos DB->web1 y DB->web2 no se completaron.
+# El timeout por sí solo no atribuye la causa exclusivamente al firewall.
