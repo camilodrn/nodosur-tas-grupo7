@@ -1,0 +1,46 @@
+# Nodo Sur E3 — Auditoria de acceso al certificado TLS
+# Fecha: 21/10/2026
+# VM308 — HAProxy
+# Comprobaciones de solo lectura, sin modificar servicios.
+
+=== PERMISOS DEL HOST ===
+755 0:0 root:root /etc/nodosur
+750 0:99 root:UNKNOWN /etc/nodosur/tls
+640 0:99 root:UNKNOWN /etc/nodosur/tls/haproxy-www.pem
+
+=== RESOLUCION NSS ===
+GID numerico: 99
+GID sin nombre resuelto por NSS en el host.
+
+=== IDENTIDAD DENTRO DEL CONTENEDOR ===
+Contenedor: nodosur-haproxy
+uid=99(haproxy) gid=99(haproxy)
+groups=99(haproxy)
+
+=== USUARIO CONFIGURADO EN DOCKER ===
+Usuario=haproxy
+
+=== MONTAJE DEL CERTIFICADO ===
+Origen=/etc/nodosur/tls/haproxy-www.pem
+Destino=/usr/local/etc/haproxy/certs/haproxy.pem
+RW=false
+
+=== COMPROBACION DE ACCESO EFECTIVO ===
+Usuario: uid=99(haproxy) gid=99(haproxy)
+Prueba: test -r sobre el PEM montado
+Resultado: certificado legible
+
+=== CONCLUSION ===
+El grupo numerico 99 no tiene nombre resuelto en
+el host, pero corresponde a haproxy en el contenedor.
+
+El proceso con UID/GID 99 tiene acceso de lectura
+al PEM. El montaje Docker es de solo lectura.
+
+No se detecto necesidad de modificar permisos.
+No se modificaron archivos, servicios ni contenedores.
+
+ALCANCE:
+No se auditaron todas las identidades del host,
+las ACL adicionales ni todos los controles de acceso.
+No se expuso el contenido del certificado ni su clave.
