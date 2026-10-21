@@ -33,14 +33,20 @@ La regla no afecta a otros puertos por sí misma; el tráfico que no coincide pu
 
 [Consulta de solo lectura del 21/10](../evidencias/e3/permisos-publicacion-git-db-proxy-20261021.txt): en VM279 el secreto DB y directorio son root:root con modos 600/700; Docker publica `3306/tcp` solo en `10.33.199.60:3306`. En VM308 el certificado TLS (incluye clave privada) usa modo 640 root:UNKNOWN y su directorio modo 750; Docker publica 8080/8443 internos a `10.33.195.194:80/443`. `UNKNOWN` corresponde al nombre de grupo no resuelto en el host. La auditoría posterior confirmó que el GID 99 corresponde al grupo `haproxy` dentro del contenedor, que se ejecuta con UID/GID 99. El PEM está montado con `RW=false` y se comprobó su lectura efectiva mediante `test -r` bajo esa identidad ([evidencia](../evidencias/e3/haproxy-certificado-gid99-20261021.txt)). No fue necesario cambiar permisos. Esta prueba no constituye una auditoría exhaustiva de ACL ni de identidades del host. Los enlaces a IP concreta delimitan interfaz de escucha, **no sustituyen pruebas de firewall de origen**.
 
+## Auditoría complementaria de VM279 y DNS (21/10/2026)
+
+La [captura de reglas y consultas](../evidencias/e3/auditoria-firewall-db-dns-20261021.txt) confirma que el `FORWARD` de VM279 tiene política `DROP` y pasa primero por `DOCKER-USER`. Las excepciones observadas hacia el puerto 3306 son los orígenes `.59` (VM268 DNS/NFS), `.62` (web2) y `.58` (web1), antes de una regla `DROP` para los demás orígenes sobre el destino original `10.33.199.60:3306`; el contador DROP registra 4 paquetes. UFW está activo con entradas predeterminadamente denegadas y permisos explícitos para 3306 desde esas tres IP y SSH administrativo desde las redes `10.30.248.0/24` y `10.33.21.0/24`. **`RETURN` no certifica aceptación final** y los contadores no identifican origen ni instante de cada paquete. También persisten reglas para `13307` con contadores no nulos; su publicación y necesidad no están confirmadas.
+
+En VM268 se observó respuesta SOA autoritativa (`aa`, `NOERROR`, serial `2026102001`) sobre UDP y TCP desde Fedora. La consulta AXFR presentó `NOERROR` y `ANSWER: 9`, **indicio de transferencia autorizada desde Fedora por VPN**, pero la salida se truncó con `head` y aún no se confirmó un `XFR size` final ni se revisó el alcance de las ACL. No atribuir acceso desde Internet. No se modificaron servicios ni reglas.
+
 ## Reglas y flujos adicionales aún por corroborar
 
 | Flujo | Política esperada | Pendiente |
 |---|---|---|
 | VPN/laboratorio → SSH administrativo de cada VM | Permitir solo a redes/cuentas autorizadas | Verificar filtros efectivos y accesos, sin revelar secretos |
-| Cliente VPN/laboratorio → DNS autoritativo VM268 | Permitir consultas UDP/TCP 53 según política | Guardar consultas directas `dig` UDP/TCP, AA/SOA y filtro AXFR |
+| Cliente VPN/laboratorio → DNS autoritativo VM268 | Permitir SOA por UDP/TCP; AXFR solo según política de secundarios | SOA UDP/TCP ya autoritativo (`aa`). AXFR devuelve `NOERROR`, `ANSWER: 9` desde Fedora por VPN, pero falta confirmar término, ACL efectiva y necesidad de permitirlo |
 | MariaDB VM279 → HTTPS administrativo del proxy VM308 | Bloquear según política documentada | Falta salida técnica versionada que acredite origen/destino |
-| VM268 NFS/DNS → MariaDB VM279 TCP 3306 | Política histórica posiblemente permisiva | Comprobar decisión real antes de describirlo como bloqueado |
+| VM268 NFS/DNS → MariaDB VM279 TCP 3306 | Excepción observada en `DOCKER-USER` y UFW | La IP `.59` está exceptuada, pero el contador de regla es 0 y no hay ensayo de conexión desde VM268; comprobar necesidad y alcance, sin asumir aceptación final |
 | Redes ajenas a las autorizadas → puertos HTTP de backends / DB | Bloquear | Verificación segura desde un origen de prueba autorizado para negativas |
 
 ## Aplicación y precauciones
