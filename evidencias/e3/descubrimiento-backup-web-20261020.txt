@@ -1,0 +1,24 @@
+# E3 — Inspección inicial de respaldo WordPress en VM268, 20-10-2026
+# Transcripción parcial del inventario proporcionado por el equipo.
+# No se inspeccionó ni restauró el archivo en esta etapa.
+
+$ sudo du -sh /srv/nodosur/uploads
+5.7M    /srv/nodosur/uploads
+
+$ df -hT /srv/nodosur/uploads /var/backups
+Filesystem                           Type  Size  Used Avail Use% Mounted on
+/dev/mapper/ubuntu--vg-nodosur--data ext4   20G  5.8M   19G   1% /srv/nodosur
+/dev/mapper/ubuntu--vg-ubuntu--lv    ext4   97G  3.6G   89G   4% /
+
+$ sudo find /var/backups /srv/nodosur /mnt /media -maxdepth 4 -type f \( -iname '*uploads*.tar*' -o -iname '*wordpress*.tar*' -o -iname '*nodosur*.tgz' -o -iname '*.tar.zst' \) -print 2>/dev/null | head -30
+/var/backups/nodosur-remote/web/wordpress-files-20261019-205742.tar.gz
+
+$ sudo systemctl show nodosur-remote-backup-maintenance.service -p ExecStart -p FragmentPath --no-pager
+ExecStart={ path=/usr/local/sbin/nodosur-remote-backup-maintenance ; argv[]=/usr/local/sbin/nodosur-remote-backup-maintenance ; ignore_errors=no ; start_time=[Wed 2026-10-21 00:03:47 UTC] ; stop_time=[Wed 2026-10-21 00:03:47 UTC] ; pid=174404 ; code=exited ; status=0 }
+FragmentPath=/etc/systemd/system/nodosur-remote-backup-maintenance.service
+
+# Interpretación:
+# - Existe un .tar.gz llamado wordpress-files-20261019-205742.tar.gz.
+# - Todavía no se ha verificado su integridad ni se han enumerado sus miembros.
+# - No se puede afirmar que contenga uploads, wp-config, base de datos, ni que permita restaurar WordPress.
+# - No se ha identificado aún el proceso que creó este .tar.gz ni su periodicidad.
