@@ -25,6 +25,12 @@ Los Compose de ambas VMs usan `wordpress:7.1.2-php8.3-apache`, pero cada host ha
 
 El operador transfirió a VM310 `wordpress-7.1.3.tar.gz`, lo volvió a verificar por SHA-1 oficial, Gzip y lectura de `version.php`, y obtuvo SHA-256 `d2a09acb6a15e3b9c471d72557753c266d6f41a79ed19bfe04cbfe49e283b2a5` ([evidencia](../evidencias/e3/wordpress-713-transferido-web2-20261021.txt)). Después extrajo el paquete en un directorio de staging privado **fuera de** `/srv/nodosur/web2/html`: `/var/tmp/nodosur-e3-wp713-staging/wordpress`. Verificó directorios `wp-admin`, `wp-includes`, archivo `wp-login.php`, versión 7.1.3 y herramienta `rsync` del host. WordPress activo **continúa en 7.1.2** ([evidencia](../evidencias/e3/wordpress713-staging-web2-20261021.txt)).
 
+## Ensayo de falla y retirada de web2 — realizado
+
+En VM308 se comprobó web1 HTTP 200 en home, `/tienda/` y archivo uploads NFS, y HAProxy `running`. El operador detuvo exclusivamente `nodosur-web2` en VM310 (`exited`). HAProxy registró **web2 DOWN** por conexión rechazada; **ocho solicitudes** HTTPS posteriores obtuvieron HTTP/2 200, todas con `X-NodoSur-Backend: web1`. [Evidencia saneada](../evidencias/e3/prueba-falla-web2-haproxy-web1-20261021.txt).
+
+**Pendiente:** prueba de recuperación y verificación de reincorporación (web2 debe permanecer fuera de servicio durante la intervención). La muestra no mide posibles errores de solicitudes durante el intervalo de detección, por lo que no afirmar 100% de disponibilidad ininterrumpida.
+
 ## Puertas de seguridad antes de un cambio
 
 1. Confirmar en ambos nodos versiones, localidad/idioma del paquete y `$wp_db_version`; comprobar que el core 7.1.3 de referencia es íntegro frente a checksums del proveedor, no copiar a ciegas desde web1.
