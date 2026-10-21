@@ -78,3 +78,25 @@ ALCANCE
 - No es auditoría total de nftables, reglas FORWARD posteriores,
   ACL BIND9 o de todas las redes de origen.
 - No se cambiaron firewall, servicios, reglas DNS ni datos.
+
+=== COMPROBACIONES POSTERIORES (21/10/2026) ===
+VM279 — contenedores:
+  nodosur-db-staging: 10.33.199.60:3306->3306/tcp
+VM279 — ss -lntp '( sport = :13307 )':
+  sin sockets en escucha
+VM279 — iptables -t nat -S DOCKER | grep -- '13307':
+  sin reglas NAT Docker para 13307
+Interpretación: las reglas DOCKER-USER para 13307 persisten,
+pero no se observó escucha ni publicación Docker de ese puerto
+en esta consulta. No se ha verificado dependencia histórica ni
+exposición mediante otros mecanismos.
+
+FEDORA → VM268 — AXFR COMPLETO:
+  dig @10.33.195.205 nodosur07.tas AXFR +noall +stats
+  ;; XFR size: 9 records (messages 1, bytes 290)
+Interpretación: TRANSFERENCIA AXFR CONFIRMADA desde Fedora por
+la VPN institucional. No se imprimieron los registros.
+No prueba acceso desde Internet ni desde otros segmentos.
+Pendiente revisar la ACL efectiva de BIND9 y necesidad de
+transferencias a secundarios antes de decidir endurecimiento.
+Sin cambios en producción.
