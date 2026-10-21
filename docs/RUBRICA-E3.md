@@ -16,9 +16,9 @@ Esta matriz no reemplaza la demostración en vivo. La implementación usa cinco 
 
 ## Orden razonado de cierre
 
-**Prioridad 1 — Reproducibilidad y coherencia con Git:** resolver/revisar el PR #2 y reconciliar los checkouts de VM263/VM310 **sin reemplazar sus configuraciones operativas**; verificar que las instrucciones de despliegue enumeren prerequisitos secretos, montajes y certificación de manera reproducible aunque los valores privados queden fuera del repositorio.
+**Prioridad 1 — Reproducibilidad y coherencia con Git:** la [guía de reconstrucción](DESPLIEGUE-REPRODUCIBLE-E3.md), el [preflight por rol](../scripts/preflight-e3.sh) y la [huella semántica de Compose](../scripts/compose-fingerprint-e3.sh) documentan requisitos y permiten verificar sin escrituras. **Pendiente verificarlos en los hosts reales**, revisar el PR #2 y reconciliar los checkouts de VM263/VM310 sin reemplazar sus configuraciones operativas. Esto NO sustituye una restauración integral desde cero.
 
-**Prioridad 2 — Preparar evidencia de la demo:** tener lista una secuencia legible de DNS, HTTP 301, HTTPS, cabecera `X-NodoSur-Backend`, ambos web `200`, archivo NFS, conectividad y reglas. Planificar fallo/reincorporación **solo cuando esté autorizada** y conservar evidencia `DOWN`/`UP` sin tocar DB/volúmenes.
+**Prioridad 2 — Preparar evidencia de la demo:** seguir el [guion de 12–15 minutos](PLAN-DEMOSTRACION-E3.md): DNS, HTTP 301, HTTPS, cabecera `X-NodoSur-Backend`, ambos web `200`, archivo NFS, DB y reglas. Planificar fallo/reincorporación **solo cuando esté autorizada** y conservar evidencia `DOWN`/`UP` sin tocar DB/volúmenes.
 
 **Prioridad 3 — Defensa oral:** explicar función de cada VM y de cada flujo, diferencias entre Docker Compose por host y orquestación, dependencia de servicios compartidos, limitación del `HEAD /` y certificado autofirmado. Mostrar resultados reales, no atribuir garantías de seguridad/HA que no fueron ensayadas.
 
