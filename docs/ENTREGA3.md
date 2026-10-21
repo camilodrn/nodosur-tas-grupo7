@@ -15,8 +15,8 @@ Escalar WordPress/WooCommerce de la instalación tradicional a dos backends en D
 | Comportamiento a defender | Evidencia que tenemos | Interpretación correcta |
 |---|---|---|
 | HAProxy distribuye peticiones | [8 respuestas en alternancia, 4/4](../evidencias/e3/balanceo-roundrobin.txt) | Roundrobin observado con ambos web disponibles |
-| Un backend deja de atender | [8 respuestas HTTP 200 de web1](../evidencias/e3/failover-web2-detenido.txt) | Continuidad observada durante la prueba con web2 fuera del balanceo; el archivo no contiene la orden de parada ni log `DOWN` |
-| Web2 vuelve | [8 respuestas HTTP 200, 4/4](../evidencias/e3/recuperacion-web2.txt) | Ambos backends vuelven a recibir tráfico; sin log `UP` ni tiempo formal medido |
+| Un backend deja de atender | [Detención controlada, log `DOWN` y 8/8 HTTP 200 vía web1](../evidencias/e3/prueba-falla-web2-haproxy-web1-20261021.txt) | Continuidad demostrada después de la detección de caída; no prueba ausencia de errores en el intervalo de detección |
+| Web2 vuelve | [Actualización WordPress 7.1.3, log `UP` de HAProxy, 8/8 HTTP 200 repartidos 4/4](../evidencias/e3/wordpress713-recuperacion-web2-haproxy-20261021.txt) | Reincorporación automática por health check Layer7 HTTP 200 verificada; no hay RTO formal medido |
 | Configuración y publicación HTTPS | [`haproxy -c` correcto y redirección HTTP 301](../evidencias/e3/http-redirect-y-validacion-proxy-20261021.txt), [6 HTTPS exitosos 3/3](../evidencias/e3/https-haproxy.txt) | Proxy operativo; sin demostrar confianza pública del certificado |
 | Certificado TLS | [SAN, fechas y huella pública](../evidencias/e3/certificado-publico-y-repo-local-20261021.txt) | Autofirmado, válido por fechas y nombres, **no** reconocido automáticamente por navegadores |
 | Contenido compartido por NFS | [Mismo archivo, tres SHA-256 idénticos](../evidencias/e3/nfs-mismo-archivo-web1-web2-20261021.txt) | Ambos web entregan bytes idénticos al origen; no prueba escritura cruzada de archivos nuevos |
@@ -48,17 +48,23 @@ Evidencia: [resultado final de los dos backends](../evidencias/e3/apache-uploads
 
 **Nota operativa:** se comprobaron [huellas semánticas idénticas de Compose entre Fedora y VM263/VM310](../evidencias/e3/huellas-compose-web1-web2-verificadas-20261021.txt). Los checkouts instalados en VM263 y VM310 tienen ediciones locales de `compose/web1/compose.yaml` y `compose/web2/compose.yaml`. GitHub también contiene los cambios, pero **no se debe ejecutar `git pull`/`reset` indiscriminadamente en esas VMs** hasta reconciliar los checkouts sin reemplazar los datos ni las configuraciones activas. El PR #2 sigue sin fusionar con `e3/integracion`.
 
+## Alineación de WordPress y recuperación posterior (21/10/2026)
+
+Tras respaldar archivos privados de web2 y generar/verificar un respaldo reciente de MariaDB, el operador preparó el paquete oficial WordPress 7.1.3 y actualizó **solo el core de web2** con el contenedor detenido. Se conservaron `wp-config.php`, `wp-content` y NFS; pasaron siete pruebas PHP lint aisladas. Web2 volvió a `running`, Apache reportó `Syntax OK` (aviso no fatal ServerName), core declaró **7.1.3** y esquema 61833. Desde VM308, portada, tienda e imagen NFS devolvieron 200, PHP bajo uploads 403. HAProxy registró `web2 is UP` por `Layer7 check passed, code: 200` y 8 solicitudes al frontend obtuvieron HTTP 200, repartidas **4/4**.
+
+La secuencia completa incluye [evento DOWN y continuidad atendida por web1](../evidencias/e3/prueba-falla-web2-haproxy-web1-20261021.txt) y [evento UP y regreso del balanceo](../evidencias/e3/wordpress713-recuperacion-web2-haproxy-20261021.txt), respaldada por el [plan de alineación](PLAN-ALINEACION-WORDPRESS-E3.md). No se cuantificaron errores durante el intervalo previo al DOWN ni se ensayó restauración funcional integrada. Está pendiente auditar hashes de core web1/web2 postactualización.
+
 ## Qué no está demostrado todavía
 
-- No hay registros `DOWN/UP` conservados en las evidencias de failover ni un **RTO/RPO medido**.
-- El montaje NFS y las lecturas idénticas no certifican por sí solos que todos los plugins, salts, sesiones o pedidos concurrentes sean coherentes. **Se detectó discrepancia del WordPress instalado**: web1 7.1.3 frente a web2 7.1.2, respaldada por hashes distintos de `wp-admin` y `wp-includes`; en cambio, los árboles completos de plugins y temas tienen hashes idénticos, al igual que WooCommerce 11.1.0 ([evidencia](../evidencias/e3/wordpress-arboles-core-plugins-temas-20261021.txt)). Existe un [plan de alineación controlada](PLAN-ALINEACION-WORDPRESS-E3.md): respaldo privado de web2 (55.351.002 bytes, sha256 OK) y respaldo MariaDB previamente comprobado (sha256/gzip OK). **No se ha ejecutado aún actualización** y se requiere backup BD próximo al cambio, prueba y reversión controladas.
+- Sí hay registros `DOWN/UP` conservados en la nueva prueba controlada de falla y recuperación; no se ha medido formalmente un **RTO/RPO** ni la posible pérdida de solicitudes durante el umbral de detección.
+- El montaje NFS y las lecturas idénticas no certifican por sí solos que todos los plugins, salts, sesiones o pedidos concurrentes sean coherentes. **El desfase de WordPress 7.1.3 frente a 7.1.2 fue corregido:** ahora ambos nodos declaran 7.1.3; resta repetir comparación por hashes de core y revisar diferencias de configuración. WooCommerce 11.1.0 y los árboles completos de plugins/temas coincidían según [evidencia previa](../evidencias/e3/wordpress-arboles-core-plugins-temas-20261021.txt). Se verificaron [respaldo privado HTML](../evidencias/e3/respaldo-html-web2-pre-upgrade-20261021.txt) y [SQL reciente](../evidencias/e3/respaldo-mariadb-pre-cambio-web2-20261021.txt); **no hay ensayo de restauración real**.
 - Los cuatro Compose funcionan donde están instalados, pero un checkout nuevo no reconstruye automáticamente la VPN, las VMs, los secretos, el TLS, los datos y el almacenamiento.
 - HAProxy, MariaDB, DNS y NFS son **SPOF**. No se ha demostrado continuidad ante caída de cualquiera de esas dependencias compartidas.
 - La protección Apache de `uploads` **sí está instalada** en ambos WordPress, con evidencia aislada y productiva. Otras propuestas de Codex para firewall, systemd, HAProxy y backups **no se han aplicado a las VMs** y requieren validación separada.
 
 ## Antes de la defensa
 
-La demostración deberá confirmar de nuevo el estado de los servicios, presentar balanceo y, en una ventana autorizada, reproducir una falla controlada con sus logs de salud. También hay que estar preparados para explicar el uso de NFS, MariaDB compartida, Docker Compose, `DOCKER-USER` y los puntos únicos de fallo. Este ensayo queda **para la etapa final de preparación**, una vez cerrado GitHub y resueltas las mejoras técnicas justificadas.
+La falla controlada con logs DOWN/UP ya fue ensayada y documentada. Para la defensa corresponde revalidar estado de servicios, balanceo y endpoints, y preparar la demostración sin repetir la falla si no hay una ventana autorizada. Explicar el uso de NFS, MariaDB compartida, Docker Compose, `DOCKER-USER`, el umbral de health checks y los puntos únicos de fallo.
 
 ## Nota sobre E4
 
