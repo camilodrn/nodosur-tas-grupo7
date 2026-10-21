@@ -23,3 +23,19 @@ Volumen=nodosur-db-staging_db_stage_data
 # - La evidencia histórica independiente en este repositorio consigna 52 tablas,
 #   51 posts, 512 opciones, 4 usuarios y red 'none'; falta verificar metadata real
 #   del contenedor existente antes de vincular ambos resultados.
+
+# Segunda inspección realizada por el equipo en VM279:
+$ sudo docker inspect nodosur-db-restorecheck --format 'Red={{.HostConfig.NetworkMode}} Puertos={{json .HostConfig.PortBindings}}'
+Red=none Puertos={}
+$ sudo docker inspect nodosur-db-restorecheck --format '{{range .Mounts}}{{if eq .Destination "/var/lib/mysql"}}Nombre={{.Name}} Destino={{.Destination}}{{end}}{{end}}'
+Nombre=nodosur_db_restorecheck_data Destino=/var/lib/mysql
+$ sudo docker inspect nodosur-db-restorecheck --format 'Estado={{.State.Status}} Salida={{.State.ExitCode}} Finalizado={{.State.FinishedAt}}'
+Estado=exited Salida=0 Finalizado=2026-10-20T16:38:56.515230151Z
+$ sudo docker inspect nodosur-db-staging --format 'Estado={{.State.Status}} Salud={{.State.Health.Status}}'
+Estado=running Salud=healthy
+
+# Conclusión: aislamiento real del contenedor persistente comprobado;
+# la correspondencia temporal y de red es coherente con la evidencia histórica de
+# restauración con 52 tablas, 51 posts, 512 opciones y 4 usuarios.
+# El código 0 por sí solo no verifica contenido del volumen, que se acreditó
+# en evidencia histórica independiente, no en esta inspección.
