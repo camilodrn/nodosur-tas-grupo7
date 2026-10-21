@@ -81,6 +81,8 @@ sudo test -s /etc/nodosur/apache/nodosur-uploads.conf && echo 'APACHE CONFIG: PR
 
 **Los cuatro comandos Compose se ejecutan en sus respectivas VMs**, no los cuatro juntos en cada VM. Los `config --quiet` comprueban sintaxis y resolución de estructura; no garantizan que secretos, servicios, volúmenes ni puertos estén operativos.
 
+Herramientas de consulta incluidas en la rama: `bash scripts/preflight-e3.sh ROL` (en cada VM del rol; verifica contenedor, ruta/mount y configuración) y `NODOSUR_REPO_DIR=RUTA bash scripts/compose-fingerprint-e3.sh ROL` (en Fedora y VM; solo imprime una huella del Compose JSON normalizado). **Las huellas solo son comparables si se usa el mismo rol y configuración efectiva**, y no comprueban que un contenedor haya sido creado con esa definición. Los scripts deben estar presentes y pasar revisión de sintaxis antes de ejecutarse.
+
 Para capturar comprobaciones con alcance más preciso: [evidencia de Apache en producción](../evidencias/e3/apache-uploads-web1-web2-final-20261021.txt), [matriz de flujos](MATRIZ-FLUJOS-E3.md), [validaciones de E3](ENTREGA3.md) y [rúbrica](RUBRICA-E3.md).
 
 ## Persistencia y recuperación
