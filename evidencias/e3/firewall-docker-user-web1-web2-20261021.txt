@@ -1,0 +1,40 @@
+# E3 — Estado y reglas DOCKER-USER de los dos backends (20/21-10-2026)
+# Transcripciones aportadas por el equipo. Comandos solo lectura; no hubo cambio de reglas.
+#
+# VM310 web2 10.33.195.208 / 10.33.199.62
+$ sudo systemctl is-active nodosur-docker-firewall.service
+active
+$ sudo systemctl is-enabled nodosur-docker-firewall.service
+enabled
+$ sudo iptables -S DOCKER-USER
+-N DOCKER-USER
+-A DOCKER-USER ! -s 10.33.199.61/32 -p tcp -m conntrack --ctorigdst 10.33.199.62 --ctorigdstport 18080 --ctdir ORIGINAL -j DROP
+$ sudo iptables -nvL DOCKER-USER
+Chain DOCKER-USER (1 references)
+ pkts bytes target     prot opt in     out     source               destination
+    4   240 DROP       6    --  *      *      !10.33.199.61         0.0.0.0/0            ctorigdst 10.33.199.62 ctorigdstport 18080 ctdir ORIGINAL
+#
+# VM263 web1 10.33.195.202 / 10.33.199.58
+$ sudo systemctl is-active nodosur-docker-firewall.service
+active
+$ sudo systemctl is-enabled nodosur-docker-firewall.service
+enabled
+$ sudo iptables -S DOCKER-USER
+-N DOCKER-USER
+-A DOCKER-USER ! -s 10.33.199.61/32 -p tcp -m conntrack --ctorigdst 10.33.199.58 --ctorigdstport 18081 --ctdir ORIGINAL -j DROP
+$ sudo iptables -nvL DOCKER-USER
+Chain DOCKER-USER (1 references)
+ pkts bytes target     prot opt in     out     source               destination
+    4   240 DROP       6    --  *      *      !10.33.199.61         0.0.0.0/0            ctorigdst 10.33.199.58 ctorigdstport 18081 ctdir ORIGINAL
+#
+# CONCLUSION
+# El firewall genérico instalado es nodosur-docker-firewall.service, activo y
+# habilitado en los dos backends. Cada regla DOCKER-USER descarta TCP de orígenes
+# distintos de la IP del proxy .61 para el destino original WordPress correspondiente.
+# Contadores 4 paquetes/240 bytes en cada host acreditan que hubo descartes,
+# pero no el origen de cada paquete ni la causa inequívoca de los timeouts de DB.
+# El hecho de no hacer match al DROP no significa por sí solo que la conexión
+# del proxy esté permitida por todas las capas: pruebas HTTP/TCP anteriores sí
+# confirmaron conectividad efectiva desde VM308.
+# No hay todavía evidencia de comportamiento tras reiniciar Docker en web1/web2.
+# Las unidades nuevas propuestas en audit/e3-codex-revisada NO están desplegadas.
