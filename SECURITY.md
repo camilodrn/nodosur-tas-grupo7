@@ -30,7 +30,7 @@ Se incorporó al repositorio el archivo [`configs/apache/nodosur-uploads.conf`](
 
 ## Medidas propuestas, pendientes de instalación
 
-Codex propone bloquear interpretación de PHP/CGI desde `wp-content/uploads`, mejorar saneamiento de encabezados en HAProxy, usar lectura explícita de archivo secreto para MariaDB en web2, reforzar prechequeo de NFS y reorganizar políticas de firewall/systemd. **No se consideran medidas productivas solo por existir en el PR de auditoría.** Requieren validar sintaxis, configuración efectiva, comportamiento y reversión antes de adoptarlas.
+La medida de **bloquear interpretación de PHP/CGI en `wp-content/uploads` ya se probó e instaló en web1 y web2** (ver evidencia final anterior). Las propuestas restantes de Codex incluyen mejorar saneamiento de encabezados en HAProxy, reconsiderar la referencia al archivo de secreto de MariaDB en web2, reforzar el prechequeo de NFS y reorganizar políticas de firewall/systemd. **No se consideran productivas solo por existir en el PR de auditoría.** Requieren validar configuración efectiva, comportamiento y reversión antes de adoptarlas.
 
 En particular, el cambio de firewall no debe reemplazar una regla que ya funciona sin examinar las cadenas existentes y la ruta administrativa de recuperación. Los nombres de volúmenes Docker de MariaDB no se deben alterar a ciegas: el productivo es `nodosur-db-staging_db_stage_data`, pese a su nombre histórico.
 
