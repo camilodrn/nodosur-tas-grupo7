@@ -1,105 +1,68 @@
-# Nodo Sur — Taller de Administración de Sistemas
+# Nodo Sur — Grupo 7
 
-Proyecto académico del **Grupo 7** para el Taller de Administración de Sistemas, USM, segundo semestre 2026.
+**Taller de Administración de Sistemas (EIN-090B) · USM Sede Concepción · Segundo semestre 2026**
 
-## Estado actual
+Proyecto de infraestructura para una plataforma WordPress/WooCommerce con dos servidores web, balanceo de carga y estado compartido. Esta es la implementación correspondiente a la **Entrega 3: publicación resiliente, contenedores y seguridad**.
 
-Arquitectura distribuida validada para la entrega:
+**Estado de las comprobaciones: 21 de octubre de 2026.** El sistema está desplegado en el laboratorio iLab y se accede desde redes autorizadas. Los cambios adicionales propuestos por Codex en la [auditoría separada](https://github.com/camilodrn/nodosur-tas-grupo7/pull/1) **no están desplegados**.
 
-- **VM .59 — DNS autoritativo / BIND9**
-  - Administración/laboratorio: `10.33.195.205`
-  - Red interna: `10.33.199.59`
-  - Zona: `nodosur07.tas`
-- **VM .58 — Web/CMS**
-  - Administración/laboratorio: `10.33.195.202`
-  - Red interna: `10.33.199.58`
-  - Apache + PHP-FPM + WordPress + WooCommerce
-- **VM .60 — Base de datos**
-  - Administración/SSH: `10.33.195.226`
-  - Red interna: `10.33.199.60`
-  - MariaDB escucha en `10.33.199.60:3306`
+## Arquitectura implementada
 
-Flujo principal:
+`Cliente → DNS (VM268) → nombre del proxy (VM308) → WordPress web1 (VM263) / web2 (VM310) → MariaDB (VM279)`
 
-`Cliente → DNS .59 → Web .58 → MariaDB .60`
+El DNS resuelve el nombre; **no es un intermediario del tráfico HTTP**. Ambos WordPress usan una base de datos común y montan el directorio `uploads` desde NFS en VM268.
 
-## Controles implementados
+| VM | Rol | IP de acceso/administración | IP interna |
+|---|---|---|---|
+| 268 | BIND9, NFS y copia de respaldos | `10.33.195.205` | `10.33.199.59` |
+| 263 | WordPress/WooCommerce web1, Docker | `10.33.195.202` | `10.33.199.58` |
+| 310 | WordPress/WooCommerce web2, Docker | `10.33.195.208` | `10.33.199.62` |
+| 279 | MariaDB 10.11, Docker | `10.33.195.226` | `10.33.199.60` |
+| 308 | HAProxy 3.2, Docker y terminación HTTPS | `10.33.195.194` | `10.33.199.61` |
 
-- DNS autoritativo para `nodosur07.tas`.
-- HTTP redirigido a HTTPS.
-- Certificado TLS autofirmado para laboratorio.
-- MariaDB separada de la VM web.
-- Almacenamiento LVM dedicado para `wp-content/uploads` en la VM .58.
-- UFW con accesos por origen y rol.
-- SSH restringido a redes VPN/laboratorio y a miembros de `ssh-nodosur`.
-- `PermitRootLogin no`.
-- Cuentas nominativas para los integrantes del equipo.
-- **Sudo limitado por rol** para las cuentas operativas mediante `nodosur-ops`.
-- Acceso a logs mediante `systemd-journal` sin entregar root irrestricto.
-- Una cuenta bootstrap/recovery por VM con sudo completo.
-- Cuenta temporal `tas_revision` con sudo completo exclusivamente para revisión docente.
-- Logs y pruebas reproducibles para web, DNS, SSH y MariaDB.
-- VMs actualizadas y validadas después del mantenimiento.
-- Flujo WooCommerce validado mediante el pedido de prueba `#71`, correlacionado con MariaDB `.60`.
-- Contribuciones del equipo registradas en `CONTRIBUCIONES.md` sin inventar reparto retrospectivo.
+- **DNS:** `nodosur07.tas` y `www.nodosur07.tas` apuntan al proxy `10.33.195.194`.
+- **Proxy:** HTTP 80 redirige a HTTPS 443; distribuye tráfico `roundrobin` a web1 `10.33.199.58:18081` y web2 `10.33.199.62:18080`. Usa health checks HTTP.
+- **WordPress:** ambos contenedores declaran `wordpress:7.1.2-php8.3-apache`; el core, plugins y configuración local requieren coherencia entre nodos.
+- **Datos:** MariaDB compartida en `10.33.199.60:3306`. Su volumen productivo mantiene el nombre histórico **`nodosur-db-staging_db_stage_data`**: no renombrar ni borrar.
+- **Uploads:** `/srv/nodosur/nfs/uploads` está montado en ambos servidores web con lectura/escritura. Los archivos son servidos por los dos backends.
 
-## Redes relevantes
+Consulta [ARQUITECTURA.md](ARQUITECTURA.md) para el diagrama, protocolos y límites; e [INVENTARIO.md](INVENTARIO.md) para los identificadores efectivos de las VMs.
 
-- VPN USM: `10.30.248.0/24`
-- Laboratorio: `10.33.21.0/24`
-- Red interna Grupo 7: `10.33.199.56/29`
+## Evidencias de Entrega 3
 
-## Estructura del repositorio
+| Prueba | Resultado sustentado |
+|---|---|
+| [Balanceo](evidencias/e3/balanceo-roundrobin.txt) | 8 respuestas HTTP 200: 4 de web1 y 4 de web2 |
+| [Falla de web2](evidencias/e3/failover-web2-detenido.txt) | 8 respuestas HTTP 200 atendidas por web1 durante la prueba |
+| [Reincorporación de web2](evidencias/e3/recuperacion-web2.txt) | 8 respuestas HTTP 200, distribuidas 4/4 |
+| [HTTPS](evidencias/e3/https-haproxy.txt), [HTTP 301 y config válida](evidencias/e3/http-redirect-y-validacion-proxy-20261021.txt) | HTTPS operativo; redirección a `https://nodosur07.tas/`; `haproxy -c` válido |
+| [Certificado público](evidencias/e3/certificado-publico-y-repo-local-20261021.txt) | SAN para apex y `www`; certificado **autofirmado**, sin confianza automática de terceros |
+| [Carrito WooCommerce](evidencias/e3/carrito-coherencia-postmigracion.txt) | Producto de prueba añadido en web1, consultado y retirado en web2 |
+| [Persistencia de archivo](evidencias/e3/nfs-mismo-archivo-web1-web2-20261021.txt) | SHA-256 idéntico en NFS, HTTP web1 y HTTP web2 |
+| [Firewall web1/web2](evidencias/e3/firewall-docker-user-web1-web2-20261021.txt) y [conectividad](evidencias/e3/acceso-proxy-backends-20261020.txt) | Reglas `DOCKER-USER` activas para puertos internos; proxy autorizado conecta, origen DB agotó tiempo |
+| [Compose en las cuatro VMs](evidencias/e3/compose-productivo-db-proxy-20261021.txt), [web1/web2 y PHP](evidencias/e3/compose-productivo-web1-web2-y-php-20261021.txt) | Compose válido en los cuatro hosts Docker; contenedores en ejecución |
+| [Validación de Codex en Fedora](evidencias/e3/validacion-local-fedora-20261021.txt) | 25/25 pruebas locales pasaron; barrido heurístico no detectó candidatos a secretos. **Corresponde al árbol local de auditoría, no a la rama estable ni a las VMs** |
 
-- `configs/`: ejemplos saneados de configuración.
-- `configs/sudo/`: política reproducible de privilegios por rol.
-- `scripts/`: validaciones no destructivas.
-- `pruebas/`: procedimientos reproducibles y resultados esperados.
-- `evidencias/`: guía para capturas/logs de evidencia.
-- `docs/`: decisiones de arquitectura.
-- `BITACORA.md`: incidentes técnicos reales y su resolución.
-- `CONTRIBUCIONES.md`: registro de trabajo real por integrante y evidencia disponible.
-- `CHECKLIST_ENTREGA2.md`: estado consolidado y pendientes antes de entregar.
+Las evidencias se presentan con su alcance real: las capturas históricas no incluyen por sí solas los logs `DOWN/UP` del proxy ni una medición formal de RTO.
 
-## Seguridad
+## Organización del repositorio
 
-**Este repositorio no debe contener credenciales, contraseñas, salts, claves privadas, dumps con datos sensibles ni archivos `wp-config.php` reales.**
+- `compose/`: Compose por rol y host. **No son un único Compose que despliegue cinco VMs automáticamente.**
+- `configs/`: configuraciones saneadas y ejemplos; algunos corresponden a E2 y se identifican mediante la documentación.
+- `scripts/` y `pruebas/`: utilidades y procedimientos de comprobación.
+- `evidencias/e3/`: resultados verificables de pruebas.
+- [Estado y pruebas E3](docs/ENTREGA3.md), [matriz de flujos](docs/MATRIZ-FLUJOS-E3.md) y [decisiones](docs/decisiones-arquitectura.md).
 
-Las configuraciones incluidas están saneadas y usan placeholders cuando corresponde. El barrido pre-publicación verificó además que el árbol actual no contiene archivos `.env`, dumps SQL, claves privadas TLS/SSH ni respaldos sensibles.
+Las credenciales, certificados con claves privadas y `wp-config.php` reales permanecen **fuera de Git**. La reproducción de un host requiere también su configuración externa, los montajes NFS y sus datos; `docker compose config --quiet` verifica la definición, **no reconstruye por sí solo toda la infraestructura**.
 
-## Acceso de revisión
+## Límites de disponibilidad
 
-La cuenta temporal `tas_revision` dispone de privilegios administrativos completos en las tres VMs para facilitar la evaluación docente. Sus credenciales se documentan **fuera del repositorio** y deben revocarse al finalizar la evaluación.
+Se ha demostrado tolerancia a la caída **de un backend web** mientras el otro y las dependencias compartidas siguen disponibles. **No existe alta disponibilidad integral**: HAProxy, MariaDB, DNS y NFS son instancias únicas; VM268 concentra varios servicios importantes.
 
-Las cuentas del equipo usan privilegios limitados según el rol de cada VM. Los accesos completos de contingencia permanecen en las cuentas bootstrap/recovery y no se consideran cuentas operativas diarias.
+Las imágenes, sesiones autenticadas y operaciones de compra concurrentes no se consideran exhaustivamente validadas por la prueba de un archivo o de un carrito. No se declara un RTO/RPO medido ni una restauración integrada de WordPress y MariaDB.
 
-## Validación rápida
+## Seguridad y operación
 
-Desde un cliente de las redes autorizadas:
+Los accesos de administración son para cuentas autorizadas desde VPN/laboratorio. El certificado HTTPS es autofirmado y requiere confianza explícita para validar la identidad del servidor.
 
-```bash
-bash scripts/validate-web.sh
-bash scripts/validate-dns.sh
-```
-
-En `.60`, las cuentas operativas pueden ejecutar:
-
-```bash
-bash scripts/validate-db-local.sh
-```
-
-El script utiliza `/usr/local/sbin/nodosur-db-check`, autorizado por la política de sudo limitada, y no entrega una consola MariaDB ejecutada arbitrariamente como root.
-
-La validación completa de la configuración de SSH mediante:
-
-```bash
-bash scripts/validate-ssh-config.sh
-```
-
-requiere `tas_revision` o la cuenta bootstrap/recovery de la VM, porque `sshd -t/-T` necesita privilegios que deliberadamente no se entregan a las cuentas operativas.
-
-Las pruebas detalladas están documentadas en `pruebas/`.
-
-## Pendientes de cierre
-
-El flujo empresarial WooCommerce, el registro de contribuciones y el barrido pre-publicación ya están cerrados. El pendiente académico restante es preparar la defensa individual.
+**No ejecutar a ciegas** `docker compose down -v`, `docker volume prune`, cambios de firewall o migraciones de rutas systemd en esta infraestructura: pueden afectar datos o interrumpir la defensa. Las mejoras de Codex continúan aisladas en su PR de auditoría y requieren una adopción planificada.
