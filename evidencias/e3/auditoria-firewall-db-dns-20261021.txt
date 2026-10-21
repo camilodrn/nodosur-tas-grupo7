@@ -126,3 +126,29 @@ INTERPRETACION:
 - Una posible medida acotada, si no hay secundarios, es incorporar
   allow-transfer { none; }; a esta zona y verificar DNS UDP/TCP y AXFR.
 - Esta sección NO documenta un cambio ya aplicado.
+
+=== VM268 — DETALLE DE LA ZONA Y REGISTRO NS (21/10/2026) ===
+named-checkconf -px (zona nodosur07.tas):
+  zone "nodosur07.tas" {
+      type primary;
+      file "/etc/bind/db.nodosur07.tas";
+      allow-update { "none"; };
+  };
+  No se observa allow-transfer para esta zona.
+dig @10.33.195.205 nodosur07.tas NS:
+  nodosur07.tas. 3600 IN NS ns1.nodosur07.tas.
+stat /etc/bind/named.conf.local:
+  644 root:bind /etc/bind/named.conf.local
+
+CONCLUSION Y LIMITACIONES:
+- Solo hay un NS publicado para la zona; no se ha identificado
+  necesidad de un secundario que reciba AXFR.
+- La ausencia de allow-transfer en BIND 9.18 es compatible con
+  el valor por defecto permisivo documentado por ISC y con
+  AXFR completo observado desde Fedora por VPN.
+- No queda demostrado que no existan secundarios ocultos o
+  acuerdos fuera del DNS publicado. Revisarlos antes de cerrar
+  transferencias.
+- Cambio propuesto (NO aplicado): allow-transfer { none; };
+  dentro de zone nodosur07.tas, con backup, validacion, recarga
+  controlada y comprobacion DNS UDP/TCP y rechazo de AXFR.
