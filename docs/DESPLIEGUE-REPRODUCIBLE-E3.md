@@ -95,9 +95,9 @@ La documentación actual no acredita todavía una restauración integral de esas
 
 ## Precauciones para actualización Git
 
-En VM263 y VM310, la configuración Apache se introdujo directamente en sus Compose durante una intervención aprobada; **`git status --short` muestra modificaciones locales**. Las mismas declaraciones se encuentran ahora en el PR `e3/cierre-tecnico`, pero no basta con `git pull` desde la rama antigua: Git puede negarse a sobrescribir archivos locales o producir divergencia.
+En VM263 y VM310, la configuración Apache se introdujo directamente en sus Compose durante una intervención aprobada. La [auditoría Git de los dos backends](../evidencias/e3/git-backends-cambios-locales-20261021.txt) confirmó que **VM263 está en `e3/backend1` (`8b067ef`) y VM310 en `e3/backend2` (`667d7d9`)**, cada una con **un solo archivo localmente modificado**: su Compose, al que se añadieron ocho líneas para montar `nodosur-uploads.conf` de solo lectura y sin crear rutas faltantes. `git diff --check` no reportó errores. Ya se había comprobado que las [huellas semánticas de Compose](../evidencias/e3/huellas-compose-web1-web2-verificadas-20261021.txt) coincidían con las de Fedora. La rama del PR no es la rama instalada en las VMs.
 
-No ejecutar `reset --hard`, `clean`, `stash -u` o `pull` sin revisar **diff, backup y rama local**. Es preferible comparar el Compose de la VM con el archivo del PR y decidir una reconciliación no destructiva; sólo entonces alinear la rama o desplegar nuevos cambios.
+**Decisión para E3:** preservar los cambios locales ya operativos; no es necesario dejar los checkouts Git limpios para demostrar el Compose vigente y no se requiere reiniciar ni recrear servicios. No ejecutar `reset --hard`, `clean`, `stash -u` ni `pull` indiscriminadamente. Si posteriormente se requiere alinear ramas, hacerlo con revisión de diff, respaldo, reversión y ventana de intervención. El estado Git limpio y la igualdad de hashes de Compose son criterios diferentes.
 
 ## Tabla de aceptación para reconstrucción futura
 
