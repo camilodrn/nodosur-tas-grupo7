@@ -22,7 +22,7 @@ El DNS resuelve el nombre; **no es un intermediario del tráfico HTTP**. Ambos W
 
 - **DNS:** `nodosur07.tas` y `www.nodosur07.tas` apuntan al proxy `10.33.195.194`.
 - **Proxy:** HTTP 80 redirige a HTTPS 443; distribuye tráfico `roundrobin` a web1 `10.33.199.58:18081` y web2 `10.33.199.62:18080`. Usa health checks HTTP.
-- **WordPress:** ambos contenedores declaran `wordpress:7.1.2-php8.3-apache`; el core, plugins y configuración local requieren coherencia entre nodos.
+- **WordPress:** ambos contenedores declaran `wordpress:7.1.2-php8.3-apache`, pero el core realmente montado **difiere**: web1 7.1.3 y web2 7.1.2, observado el 21/10. WooCommerce 11.1.0 coincide en ambos ([evidencia](evidencias/e3/wordpress-equivalencia-web1-web2-20261021.txt)). Requiere revisión antes de declarar equivalencia completa.
 - **Datos:** MariaDB compartida en `10.33.199.60:3306`. Su volumen productivo mantiene el nombre histórico **`nodosur-db-staging_db_stage_data`**: no renombrar ni borrar.
 - **Uploads:** `/srv/nodosur/nfs/uploads` está montado en ambos servidores web con lectura/escritura. Los archivos son servidos por los dos backends.
 
