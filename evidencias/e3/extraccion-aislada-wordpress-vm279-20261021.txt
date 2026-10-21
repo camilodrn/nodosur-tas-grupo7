@@ -20,6 +20,18 @@ RESULTADO: EXTRACCION Y RECUENTOS CORRECTOS
 # Alcance:
 # - Acredita extracción real, presencia de wp-config.php (no contenido) y recuentos.
 # - No acredita puesta en marcha de WordPress, conexión a DB recuperada,
-#   equivalencia bit a bit de los 10.313 archivos extraídos ni restauración de metadata.
+#   restauración de metadata ni ensayo funcional integrado. La verificación SHA-256
+#   posterior sí comprobó equivalencia bit a bit de los 10.313 archivos.
 # - El directorio del ensayo persiste: contiene wp-config.php posiblemente sensible.
 # - No se publica TAR, secretos ni datos del archivo en GitHub.
+
+# Validación posterior de integridad SHA-256, aportada por el equipo:
+# Se comparó cada archivo regular del TAR contra el archivo extraído
+# en /var/backups/nodosur/restore-web-check-20261021.
+=== INTEGRIDAD POST-RESTAURACION ===
+Archivos comparados: 10313
+Diferencias detectadas: 0
+RESULTADO: RESTAURACION DE ARCHIVOS VERIFICADA
+#
+# Esto acredita coincidencia de contenido de los 10.313 archivos regulares.
+# No constituye arranque integrado WordPress+MariaDB ni verificación de metadatos.
