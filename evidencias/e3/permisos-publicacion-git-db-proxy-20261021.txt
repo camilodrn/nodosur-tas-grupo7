@@ -1,0 +1,30 @@
+# Nodo Sur E3 — Permisos de archivos privados, puertos enlazados y revision Git
+# Fecha: 21/10/2026. Operador ejecutó comandos de solo lectura.
+#
+# VM308 — HAProxy
+/etc/nodosur/tls: 750 root:UNKNOWN
+/etc/nodosur/tls/haproxy-www.pem: 640 root:UNKNOWN
+HostConfig.PortBindings:
+  8080/tcp -> HostIp 10.33.195.194 HostPort 80
+  8443/tcp -> HostIp 10.33.195.194 HostPort 443
+git branch --show-current: e3/proxy
+git rev-parse --short HEAD: fdaba39
+#
+# VM279 — MariaDB
+/etc/nodosur/secrets: 700 root:root
+/etc/nodosur/secrets/db-stage-root.password: 600 root:root
+HostConfig.PortBindings:
+  3306/tcp -> HostIp 10.33.199.60 HostPort 3306
+git branch --show-current: e3/database
+git rev-parse --short HEAD: 488cb27
+#
+# Interpretación: el secreto DB está restringido al dueño root y el
+# puerto 3306 solo publicado en IP interna. HAProxy está publicado en IP
+# administrativa esperada. root:UNKNOWN significa que el nombre del grupo
+# no se resolvió en host; requiere revisión numérica del GID y de la
+# membresía efectiva antes de concluir que el .pem es accesible por otros.
+# Modos 750/640 no son necesariamente inseguros sin ese contexto.
+# Estos bindings no demuestran por si mismos filtrado de origen.
+# Las ramas son distintas por rol; árbol limpio no prueba igualdad de
+# commits con el PR e3/cierre-tecnico.
+# No se expusieron archivos secretos ni se alteraron servicios.
