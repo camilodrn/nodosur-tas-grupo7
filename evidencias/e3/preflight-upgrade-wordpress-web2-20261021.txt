@@ -1,0 +1,34 @@
+# Nodo Sur E3 — Preflight antes de alinear WordPress web2
+# 21/10/2026, terminal VM310 (nodosur-g7-web2), operador compartio salida.
+# Solo consultas; NO se realizo upgrade ni backup adicional en esta prueba.
+
+=== HERRAMIENTAS DISPONIBLES EN CONTENEDOR WEB2 ===
+wp: no instalado
+tar: disponible
+curl: disponible
+unzip: no instalado
+
+=== ARCHIVOS WORDPRESS WEB2 ===
+Archivo: /srv/nodosur/web2/html/wp-includes/version.php
+Fecha=2026-09-25 16:40:34.350617153 +0000
+Propietario=www-data:www-data
+
+=== ESPACIO DISPONIBLE EN HOST WEB2 ===
+Filesystem                         Size  Used Avail Use% Mounted on
+/dev/mapper/ubuntu--vg-ubuntu--lv   97G  4.4G   88G   5% /
+
+=== TAMAÑO WORDPRESS SIN UPLOADS ===
+204M /srv/nodosur/web2/html
+
+=== RESPALDOS E3 EN ESTA VM ===
+web2-compose-pre-uploads-20261021-042917.yaml (795 bytes)
+
+=== INTERPRETACIÓN ===
+# Espacio suficiente para respaldo del árbol WordPress local de unos 204 MiB.
+# El único archivo visto EN /var/backups/nodosur-e3 es la copia del Compose;
+# no es un respaldo de WordPress, plugins, temas, uploads ni MariaDB.
+# La ausencia de 'wp' y 'unzip' en el CONTENEDOR no implica ausencia en el host.
+# No se ha demostrado backup recuperable del CMS local ni de la BD a esta fecha.
+# Antes de upgrade, verificar backup consistente MariaDB en VM279,
+# respaldar árbol HTML de web2 preservando wp-config.php con permisos
+# restrictivos, y preparar reversión; uploads NFS se administran aparte.
