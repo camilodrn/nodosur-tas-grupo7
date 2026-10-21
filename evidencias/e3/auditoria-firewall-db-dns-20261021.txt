@@ -1,0 +1,80 @@
+# Nodo Sur E3 — Auditoría de reglas MariaDB y DNS autoritativo
+# Fecha: 21/10/2026. Transcripción resumida de salidas del operador.
+# Comandos de consulta, sin cambios de firewall, Docker o DNS.
+# Se omiten cookies EDNS y cualquier contenido de transferencia de zona.
+
+=== VM279 / MariaDB: iptables -S DOCKER-USER ===
+-N DOCKER-USER
+-A DOCKER-USER -s 10.33.199.59/32 -i ens19 -p tcp -m conntrack --ctorigdst 10.33.199.60 --ctorigdstport 3306 --ctdir ORIGINAL -j RETURN
+-A DOCKER-USER -s 10.33.199.62/32 -i ens19 -p tcp -m conntrack --ctorigdst 10.33.199.60 --ctorigdstport 3306 --ctdir ORIGINAL -j RETURN
+-A DOCKER-USER -s 10.33.199.58/32 -i ens19 -p tcp -m conntrack --ctorigdst 10.33.199.60 --ctorigdstport 3306 --ctdir ORIGINAL -j RETURN
+-A DOCKER-USER -i ens19 -p tcp -m conntrack --ctorigdst 10.33.199.60 --ctorigdstport 3306 --ctdir ORIGINAL -j DROP
+-A DOCKER-USER -s 10.33.199.62/32 -i ens19 -p tcp -m conntrack --ctorigdst 10.33.199.60 --ctorigdstport 13307 --ctdir ORIGINAL -j RETURN
+-A DOCKER-USER -s 10.33.199.58/32 -i ens19 -p tcp -m conntrack --ctorigdst 10.33.199.60 --ctorigdstport 13307 --ctdir ORIGINAL -j RETURN
+-A DOCKER-USER -i ens19 -p tcp -m conntrack --ctorigdst 10.33.199.60 --ctorigdstport 13307 --ctdir ORIGINAL -j DROP
+
+=== VM279 / CONTADORES DE DOCKER-USER ===
+3306 desde .59: RETURN 0 paquetes
+3306 desde .62: RETURN 2486K paquetes / 339M bytes
+3306 desde .58: RETURN 2550K paquetes / 348M bytes
+3306 otros: DROP 4 paquetes / 240 bytes
+13307 desde .62: RETURN 18 paquetes / 1214 bytes
+13307 desde .58: RETURN 18 paquetes / 1214 bytes
+13307 otros: DROP 10 paquetes / 600 bytes
+
+=== VM279 / FORWARD Y UFW ===
+FORWARD policy: DROP
+FORWARD: salto a DOCKER-USER antes de DOCKER-FORWARD.
+UFW: active; logging low; default deny incoming, allow outgoing, deny routed.
+UFW ALLOW IN 10.33.199.60 3306/tcp desde 10.33.199.59
+UFW ALLOW IN 10.33.199.60 3306/tcp desde 10.33.199.58
+UFW ALLOW IN 10.33.199.60 3306/tcp desde 10.33.199.62
+UFW ALLOW IN 10.33.195.226 22/tcp desde 10.30.248.0/24
+UFW ALLOW IN 10.33.195.226 22/tcp desde 10.33.21.0/24
+
+INTERPRETACION DE FIREWALL
+- Las excepciones observadas en DOCKER-USER hacia 3306 incluyen
+  .59 (VM268 DNS/NFS), .62 (web2) y .58 (web1).
+- RETURN no equivale por sí solo a conexión TCP aceptada.
+- La conectividad TCP desde web1/web2 a MariaDB ya se probó
+  en evidencia anterior: firewall-db-tras-reinicio.txt.
+- El contador DROP 3306 demuestra coincidencias de descarte
+  pero no identifica el origen exacto ni la fecha de los paquetes.
+- Existen reglas de puerto 13307 con contadores no nulos;
+  no se ha confirmado si un servicio lo publica actualmente.
+- No se modificaron políticas ni se determinó que la regla .59
+  sea necesaria para la operación corriente.
+
+=== FEDORA -> VM268 / DNS SOA UDP ===
+Consulta: dig @10.33.195.205 nodosur07.tas SOA (UDP)
+status: NOERROR
+flags: qr aa rd
+SOA: ns1.nodosur07.tas. admin.nodosur07.tas.
+serial: 2026102001
+Recursion requested but not available.
+
+=== FEDORA -> VM268 / DNS SOA TCP ===
+Consulta: dig @10.33.195.205 nodosur07.tas SOA +tcp
+status: NOERROR
+flags: qr aa rd
+SOA: ns1.nodosur07.tas. admin.nodosur07.tas.
+serial: 2026102001
+Recursion requested but not available.
+
+=== FEDORA -> VM268 / DNS AXFR (SALIDA PARCIAL) ===
+Consulta: dig @10.33.195.205 nodosur07.tas AXFR +noall +comments | head -n 15
+Primera cabecera observada:
+status: NOERROR
+flags: qr aa
+ANSWER: 9
+El comando recortó la salida con head: no consta aún el fin
+de transferencia ni el marcador XFR size.
+Interpretación preliminar: posible AXFR permitido desde Fedora
+sobre la VPN. NO equivale a demostrar acceso desde Internet.
+Pendiente confirmar finalización sin listar contenido de la zona.
+
+ALCANCE
+- Evidencia de reglas efectivas observadas y DNS autoritativo.
+- No es auditoría total de nftables, reglas FORWARD posteriores,
+  ACL BIND9 o de todas las redes de origen.
+- No se cambiaron firewall, servicios, reglas DNS ni datos.
