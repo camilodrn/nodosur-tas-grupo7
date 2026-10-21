@@ -1,0 +1,30 @@
+# Nodo Sur E3 — Comparación postactualización WordPress web1/web2
+# Fecha: 21 de octubre de 2026. Salidas terminal aportadas por operador.
+# Solo lectura de directorios locales WordPress.
+# Cálculo reproducible en cada VM:
+# cd /srv/nodosur/web[1|2]/html
+# for dir in wp-admin wp-includes wp-content/plugins wp-content/themes; do
+#   find "$dir" -type f | wc -l
+#   find "$dir" -type f -print0 | LC_ALL=C sort -z | xargs -0 -r sha256sum | sha256sum
+# done
+#
+# VM310 web2
+wp-admin:           593  9840e4f358a49d84be76487a88e02d2fe049de7b029098a0e9ced9561d0568c5
+wp-includes:        2729  0b1ac00b1e04409045a5ed04e51a62c9c945bec77feedac3cc5fd59c2e5f0a35
+wp-content/plugins: 5911  18422824b698330724d1fcc5b3182c8649e341305231cf82d629e4e09e3dc256
+wp-content/themes:  584  d947bbd940d63b45d9785246cb3cf5087ce00493727016ac0272b798eb2be0a9
+#
+# VM263 web1
+wp-admin:           593  9840e4f358a49d84be76487a88e02d2fe049de7b029098a0e9ced9561d0568c5
+wp-includes:        2729  0b1ac00b1e04409045a5ed04e51a62c9c945bec77feedac3cc5fd59c2e5f0a35
+wp-content/plugins: 5911  18422824b698330724d1fcc5b3182c8649e341305231cf82d629e4e09e3dc256
+wp-content/themes:  584  d947bbd940d63b45d9785246cb3cf5087ce00493727016ac0272b798eb2be0a9
+#
+# Resultado: 4/4 huellas de directorios iguales y números de archivos iguales.
+# Total 9.817 archivos cotejados con rutas ordenadas y hashes SHA256 por fichero.
+# La comparación incluye rutas y contenido regular de esos árboles, no atributos
+# (propietarios/permisos/mtime), symlinks u otros archivos que no sean regulares.
+# Tampoco incluye raíz del WordPress, wp-config.php ni uploads NFS,
+# ni certifica equivalencia de runtime, opciones DB, sesiones, plugins activos.
+# La comparación se realizó tras pasar web2 de 7.1.2 a 7.1.3 y
+# comprobar web2 HTTP 200, log HAProxy UP y balanceo 4/4.
