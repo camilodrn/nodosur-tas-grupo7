@@ -85,6 +85,8 @@ Herramientas de consulta incluidas en la rama: `bash scripts/preflight-e3.sh ROL
 
 Para capturar comprobaciones con alcance más preciso: [evidencia de Apache en producción](../evidencias/e3/apache-uploads-web1-web2-final-20261021.txt), [matriz de flujos](MATRIZ-FLUJOS-E3.md), [validaciones de E3](ENTREGA3.md) y [rúbrica](RUBRICA-E3.md).
 
+**Preflight DB y proxy verificado el 21/10/2026:** se ejecutaron `docker compose ... config --quiet` correctamente en VM279 y VM308, y se comprobaron contenedores en ejecución, imagen, DB `healthy`, volumen histórico y existencia de archivos privados ([evidencia](../evidencias/e3/preflight-db-proxy-compose-20261021.txt)). Los repos locales aparecieron limpios, pero no se comprobó igualdad de commit/branch con `e3/cierre-tecnico`. Estas validaciones no sustituyen reconstrucción limpia de la infraestructura.
+
 ## Persistencia y recuperación
 
 La BD está en un **volumen Docker productivo** en VM279. El WordPress local está en bind mounts separados por backend. `uploads` está compartido por NFS y depende de VM268. Por eso un respaldo íntegro necesita **consistencia coordinada de base de datos, WordPress local y NFS**, además de secretos y configuraciones: copiar solo `uploads` no restaura la tienda completa.
