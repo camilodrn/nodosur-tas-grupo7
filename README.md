@@ -49,12 +49,15 @@ Las evidencias se presentan con su alcance real: las capturas históricas no inc
 
 - `compose/`: Compose por rol y host. **No son un único Compose que despliegue cinco VMs automáticamente.**
 - `configs/`: configuraciones saneadas y ejemplos; algunos corresponden a E2 y se identifican mediante la documentación.
-- `scripts/`: validadores de DNS, web, MariaDB E3 y revisión heurística de secretos.
+- `scripts/`: validadores de DNS, web, MariaDB E3, preflight de estado por host y huella semántica de Compose, además de revisión heurística de secretos.
 - [`pruebas/`](pruebas/README.md): índice de procedimientos, con la prueba de carrito protegida por autorización explícita y la separación E2/E3.
 - `evidencias/e3/`: resultados verificables de pruebas.
-- [Estado y pruebas E3](docs/ENTREGA3.md), [matriz de flujos](docs/MATRIZ-FLUJOS-E3.md) y [decisiones](docs/decisiones-arquitectura.md).
+- [Estado y pruebas E3](docs/ENTREGA3.md), [matriz de flujos](docs/MATRIZ-FLUJOS-E3.md), [autoevaluación de rúbrica](docs/RUBRICA-E3.md) y [decisiones](docs/decisiones-arquitectura.md).
+- [Guía de reconstrucción y prerequisitos](docs/DESPLIEGUE-REPRODUCIBLE-E3.md) y [plan de demostración de 12–15 minutos](docs/PLAN-DEMOSTRACION-E3.md).
 - [Revisión selectiva de mejoras de Codex](docs/REVISION-CODEX-E3.md): qué se incorporó, qué requiere pruebas y qué no se debe desplegar todavía.
 - [Historial de Entrega 2](docs/historia/CHECKLIST_ENTREGA2.md): checklist original conservado fuera de la raíz, para no confundir E2 con E3.
+
+**Reproducibilidad:** el mismo Compose debe describir lo que realmente está instalado. Para comprobarlo sin alterar los servicios, ejecutar [`scripts/compose-fingerprint-e3.sh`](scripts/compose-fingerprint-e3.sh) en el clon Fedora y en la VM correspondiente, y comparar huellas. Para validar estado/rutas/volumen mediante consultas de solo lectura está [`scripts/preflight-e3.sh`](scripts/preflight-e3.sh). Ver instrucciones y límites en la [guía](docs/DESPLIEGUE-REPRODUCIBLE-E3.md).
 
 Las credenciales, certificados con claves privadas y `wp-config.php` reales permanecen **fuera de Git**. La reproducción de un host requiere también su configuración externa, los montajes NFS y sus datos; `docker compose config --quiet` verifica la definición, **no reconstruye por sí solo toda la infraestructura**.
 
