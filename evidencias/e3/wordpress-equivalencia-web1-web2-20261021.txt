@@ -1,0 +1,55 @@
+# Entrega 3 — Comparación de versiones CMS y directorios en web1 / web2
+# Fecha de sesiones provistas: 21/10/2026. Consultas de solo lectura.
+# Se consultó directamente el WordPress persistente de cada contenedor.
+# No se imprimieron wp-config.php, salts, contraseñas ni variables privadas.
+
+=== WEB1: VM263 (nodosur-web1) ===
+VERSION WORDPRESS:
+$wp_version = '7.1.3';
+VERSION WOOCOMMERCE:
+ * Version: 11.1.0
+PLUGINS (DIRECTORIOS):
+akismet
+woocommerce
+TEMAS (DIRECTORIOS):
+hello-elementor
+shopire
+shopway
+twentytwentyfive
+twentytwentyfour
+twentytwentythree
+HUELLAS ARCHIVOS PRINCIPALES:
+7513dacf90ade66347561ffc2e79d27e74b6a3f05d869bd455144ed7cd378a04  wp-includes/version.php
+99c8762e9ddc6ee5580d079ecf2bd5ed2d18c48ae1f3b793777de16729c948c1  wp-content/plugins/woocommerce/woocommerce.php
+
+=== WEB2: VM310 (nodosur-web2) ===
+VERSION WORDPRESS:
+$wp_version = '7.1.2';
+VERSION WOOCOMMERCE:
+ * Version: 11.1.0
+PLUGINS (DIRECTORIOS):
+akismet
+woocommerce
+TEMAS (DIRECTORIOS):
+hello-elementor
+shopire
+shopway
+twentytwentyfive
+twentytwentyfour
+twentytwentythree
+HUELLAS ARCHIVOS PRINCIPALES:
+c822935799e6f3b83129882554ccff48596cf98b4a5eb82b83d82fe15455894e  wp-includes/version.php
+99c8762e9ddc6ee5580d079ecf2bd5ed2d18c48ae1f3b793777de16729c948c1  wp-content/plugins/woocommerce/woocommerce.php
+
+=== CONCLUSIÓN Y LÍMITES ===
+# La versión efectiva de WordPress difiere entre web1 (7.1.3) y web2 (7.1.2).
+# El tag de imagen Docker wordpress:7.1.2-php8.3-apache, observado
+# previamente en ambos hosts, NO acredita igualdad del CMS bind-mounted.
+# Coinciden versión y hash del archivo principal de WooCommerce,
+# más nombres de directorios de plugins y temas.
+# No se ha comprobado equivalencia del árbol completo del core,
+# de otros archivos de plugins/temas ni de activación/configuración
+# de plugins. Tampoco se conoce aún la causa de la diferencia.
+# No se modificó ningún archivo productivo.
+# Antes de actualizar, revisar alcance, integridad, mantenimiento,
+# backups y compatibilidad, sin alterar MariaDB ni NFS.
