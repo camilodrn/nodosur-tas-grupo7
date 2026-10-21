@@ -1,6 +1,6 @@
 # Seguridad de Nodo Sur — Entrega 3
 
-Esta guía distingue las medidas **observadas en las VMs** de las propuestas de Codex que siguen pendientes. La protección Apache de `uploads` se instaló **en web2 únicamente** durante E3; web1 sigue pendiente. El laboratorio funciona con dos WordPress, HAProxy, MariaDB y NFS en cinco VMs.
+Esta guía distingue las medidas **observadas en las VMs** de las propuestas de Codex que siguen pendientes. La protección Apache de `uploads` está instalada en **ambos servidores web (VM263 y VM310)** durante E3, con prueba de disponibilidad e imágenes conservadas. El laboratorio funciona con dos WordPress, HAProxy, MariaDB y NFS en cinco VMs.
 
 ## Secretos y materiales que no van a GitHub
 
@@ -22,11 +22,11 @@ Los ejemplos de configuración no deben contener valores privados. Los servicios
 
 Ver [matriz de flujos E3](docs/MATRIZ-FLUJOS-E3.md), [firewall en web1/web2](evidencias/e3/firewall-docker-user-web1-web2-20261021.txt) y [datos públicos del certificado](evidencias/e3/certificado-publico-y-repo-local-20261021.txt).
 
-**Comprobación adicional (21/10/2026):** Apache en ambos WordPress respondió `Syntax OK` con advertencia no crítica `AH00558` de `ServerName`. Al momento de esa comprobación histórica aún no estaba instalada la protección de uploads; posteriormente **se instaló en web2**, mientras que web1 continúa sin ella. Esto **no permite afirmar por sí solo que PHP se ejecute en uploads**; falta comprobar reglas globales/heredadas antes de considerar el cambio. En web2 se confirmó sin revelar valores que `/run/secrets/db_password` está presente, no vacío, y que `wp-config.php` contiene una referencia a ese archivo. No se concluye necesidad de migrar credenciales. [Evidencia](evidencias/e3/apache-secretos-y-validadores-20261021.txt).
+**Comprobación adicional (21/10/2026):** Apache en ambos WordPress respondió `Syntax OK` con advertencia no crítica `AH00558` de `ServerName`. Al momento de esa comprobación histórica aún no estaba instalada la protección de uploads; **posteriormente se instaló en web1 y web2**. Esto **no permite afirmar por sí solo que PHP se ejecute en uploads**; falta comprobar reglas globales/heredadas antes de considerar el cambio. En web2 se confirmó sin revelar valores que `/run/secrets/db_password` está presente, no vacío, y que `wp-config.php` contiene una referencia a ese archivo. No se concluye necesidad de migrar credenciales. [Evidencia](evidencias/e3/apache-secretos-y-validadores-20261021.txt).
 
 **Barrido final en NFS (VM268):** la búsqueda privilegiada de archivos con extensiones `.php*`, `.phtml` y `.phar` terminó sin errores y contó **0 coincidencias**. La comprobación equivalente en el `.htaccess` principal de web2 tampoco encontró las directivas de denegación consultadas. No existe evidencia de PHP malicioso presente, pero se recomienda impedir su ejecución futura en `uploads`. [Evidencia](evidencias/e3/nfs-php-y-htaccess-web2-20261021.txt).
 
-Se incorporó al repositorio el archivo **candidato** [`configs/apache/nodosur-uploads.conf`](configs/apache/nodosur-uploads.conf), que deniega PHP/PHTML/PHAR bajo `uploads` y deshabilita CGI/listado de directorio; **ya está montado y activo en web2 (VM310)**, con `apache2ctl -t` OK, portada HTTP 200, imagen NFS HTTP 200 y URL PHP inexistente HTTP 403 ([evidencia](evidencias/e3/apache-uploads-web2-productivo-20261021.txt)). **No está activo aún en web1 (VM263)**. Una prueba aislada adicional sí comprobó 200/403 para archivos `.txt`/`.php` existentes creados fuera de producción.
+Se incorporó al repositorio el archivo [`configs/apache/nodosur-uploads.conf`](configs/apache/nodosur-uploads.conf), que deniega PHP/PHTML/PHAR bajo `uploads` y deshabilita CGI/listado de directorio. **Está montado y activo en web1 y web2** mediante bind de solo lectura, con `apache2ctl -t` correcto; ambas portadas, tiendas e imagen real de NFS respondieron HTTP 200, y la ruta PHP inexistente bajo uploads respondió HTTP 403 ([evidencia final](evidencias/e3/apache-uploads-web1-web2-final-20261021.txt)). Una prueba **aislada** comprobó 200/403 para archivos `.txt`/`.php` realmente existentes fuera de producción. No se prueba aquí la resistencia frente a todos los vectores de ejecución.
 
 ## Medidas propuestas, pendientes de instalación
 
