@@ -1,0 +1,25 @@
+# Evidencia E3 — identificación de restauración aislada existente, VM279
+# Transcripción de consultas compartidas por el equipo; solo lectura.
+#
+# docker volume inspect nodosur_db_restorecheck_data
+Nombre=nodosur_db_restorecheck_data Creado=2026-10-20T16:34:55Z Ruta=/var/lib/docker/volumes/nodosur_db_restorecheck_data/_data
+#
+# docker ps -a --filter volume=nodosur_db_restorecheck_data
+NAMES                     IMAGE           STATUS
+nodosur-db-restorecheck   mariadb:10.11   Exited (0) 9 hours ago
+#
+# docker ps -a
+NAMES                     IMAGE           STATUS
+nodosur-db-staging        mariadb:10.11   Up 7 hours (healthy)
+nodosur-db-restorecheck   mariadb:10.11   Exited (0) 9 hours ago
+#
+# docker inspect nodosur-db-staging (mount /var/lib/mysql)
+Volumen=nodosur-db-staging_db_stage_data
+#
+# Interpretación:
+# - El contenedor de prueba está detenido y usa un volumen con nombre distinto al productivo.
+# - Los datos de producción siguen en el volumen histórico.
+# - Exited (0) no demuestra por sí solo el éxito de la importación.
+# - La evidencia histórica independiente en este repositorio consigna 52 tablas,
+#   51 posts, 512 opciones, 4 usuarios y red 'none'; falta verificar metadata real
+#   del contenedor existente antes de vincular ambos resultados.
