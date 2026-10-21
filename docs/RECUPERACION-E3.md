@@ -14,7 +14,7 @@ El equipo reportó copia `nodo_sur_final-20261020-190237.sql.gz` en `archive` de
 
 Existe en VM268 un archivo privado de respaldo web `/var/backups/nodosur-remote/web/wordpress-files-20261019-205742.tar.gz` (59 MB, root:root `0600`): se verificó GZIP y el listado TAR registra entradas `uploads`, plugins, temas y un `wp-config.php`. **Su contenido no ha sido comparado con NFS actual ni restaurado**, y no hay evidencia de frecuencia de actualización. No incluir este TAR en Git: `wp-config.php` puede contener credenciales y salts. Todavía no se acredita copia independiente fuera de VM268, grants recuperables, ni el conjunto de configuración BIND/NFS y TLS. Deben custodiarse privadamente con permisos mínimos y una segunda copia en otro dominio de falla. El checksum detecta corrupción accidental, no autentica frente a quien pueda modificar archivo y manifiesto. Retención y alertas de espacio están pendientes; esta rama no elimina automáticamente respaldos.
 
-## Verificar una copia existente (solo lectura)
+La comparación adicional de [126 archivos uploads](../evidencias/e3/comparacion-sha256-uploads-20261020.txt) frente al TAR existente arrojó 0 faltantes, 0 extras y 0 diferencias SHA-256. Esto valida los archivos regulares a la fecha de la comprobación, pero no elimina el punto único de fallo: ambos siguen en VM268. Antes de declarar protección frente a pérdida completa, custodiar una copia cifrada en otra VM o destino autorizado y verificar su integridad, sin exponer `wp-config.php`/salts. La recuperación de WordPress + DB continúa sin ensayo funcional completo.\n\n## Verificar una copia existente (solo lectura)
 
 En el host que posee la copia y desde un checkout del repositorio:
 
