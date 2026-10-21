@@ -46,7 +46,7 @@ La configuración quedó montada **en web2 (VM310) y después en web1 (VM263)**,
 
 Evidencia: [resultado final de los dos backends](../evidencias/e3/apache-uploads-web1-web2-final-20261021.txt). El `403` de producción se observó consultando una ruta inexistente: se presenta como comprobación de la regla HTTP, no como ensayo de ejecución de un PHP subido. Los respaldos previos de Compose permanecen fuera de Git en los hosts web.
 
-**Nota operativa:** los checkouts instalados en VM263 y VM310 tienen ediciones locales de `compose/web1/compose.yaml` y `compose/web2/compose.yaml`. GitHub también contiene los cambios, pero **no se debe ejecutar `git pull`/`reset` indiscriminadamente en esas VMs** hasta reconciliar los checkouts sin reemplazar los datos ni las configuraciones activas. El PR #2 sigue sin fusionar con `e3/integracion`.
+**Nota operativa:** se comprobaron [huellas semánticas idénticas de Compose entre Fedora y VM263/VM310](../evidencias/e3/huellas-compose-web1-web2-verificadas-20261021.txt). Los checkouts instalados en VM263 y VM310 tienen ediciones locales de `compose/web1/compose.yaml` y `compose/web2/compose.yaml`. GitHub también contiene los cambios, pero **no se debe ejecutar `git pull`/`reset` indiscriminadamente en esas VMs** hasta reconciliar los checkouts sin reemplazar los datos ni las configuraciones activas. El PR #2 sigue sin fusionar con `e3/integracion`.
 
 ## Qué no está demostrado todavía
 
