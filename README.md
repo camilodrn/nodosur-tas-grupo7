@@ -52,8 +52,23 @@ Las evidencias se presentan con su alcance real: las capturas históricas no inc
 - `scripts/` y `pruebas/`: utilidades y procedimientos de comprobación.
 - `evidencias/e3/`: resultados verificables de pruebas.
 - [Estado y pruebas E3](docs/ENTREGA3.md), [matriz de flujos](docs/MATRIZ-FLUJOS-E3.md) y [decisiones](docs/decisiones-arquitectura.md).
+- [Revisión selectiva de mejoras de Codex](docs/REVISION-CODEX-E3.md): qué se incorporó, qué requiere pruebas y qué no se debe desplegar todavía.
 
 Las credenciales, certificados con claves privadas y `wp-config.php` reales permanecen **fuera de Git**. La reproducción de un host requiere también su configuración externa, los montajes NFS y sus datos; `docker compose config --quiet` verifica la definición, **no reconstruye por sí solo toda la infraestructura**.
+
+## Verificaciones sin modificar las VMs
+
+Desde Fedora, **conectado a la VPN y con resolución DNS correcta**, los scripts de esta rama pueden consultar web y DNS. A diferencia de los scripts antiguos, devuelven código de error cuando una prueba falla:
+
+```bash
+bash scripts/validate-dns.sh
+NODOSUR_CA_CERT=/ruta/al/certificado-publico.crt bash scripts/validate-web.sh
+python3 scripts/audit-secrets.py
+```
+
+Para un diagnóstico **sin comprobar confianza TLS**, se puede usar `NODOSUR_INSECURE=1 bash scripts/validate-web.sh`. Este modo no demuestra la identidad del servidor. No copiar claves privadas, contraseñas ni el PEM combinado de HAProxy a Fedora: usar únicamente el certificado público distribuido por un canal confiable.
+
+Estas herramientas **no** detienen contenedores ni aplican configuraciones. La prueba de failover que afecta web2 requiere una ventana y se realizará en el ensayo final.
 
 ## Límites de disponibilidad
 
