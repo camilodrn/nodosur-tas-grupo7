@@ -33,7 +33,7 @@ En las cuatro VMs se ejecutó exitosamente `docker compose -f ARCHIVO config --q
 ## Datos aún no capturados
 
 - Salida de `hostnamectl` y recursos efectivos de CPU/RAM/almacenamiento para las cinco VMs.
-- **Versiones efectivas parcialmente observadas**: WordPress web1 7.1.3 y web2 7.1.2; WooCommerce 11.1.0 y hash de su archivo principal iguales. Falta revisar el resto del core, temas, plugins y activaciones; digests de las imágenes Docker aún no capturados. [Evidencia](evidencias/e3/wordpress-equivalencia-web1-web2-20261021.txt).
+- **Versiones efectivas parcialmente observadas**: WordPress web1 7.1.3 y web2 7.1.2; WooCommerce 11.1.0 y hash de su archivo principal iguales. La [comparación del árbol de archivos](evidencias/e3/wordpress-arboles-core-plugins-temas-20261021.txt) confirmó hashes iguales en plugins y temas y diferentes en directorios de core (`wp-admin` / `wp-includes`), con conteos iguales. Falta revisar activaciones/configuración de plugins y raíz del core; digests de imágenes Docker aún no capturados. [Evidencia](evidencias/e3/wordpress-equivalencia-web1-web2-20261021.txt).
 - Versiones/configuración real de BIND9, exports NFS, ACL de todos los hosts y permisos de secretos; solo parte está contrastada.
 - Evidencia de reinicios completos y persistencia de todas las políticas después del arranque.
 
