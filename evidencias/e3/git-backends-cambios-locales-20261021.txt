@@ -1,0 +1,68 @@
+# Nodo Sur E3 — Auditoría de cambios Git locales en backends web
+# Fecha: 21/10/2026. Salidas proporcionadas por el operador.
+# Solo lectura: git status --short --branch, git log -1, git diff --check,
+# git diff -- archivo Compose. No se alteraron VMs ni contenedores.
+
+=== VM263: web1 / nodosurtas07 ===
+Rama: e3/backend1
+HEAD: 8b067ef feat(e3): finalizar backend1 con NFS RW y firewall
+git status --short --branch:
+## e3/backend1
+ M compose/web1/compose.yaml
+
+git diff --check: sin salida (sin errores detectados)
+git diff -- compose/web1/compose.yaml:
+@@ -22,6 +22,14 @@ services:
+         bind:
+           create_host_path: false
+
++      # E3: bloquear ejecucion de PHP en uploads.
++      - type: bind
++        source: /etc/nodosur/apache/nodosur-uploads.conf
++        target: /etc/apache2/conf-enabled/nodosur-uploads.conf
++        read_only: true
++        bind:
++          create_host_path: false
++
+     logging:
+       driver: json-file
+       options:
+
+=== VM310: web2 / nodosur-g7-web2 ===
+Rama: e3/backend2
+HEAD: 667d7d9 feat(e3): finalizar backend2 con firewall y NFS
+git status --short --branch:
+## e3/backend2
+ M compose/web2/compose.yaml
+
+git diff --check: sin salida (sin errores detectados)
+git diff -- compose/web2/compose.yaml:
+@@ -26,6 +26,14 @@ services:
+         bind:
+           create_host_path: false
+
++      # E3: impedir ejecución PHP en uploads.
++      - type: bind
++        source: /etc/nodosur/apache/nodosur-uploads.conf
++        target: /etc/apache2/conf-enabled/nodosur-uploads.conf
++        read_only: true
++        bind:
++          create_host_path: false
++
+     logging:
+       driver: json-file
+       options:
+
+=== INTERPRETACION Y ALCANCE ===
+- En las dos VMs, el unico archivo modificado que reporta git status
+  es el Compose del respectivo backend.
+- El cambio observado incorpora el montaje de hardening Apache para
+  uploads, en modo read_only y sin creacion automatica de ruta.
+- Evidencia anterior:
+  evidencias/e3/huellas-compose-web1-web2-verificadas-20261021.txt
+  registra huellas semanticas Compose coincidentes entre Fedora y las VMs.
+- Estos resultados NO prueban equivalencia entre commits/ramas de Git,
+  ni reconstruccion completa en host limpio.
+- Los cambios locales se preservan. No es necesaria una actualizacion
+  de Git ni una recreacion de contenedores antes de la entrega solo
+  para dejar el arbol de trabajo limpio.
