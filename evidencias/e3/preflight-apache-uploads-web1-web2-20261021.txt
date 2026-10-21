@@ -1,0 +1,27 @@
+# Entrega 3 — Preflight de despliegue Apache uploads en web1/web2
+# Salidas comunicadas por operadores del laboratorio. Sólo lectura en VMs.
+
+# VM308 proxy:
+Estado=running
+10.33.199.58:18081 -> HTTP 200 (Host nodosur07.tas, X-Forwarded-Proto: https)
+10.33.199.62:18080 -> HTTP 200 (mismos encabezados)
+
+# VM310 web2:
+systemctl is-active nodosur-web2.service -> active
+docker inspect nodosur-web2 -> Estado=running Imagen=wordpress:7.1.2-php8.3-apache
+docker compose -f compose/web2/compose.yaml config --quiet -> COMPOSE WEB2: OK
+findmnt -M /srv/nodosur/nfs/uploads -> 10.33.199.59:/srv/nodosur/uploads
+    nfs4, rw, vers=4.1, hard, proto=tcp
+git status --short -> limpio
+
+# VM263 web1:
+systemctl is-active nodosur-web1.service -> active
+docker inspect nodosur-web1 -> Estado=running Imagen=wordpress:7.1.2-php8.3-apache
+docker compose -f compose/web1/compose.yaml config --quiet -> COMPOSE WEB1: OK
+findmnt -M /srv/nodosur/nfs/uploads -> 10.33.199.59:/srv/nodosur/uploads
+    nfs4, rw, vers=4.1, hard, proto=tcp
+git status --short -> limpio
+
+# Preflight aprobado para comenzar la preparación de hardening de web2.
+# NO acredita todavía instalación, restart/recreate ni HTTP 403 en VMs productivas.
+# Sitio seguía sirviendo HTTP 200 desde ambos backends al comprobar el preflight.
