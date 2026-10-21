@@ -49,7 +49,8 @@ Las evidencias se presentan con su alcance real: las capturas históricas no inc
 
 - `compose/`: Compose por rol y host. **No son un único Compose que despliegue cinco VMs automáticamente.**
 - `configs/`: configuraciones saneadas y ejemplos; algunos corresponden a E2 y se identifican mediante la documentación.
-- `scripts/` y `pruebas/`: utilidades y procedimientos de comprobación.
+- `scripts/`: validadores de DNS, web, MariaDB E3 y revisión heurística de secretos.
+- [`pruebas/`](pruebas/README.md): índice de procedimientos, con la prueba de carrito protegida por autorización explícita y la separación E2/E3.
 - `evidencias/e3/`: resultados verificables de pruebas.
 - [Estado y pruebas E3](docs/ENTREGA3.md), [matriz de flujos](docs/MATRIZ-FLUJOS-E3.md) y [decisiones](docs/decisiones-arquitectura.md).
 - [Revisión selectiva de mejoras de Codex](docs/REVISION-CODEX-E3.md): qué se incorporó, qué requiere pruebas y qué no se debe desplegar todavía.
@@ -69,7 +70,7 @@ python3 scripts/audit-secrets.py
 
 Para un diagnóstico **sin comprobar confianza TLS**, se puede usar `NODOSUR_INSECURE=1 bash scripts/validate-web.sh`. Este modo no demuestra la identidad del servidor. No copiar claves privadas, contraseñas ni el PEM combinado de HAProxy a Fedora: usar únicamente el certificado público distribuido por un canal confiable.
 
-Estas herramientas **no** detienen contenedores ni aplican configuraciones. La prueba de failover que afecta web2 requiere una ventana y se realizará en el ensayo final.
+Los validadores DNS y web son lecturas. En **VM279** (no en Fedora), el nuevo `bash scripts/validate-db-local.sh` revisa solo la estructura Compose, el estado, health check y nombre del volumen MariaDB mediante `sudo docker inspect`; ejecutar únicamente cuando el código actualizado esté disponible en esa VM. La prueba de carrito es **diferente**: escribe temporalmente, exige `--permitir-escritura --producto ID` y se reserva para una ventana de pruebas. La prueba de failover que afecta web2 se realizará en el ensayo final.
 
 ## Límites de disponibilidad
 
