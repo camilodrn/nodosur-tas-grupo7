@@ -1,5 +1,10 @@
 # Contribuciones del equipo
 
+**Alcance de esta tabla:** trabajo y evidencia documentados de la fase E2; **no** es una atribución individual comprobada de todas las tareas y commits de E3. Antes de usarla en la defensa E3, contrastar con el grupo las actividades reales de cada integrante sin inventar autorías.
+
+---
+
+
 Este registro reconstruye el trabajo **realmente realizado** por el equipo durante la implementación de Nodo Sur. No se asignan tareas ficticias ni commits retroactivos. Como el repositorio se consolidó al final del hito, no todas las contribuciones quedaron asociadas a commits individuales; por eso se indican también otras evidencias disponibles.
 
 | Integrante | Trabajo realizado | Evidencia disponible |
