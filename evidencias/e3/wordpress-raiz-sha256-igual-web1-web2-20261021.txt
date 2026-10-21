@@ -1,0 +1,11 @@
+Nodo Sur E3. 2026-10-21. Comparación de archivos principales en la raíz de WordPress, excluyendo wp-config.php.
+Comando ejecutado con privilegios de lectura en cada VM:
+cd /srv/nodosur/web{1,2}/html
+find . -maxdepth 1 -type f con patrones wp-*.php, index.php, xmlrpc.php, license.txt, readme.html; exclusión explícita de wp-config.php; ordenamiento estable de nombres y agregación SHA-256 sobre hashes individuales de archivos.
+VM263 web1:
+63301141c3dff497923ee2a02b5067145729fd36308af4d6934075a512dc9f8d
+VM310 web2:
+63301141c3dff497923ee2a02b5067145729fd36308af4d6934075a512dc9f8d
+Resultado: ambas huellas coinciden.
+Interpretación: rutas y contenidos de los archivos regulares seleccionados de la raíz coinciden. No se inspeccionó ni compartió wp-config.php. No se concluye a partir de este test igualdad de otros archivos en raíz, symlinks, propietarios, permisos, datos NFS, opciones de BD, sesiones o credenciales.
+Esto complementa evidencias/e3/comparacion-post-upgrade-web1-web2-20261021.txt, donde coinciden hashes de los árboles wp-admin, wp-includes, plugins y temas (9817 archivos).
