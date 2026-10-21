@@ -15,9 +15,11 @@ Estas decisiones describen la plataforma **implementada**, no la configuración 
 | Manejar los contenedores por Compose + systemd | Separar servicio por rol y arranque controlado | Cada VM gestiona su propio componente | Un `active (exited)` de systemd no prueba contenedor vivo |
 | Custodiar secretos fuera de Git | No publicar claves, passwords, salts ni PEM privados | Repositorio compartible para evaluación | La reproducción necesita los archivos privados y permisos correctos |
 
-## Cambios que no están adoptados
+## Cambios adoptados y aún pendientes
 
-Codex propuso almacenar scripts y Compose bajo `/opt/nodosur`, reconstruir cadenas de firewall, endurecer encabezados HAProxy, bloquear PHP dentro de `uploads`, enlazar explícitamente el secreto de web2 y reformar backup/staging. Son **opciones evaluadas en un PR separado**, no decisiones ya ejecutadas en producción.
+La propuesta de **bloquear ejecución PHP dentro de `uploads`** se adaptó, probó en Apache aislado y **desplegó en web1 y web2** el 21/10/2026 mediante Compose, con respaldo previo y comprobación de portada, tienda, imagen NFS y HTTP 403. [Evidencia final](../evidencias/e3/apache-uploads-web1-web2-final-20261021.txt).
+
+Otras ideas de Codex —mover scripts y Compose a `/opt/nodosur`, reconstruir cadenas de firewall, endurecer encabezados HAProxy, cambiar cómo se referencia el secreto de web2 y reformar backup/staging— continúan en evaluación separada. **No deben describirse como cambios ejecutados en producción**.
 
 [Detalle de la revisión de Codex](REVISION-CODEX-E3.md).
 
