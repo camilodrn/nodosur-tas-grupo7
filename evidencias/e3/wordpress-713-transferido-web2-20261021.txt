@@ -1,0 +1,28 @@
+# Nodo Sur E3 — Paquete oficial WordPress 7.1.3 transferido y verificado en web2
+# Registro de salida aportada por operador. Fecha 21/10/2026.
+# NO es una ejecución de actualización del CMS.
+
+=== FEDORA -> VM310 ===
+$ scp ~/Proyectos/nodosur-wp-staging/7.1.3/wordpress-7.1.3.tar.gz \
+      ~/Proyectos/nodosur-wp-staging/7.1.3/wordpress-7.1.3.tar.gz.sha1 \
+      nodosur-g7-web2@10.33.195.208:/tmp/
+wordpress-7.1.3.tar.gz 100% 34MB
+wordpress-7.1.3.tar.gz.sha1 100% 40
+
+=== EN VM310 (~/nodosur-tas-grupo7, trabajando en /tmp) ===
+-rw-r--r-- 1 nodosur-g7-web2 nodosur-g7-web2 34M Oct 21 18:15 wordpress-7.1.3.tar.gz
+-rw-r--r-- 1 nodosur-g7-web2 nodosur-g7-web2 40 Oct 21 18:15 wordpress-7.1.3.tar.gz.sha1
+wordpress-7.1.3.tar.gz: OK
+# gzip -t wordpress-7.1.3.tar.gz: sin error
+$wp_version = '7.1.3';
+d2a09acb6a15e3b9c471d72557753c266d6f41a79ed19bfe04cbfe49e283b2a5  wordpress-7.1.3.tar.gz
+PAQUETE WEB2 PREPARADO
+
+# ALCANCE:
+# Transferencia correcta de paquete tar.gz y checksum .sha1 oficial.
+# Integridad del tar.gz confirmada por SHA-1 comparado con archivo publicado
+# en WordPress.org y prueba gzip -t. Versión de version.php dentro: 7.1.3.
+# SHA-256 local es identificador para cotejo de artefacto en la VM.
+# El paquete se encuentra en /tmp, NO instalado en /srv/nodosur/web2/html.
+# WordPress efectivo en VM310 sigue 7.1.2 hasta próxima verificación.
+# No se modificó Compose ni WordPress ni la base compartida.
