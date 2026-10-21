@@ -1,0 +1,32 @@
+# Evidencia E3 — copia del TAR web VM268 -> VM279 (20/21-10-2026)
+# Salidas proporcionadas por el equipo. El archivo TAR real no se publica en Git.
+# Referencia: wordpress-files-20261019-205742.tar.gz
+# Contiene wp-config.php; no se deben publicar datos ni claves.
+#
+# VM268 /home/tas_revision/.nodosur-transfer:
+# Original root-only y copia temporal para transferencia: SHA256 idéntico
+4acf5e478125d18743485a0621812b3733b065e062fd077d7acf2f9c27084bbd
+# Copia temporal de VM268: 0600, tas_revision:tas_revision.
+#
+# VM279 directorio de destino preparado:
+# /var/backups/nodosur/web-secondary root:root 0700
+# /home/tas_revision/.nodosur-transfer tas_revision:tas_revision 0700
+#
+# Transferencia iniciada desde Fedora, transporte SSH:
+$ scp -3 tas_revision@10.33.195.205:/home/tas_revision/.nodosur-transfer/wordpress-files-20261019-205742.tar.gz tas_revision@10.33.195.226:/home/tas_revision/.nodosur-transfer/
+wordpress-files-20261019-205742.tar.gz 100% 58MB 9.5MB/s 00:06
+#
+# VM279, archivo temporal recibido:
+# /home/tas_revision/.nodosur-transfer/wordpress-files-20261019-205742.tar.gz
+# -rw------- tas_revision tas_revision ~59M (21-10-2026 01:37, horario visible en VM)
+$ sha256sum /home/tas_revision/.nodosur-transfer/wordpress-files-20261019-205742.tar.gz
+4acf5e478125d18743485a0621812b3733b065e062fd077d7acf2f9c27084bbd
+$ gzip -t /home/tas_revision/.nodosur-transfer/wordpress-files-20261019-205742.tar.gz
+GZIP: CORRECTO
+#
+# LÍMITES DE ESTA EVIDENCIA
+# - Prueba integridad de tránsito y equivalencia de bytes con original mediante SHA256.
+# - Todavía NO demuestra que el TAR esté instalado definitivamente en directorio root-only,
+#   ni que pueda restaurarse WordPress + MariaDB.
+# - Sin cifrado adicional en reposo: SSH cifra tránsito; 0600/0700 limitan lectura.
+# - La redundancia está en otra VM del mismo laboratorio, no fuera del clúster.
