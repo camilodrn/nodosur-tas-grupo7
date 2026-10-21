@@ -6,7 +6,7 @@ Fuente de requisitos: `Proyecto_Integrador_TAS_2026_Nodo_Sur(2).docx`, páginas 
 
 | Pauta E3 | Evidencia observada | Qué falta para cerrar con rigor |
 |---|---|---|
-| CMS multicontenedor reproducible con Compose | `compose/proxy/compose.prod.yaml`, `compose/db-stage/compose.prod.yaml`, Compose web y documentación versionada; VMs y contenedores efectivos comprobados en auditoría | Seis Compose localizados en Fedora; parámetros no secretos están en YAML y claves privadas en rutas externas. Falta ejecutar validación local, contrastar lo versionado con las VMs (systemd hoy usa home, no `/opt/nodosur`); no se detectó `.env.example`, pero el formato no es obligatorio si la configuración saneada está documentada |
+| CMS multicontenedor reproducible con Compose | `compose/proxy/compose.prod.yaml`, `compose/db-stage/compose.prod.yaml`, Compose web y documentación versionada; VMs y contenedores efectivos comprobados en auditoría | [Seis Compose validados en Fedora](../evidencias/e3/validacion-local-fedora-20261021.txt), 25 tests aprobados y barrido heurístico sin candidatos; falta contrastar lo versionado con las VMs (systemd hoy usa home, no `/opt/nodosur`) y revalidar PHP omitido; parámetros no secretos están en YAML, secretos fuera de Git |
 | Dos backends equivalentes, identificables | [8 solicitudes 4/4](../evidencias/e3/balanceo-roundrobin.txt), respuestas `X-NodoSur-Backend`; montajes NFSv4.1 RW observados en web1/web2 | [El mismo upload se sirvió idéntico desde web1/web2 y NFS por SHA-256](../evidencias/e3/nfs-mismo-archivo-web1-web2-20261021.txt); pendiente equivalencia de versiones/plugins |
 | HAProxy como entrada HTTP/HTTPS, redirección TLS, health checks | [HTTP 301 y Location HTTPS confirmados](../evidencias/e3/http-redirect-y-validacion-proxy-20261021.txt); [6 peticiones HTTPS exitosas 3/3](../evidencias/e3/https-haproxy.txt); config `compose/proxy/haproxy.prod.cfg` con roundrobin, HEAD / y checks de servidor | Validación `haproxy -c` correcta; [SAN/vigencia del certificado público confirmados](../evidencias/e3/certificado-publico-y-repo-local-20261021.txt) (autofirmado, no prueba confianza CA); faltan logs DOWN/UP |
 | Persistencia coherente de DB/archivos/imágenes/sesiones | [Carrito compartido postmigración](../evidencias/e3/carrito-coherencia-postmigracion.txt); NFS RW desde mismo export, volumen MariaDB productivo confirmado | Upload idéntico en web1/web2/NFS comprobado; carrito compartido histórico. Pendientes sesiones autenticadas/checkout si se exigen, y validación de escrituras nuevas |
@@ -22,7 +22,7 @@ Fuente de requisitos: `Proyecto_Integrador_TAS_2026_Nodo_Sur(2).docx`, páginas 
 
 ## Seis evidencias mínimas a cerrar
 
-- [ ] Compose + variables de ejemplo sin secretos, coherentes con lo instalado.
+- [ ] [Seis Compose validados localmente](../evidencias/e3/validacion-local-fedora-20261021.txt) con código 0, sin `.env.example` nominal; **pendiente contrastar con Compose real instalado** en cada VM y documentación de secretos, antes de dar por reproducible.
 - [x] HAProxy config validada con `haproxy -c` en ejecución, **sin recargar** ([evidencia](../evidencias/e3/http-redirect-y-validacion-proxy-20261021.txt)); no confirma retrospectivamente validación antes de recargas pasadas.
 - [x] Secuencia versionada de ocho solicitudes 4 web1 / 4 web2.
 - [x] Pruebas archivadas de falla y reintegración (secuencias HTTP), **pero faltan logs DOWN/UP y marca de la acción**.
