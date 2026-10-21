@@ -31,6 +31,12 @@ En VM308 se comprobó web1 HTTP 200 en home, `/tienda/` y archivo uploads NFS, y
 
 **Pendiente:** prueba de recuperación y verificación de reincorporación (web2 debe permanecer fuera de servicio durante la intervención). La muestra no mide posibles errores de solicitudes durante el intervalo de detección, por lo que no afirmar 100% de disponibilidad ininterrumpida.
 
+## Aplicación del núcleo en web2 — terminada, pendiente validación operativa
+
+El operador confirmó en VM310 una copia controlada del core WordPress 7.1.3 desde el staging mediante rsync con verificación de contenido, conservando `wp-config.php` y sin tocar `wp-content`, NFS ni MariaDB. El archivo de respaldo previo pasó `sha256sum -c`. Se registraron 611 entradas en `wp-admin`, 3122 en `wp-includes` y 16 de raíz. La comprobación final de `wp-includes/version.php` indicó 7.1.3, la configuración quedó sin cambios y `nodosur-web2` **sigue detenido**. [Evidencia](../evidencias/e3/wordpress713-aplicacion-core-web2-20261021.txt).
+
+**Estado crucial:** aún NO se ha probado la sintaxis de PHP ni el arranque, tampoco respuesta HTTP del backend ni evento HAProxy UP. Se requiere verificar el código offline, después iniciar y medir respuesta de web2/tienda/imagen/PHP denegado; finalmente demostrar reintegración balanceada. El proxy auto-reincorpora web2 por health checks, de modo que el arranque puede devolverlo al tráfico antes de completar la batería de regresión. Ante error, sacar web2 nuevamente y mantener web1 atendiendo; no restaurar MariaDB automáticamente.
+
 ## Puertas de seguridad antes de un cambio
 
 1. Confirmar en ambos nodos versiones, localidad/idioma del paquete y `$wp_db_version`; comprobar que el core 7.1.3 de referencia es íntegro frente a checksums del proveedor, no copiar a ciegas desde web1.
