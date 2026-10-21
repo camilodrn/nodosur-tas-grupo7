@@ -100,3 +100,29 @@ No prueba acceso desde Internet ni desde otros segmentos.
 Pendiente revisar la ACL efectiva de BIND9 y necesidad de
 transferencias a secundarios antes de decidir endurecimiento.
 Sin cambios en producción.
+
+=== VM268 — VERSION Y CONFIGURACION EFECTIVA (21/10/2026) ===
+named -v:
+  BIND 9.18.39-0ubuntu0.24.04.8-Ubuntu (Extended Support Version)
+named-checkconf -l:
+  nodosur07.tas IN _default primary
+named-checkconf -px (directivas relevantes):
+  25:zone "nodosur07.tas" {
+  26:    type primary;
+  No se observó directiva allow-transfer en la salida filtrada.
+named-checkconf -z:
+  zone nodosur07.tas/IN: loaded serial 2026102001
+systemctl is-active bind9:
+  active
+
+INTERPRETACION:
+- Según el manual ISC de la serie BIND 9.18, al omitir allow-transfer
+  la política predeterminada admite transferencias desde cualquier
+  origen que alcance el servidor y cumpla los demás filtros de red.
+- Comportamiento compatible con AXFR exitoso de 9 registros desde Fedora
+  por VPN. No se han evaluado otras redes ni secundarios reales.
+- Antes de cambiar la configuración se debe inspeccionar el bloque
+  completo de la zona y sus registros NS, preparar respaldo y reversión.
+- Una posible medida acotada, si no hay secundarios, es incorporar
+  allow-transfer { none; }; a esta zona y verificar DNS UDP/TCP y AXFR.
+- Esta sección NO documenta un cambio ya aplicado.
