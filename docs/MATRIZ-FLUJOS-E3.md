@@ -29,6 +29,10 @@ El equipo ejecutó `systemctl is-active`, `is-enabled`, `iptables -S DOCKER-USER
 
 La regla no afecta a otros puertos por sí misma; el tráfico que no coincide puede quedar sujeto a otras cadenas y capas. Los contadores acreditan descartes, pero no determinan qué orígenes concretos causaron cada incremento. La conectividad de VM308 hacia ambos WordPress está comprobada con GET y hashes.
 
+## Confirmaciones de puertos y permisos — VM279/VM308
+
+[Consulta de solo lectura del 21/10](../evidencias/e3/permisos-publicacion-git-db-proxy-20261021.txt): en VM279 el secreto DB y directorio son root:root con modos 600/700; Docker publica `3306/tcp` solo en `10.33.199.60:3306`. En VM308 el certificado TLS (incluye clave privada) usa modo 640 root:UNKNOWN y su directorio modo 750; Docker publica 8080/8443 internos a `10.33.195.194:80/443`. `UNKNOWN` es el nombre de grupo sin resolver, no un grupo específico demostrado. Comprobar GID numérico y grupos con acceso antes de concluir seguridad. Los enlaces a IP concreta delimitan interfaz de escucha, **no sustituyen pruebas de firewall de origen**.
+
 ## Reglas y flujos adicionales aún por corroborar
 
 | Flujo | Política esperada | Pendiente |
