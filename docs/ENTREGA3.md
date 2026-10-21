@@ -1,151 +1,51 @@
-# Entrega 3 — Nodo Sur
+# Entrega 3 — Publicación resiliente, contenedores y seguridad
 
-## Objetivo
+**Grupo 7 · Taller de Administración de Sistemas · Octubre de 2026.**
 
-Implementar y validar una arquitectura distribuida para
-WordPress y WooCommerce, utilizando contenedores Docker,
-balanceo de carga, almacenamiento compartido, base de
-datos separada y mecanismos de recuperación.
+Esta página ordena lo que podemos **mostrar y defender técnicamente** de Nodo Sur. La pauta escrita del proyecto incluye un informe de avance; según la indicación posterior comunicada por el equipo, la evaluación de esta entrega se enfocará en la **demostración y defensa técnica**, sin un informe separado. Mantener la documentación de GitHub como respaldo, no como sustituto de la demostración.
 
-## Arquitectura implementada
+## Objetivo técnico
 
-| Rol | VM | IP administrativa | IP interna |
-|---|---|---|---|
-| DNS, NFS y respaldos | 268 | 10.33.195.205 | 10.33.199.59 |
-| WordPress 1 | 263 | 10.33.195.202 | 10.33.199.58 |
-| WordPress 2 | 310 | 10.33.195.208 | 10.33.199.62 |
-| MariaDB Docker | 279 | 10.33.195.226 | 10.33.199.60 |
-| HAProxy | 308 | 10.33.195.194 | 10.33.199.61 |
+Escalar WordPress/WooCommerce de la instalación tradicional a dos backends en Docker, con HAProxy como entrada HTTPS, MariaDB única, uploads NFS compartidos y controles de red. La condición principal de E3 es **mantener la atención del sitio cuando uno de los dos backends web deja de funcionar**; no se exige afirmar redundancia de toda la infraestructura.
 
-## Funcionamiento
+[Arquitectura](../ARQUITECTURA.md) · [Inventario de hosts](../INVENTARIO.md) · [Matriz de accesos](MATRIZ-FLUJOS-E3.md)
 
-BIND9 administra la zona nodosur07.tas y resuelve
-el dominio principal y www a 10.33.195.194.
+## Resultado de las pruebas disponibles
 
-HAProxy recibe HTTP y HTTPS, redirige HTTP a HTTPS
-y distribuye las solicitudes mediante roundrobin:
+| Comportamiento a defender | Evidencia que tenemos | Interpretación correcta |
+|---|---|---|
+| HAProxy distribuye peticiones | [8 respuestas en alternancia, 4/4](../evidencias/e3/balanceo-roundrobin.txt) | Roundrobin observado con ambos web disponibles |
+| Un backend deja de atender | [8 respuestas HTTP 200 de web1](../evidencias/e3/failover-web2-detenido.txt) | Continuidad observada durante la prueba con web2 fuera del balanceo; el archivo no contiene la orden de parada ni log `DOWN` |
+| Web2 vuelve | [8 respuestas HTTP 200, 4/4](../evidencias/e3/recuperacion-web2.txt) | Ambos backends vuelven a recibir tráfico; sin log `UP` ni tiempo formal medido |
+| Configuración y publicación HTTPS | [`haproxy -c` correcto y redirección HTTP 301](../evidencias/e3/http-redirect-y-validacion-proxy-20261021.txt), [6 HTTPS exitosos 3/3](../evidencias/e3/https-haproxy.txt) | Proxy operativo; sin demostrar confianza pública del certificado |
+| Certificado TLS | [SAN, fechas y huella pública](../evidencias/e3/certificado-publico-y-repo-local-20261021.txt) | Autofirmado, válido por fechas y nombres, **no** reconocido automáticamente por navegadores |
+| Contenido compartido por NFS | [Mismo archivo, tres SHA-256 idénticos](../evidencias/e3/nfs-mismo-archivo-web1-web2-20261021.txt) | Ambos web entregan bytes idénticos al origen; no prueba escritura cruzada de archivos nuevos |
+| Coherencia de aplicación | [Carrito del producto 43 compartido](../evidencias/e3/carrito-coherencia-postmigracion.txt) | Un flujo de carrito entre web1 y web2; no todas las sesiones ni operaciones concurrentes |
+| Reglas de red | [`DOCKER-USER` web1/web2](../evidencias/e3/firewall-docker-user-web1-web2-20261021.txt), [conectividad observada](../evidencias/e3/acceso-proxy-backends-20261020.txt) | Restricción de orígenes a puertos web; las pruebas negativas TCP no localizan por sí solas toda la causa |
+| Despliegue por host | [Compose web1/web2 y mounts](../evidencias/e3/compose-productivo-web1-web2-y-php-20261021.txt), [DB/proxy](../evidencias/e3/compose-productivo-db-proxy-20261021.txt) | Definiciones Compose correctas en cuatro hosts; contenedores running |
+| Pruebas de los cambios auditados | [25 pruebas locales OK y barrido heurístico](../evidencias/e3/validacion-local-fedora-20261021.txt) | Resultado de la rama local de Codex con dobles de Docker/iptables; **no acredita adopción en producción** |
 
-- web1: 10.33.199.58:18081
-- web2: 10.33.199.62:18080
+## Funcionamiento de la plataforma
 
-Los health checks HTTP retiran temporalmente un
-backend cuando deja de responder y lo reincorporan
-cuando vuelve a estar disponible.
+1. BIND resuelve `nodosur07.tas` hacia el proxy `10.33.195.194`.
+2. HAProxy atiende HTTP 80/HTTPS 443, redirige HTTP, termina TLS y consulta la salud de web1/web2 con `HEAD /`, respuesta esperada 200.
+3. Los backends están en `10.33.199.58:18081` (VM263) y `10.33.199.62:18080` (VM310).
+4. Los dos WordPress consultan MariaDB `10.33.199.60:3306` (VM279), con volumen de datos persistente histórico `nodosur-db-staging_db_stage_data`.
+5. El directorio `wp-content/uploads` está montado en ambos web desde NFS de VM268 (`10.33.199.59`).
+6. Las reglas `DOCKER-USER` de ambos web limitan sus puertos internos a conexiones desde el proxy `10.33.199.61`. Los secretos no deben versionarse.
 
-Ambos WordPress utilizan MariaDB Docker en
-10.33.199.60:3306 y almacenamiento NFS compartido
-para los archivos subidos.
+## Qué no está demostrado todavía
 
-El tráfico HTTPS utiliza un certificado autofirmado
-con SAN para nodosur07.tas y www.nodosur07.tas.
+- No hay registros `DOWN/UP` conservados en las evidencias de failover ni un **RTO/RPO medido**.
+- El montaje NFS y las lecturas idénticas no certifican por sí solos que todos los plugins, salts, sesiones o pedidos concurrentes sean coherentes.
+- Los cuatro Compose funcionan donde están instalados, pero un checkout nuevo no reconstruye automáticamente la VPN, las VMs, los secretos, el TLS, los datos y el almacenamiento.
+- HAProxy, MariaDB, DNS y NFS son **SPOF**. No se ha demostrado continuidad ante caída de cualquiera de esas dependencias compartidas.
+- Las mejoras de Codex de firewall, systemd, Apache, HAProxy y backup **no se han aplicado a las VMs**. Se evalúan separadamente para evitar alterar la entrega funcional.
 
-## Validaciones realizadas
+## Antes de la defensa
 
-### Balanceo
+La demostración deberá confirmar de nuevo el estado de los servicios, presentar balanceo y, en una ventana autorizada, reproducir una falla controlada con sus logs de salud. También hay que estar preparados para explicar el uso de NFS, MariaDB compartida, Docker Compose, `DOCKER-USER` y los puntos únicos de fallo. Este ensayo queda **para la etapa final de preparación**, una vez cerrado GitHub y resueltas las mejoras técnicas justificadas.
 
-Se realizaron diez solicitudes HTTPS consecutivas:
+## Nota sobre E4
 
-- 10 respuestas HTTP 200.
-- 5 respuestas desde web1.
-- 5 respuestas desde web2.
-
-### Falla y recuperación
-
-Se detuvo de forma controlada web2.
-
-HAProxy detectó el backend como DOWN.
-Durante la falla, ocho solicitudes consecutivas
-respondieron HTTP 200 desde web1.
-
-Al iniciar nuevamente web2, HAProxy detectó
-su recuperación mediante un health check HTTP 200.
-
-Se realizaron otras diez solicitudes exitosas,
-distribuidas cinco por cada backend.
-
-### Coherencia del carrito
-
-Se creó un carrito WooCommerce en web1, se agregó
-el producto de prueba ID 43 y se verificó su presencia
-desde web2.
-
-El producto fue retirado correctamente y la prueba
-finalizó con código de salida 0.
-
-Evidencia:
-evidencias/e3/carrito-coherencia-postmigracion.txt
-
-### Seguridad de red
-
-Se verificó que:
-
-- Los backends autorizados acceden a MariaDB.
-- El proxy no puede conectarse directamente a MariaDB.
-- La VM de MariaDB no puede conectarse al HTTPS del proxy
-  por la interfaz administrativa.
-- Las reglas DOCKER-USER muestran paquetes descartados.
-- El acceso HTTPS desde la VPN institucional funciona.
-
-### Respaldos
-
-La VM de MariaDB genera respaldos comprimidos y
-sus archivos SHA-256.
-
-Se verificó la réplica externa del respaldo
-nodo_sur_final-20261020-190237.sql.gz.
-
-Resultados:
-- Copia disponible en VM268, directorio archive.
-- SHA-256 correcto.
-- Compresión GZIP válida.
-- 52 tablas identificadas en el respaldo.
-
-El servicio nodosur-remote-backup-maintenance realiza
-validaciones periódicas de los respaldos recibidos.
-
-## Servicios persistentes
-
-Los servicios productivos utilizan systemd para
-gestionar los contenedores y las tareas de respaldo.
-
-La configuración versionada se encuentra en:
-
-- compose/proxy/compose.prod.yaml
-- compose/proxy/haproxy.prod.cfg
-- compose/db-stage/compose.prod.yaml
-- configs/systemd/
-- configs/firewall/
-- scripts/e3/
-
-Los certificados, las credenciales y los secretos
-se mantienen fuera del repositorio.
-
-## Limitaciones
-
-La implementación tolera la caída de un backend web,
-pero no ofrece alta disponibilidad de todos los servicios.
-
-Persisten puntos únicos de fallo:
-
-- HAProxy.
-- MariaDB.
-- DNS autoritativo.
-- Servidor NFS y repositorio de respaldos.
-
-El certificado TLS es autofirmado y requiere confianza
-explícita del cliente.
-
-La reproducción completa depende de las redes,
-volúmenes, certificados y secretos configurados en
-las VMs de laboratorio. El repositorio no constituye
-un aprovisionamiento automático completo.
-
-## Conclusión
-
-La arquitectura de cinco VMs permite distribuir
-las solicitudes, conservar el estado compartido
-de WooCommerce y mantener la atención del sitio
-ante la caída de uno de los servidores web.
-
-Las pruebas se realizaron sobre los servicios
-productivos de la Entrega 3.
+El ensayo de restauración de MariaDB (52 tablas) y la extracción de WordPress (10.313 archivos coincidentes por SHA-256) se hicieron por separado en laboratorio aislado. Son avances valiosos para la continuidad operacional de **Entrega 4**, pero no equivalen a restauración funcional integrada de WordPress + MariaDB, ni sustituyen los criterios técnicos de E3.
