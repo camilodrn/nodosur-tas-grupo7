@@ -22,6 +22,8 @@ Los ejemplos de configuración no deben contener valores privados. Los servicios
 
 Ver [matriz de flujos E3](docs/MATRIZ-FLUJOS-E3.md), [firewall en web1/web2](evidencias/e3/firewall-docker-user-web1-web2-20261021.txt) y [datos públicos del certificado](evidencias/e3/certificado-publico-y-repo-local-20261021.txt).
 
+**Comprobación adicional (21/10/2026):** Apache en ambos WordPress respondió `Syntax OK` con advertencia no crítica `AH00558` de `ServerName`. El archivo de configuración de endurecimiento propuesto para uploads no está instalado y no hay `.htaccess` dentro de uploads en web1. Esto **no permite afirmar por sí solo que PHP se ejecute en uploads**; falta comprobar reglas globales/heredadas antes de considerar el cambio. En web2 se confirmó sin revelar valores que `/run/secrets/db_password` está presente, no vacío, y que `wp-config.php` contiene una referencia a ese archivo. No se concluye necesidad de migrar credenciales. [Evidencia](evidencias/e3/apache-secretos-y-validadores-20261021.txt).
+
 ## Medidas propuestas, pendientes de instalación
 
 Codex propone bloquear interpretación de PHP/CGI desde `wp-content/uploads`, mejorar saneamiento de encabezados en HAProxy, usar lectura explícita de archivo secreto para MariaDB en web2, reforzar prechequeo de NFS y reorganizar políticas de firewall/systemd. **No se consideran medidas productivas solo por existir en el PR de auditoría.** Requieren validar sintaxis, configuración efectiva, comportamiento y reversión antes de adoptarlas.
