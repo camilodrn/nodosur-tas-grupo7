@@ -34,6 +34,20 @@ Escalar WordPress/WooCommerce de la instalación tradicional a dos backends en D
 5. El directorio `wp-content/uploads` está montado en ambos web desde NFS de VM268 (`10.33.199.59`).
 6. Las reglas `DOCKER-USER` de ambos web limitan sus puertos internos a conexiones desde el proxy `10.33.199.61`. Los secretos no deben versionarse.
 
+## Endurecimiento de uploads instalado (21/10/2026)
+
+Se incorporó la configuración [`configs/apache/nodosur-uploads.conf`](../configs/apache/nodosur-uploads.conf) para denegar PHP/PHTML/PHAR y ejecución CGI dentro de `wp-content/uploads`. Antes de su instalación se verificó `apache2ctl -t` y comportamiento HTTP de un contenedor Apache efímero aislado: archivo de texto `200` y archivo PHP existente `403`, ambos inocuos.
+
+La configuración quedó montada **en web2 (VM310) y después en web1 (VM263)**, desde `/etc/nodosur/apache/nodosur-uploads.conf` con bind de solo lectura y sin creación automática de ruta. Ambos WordPress siguieron `running`. La verificación final desde VM308 mostró:
+
+- **Web1**: portada `200`, `/tienda/` `200`, imagen real de uploads en NFS `200`, URL PHP inexistente bajo uploads `403`.
+- **Web2**: las mismas respuestas `200 / 200 / 200 / 403`.
+- **HAProxy**: seis respuestas HTTPS `200` repartidas **3 web1 / 3 web2**.
+
+Evidencia: [resultado final de los dos backends](../evidencias/e3/apache-uploads-web1-web2-final-20261021.txt). El `403` de producción se observó consultando una ruta inexistente: se presenta como comprobación de la regla HTTP, no como ensayo de ejecución de un PHP subido. Los respaldos previos de Compose permanecen fuera de Git en los hosts web.
+
+**Nota operativa:** los checkouts instalados en VM263 y VM310 tienen ediciones locales de `compose/web1/compose.yaml` y `compose/web2/compose.yaml`. GitHub también contiene los cambios, pero **no se debe ejecutar `git pull`/`reset` indiscriminadamente en esas VMs** hasta reconciliar los checkouts sin reemplazar los datos ni las configuraciones activas. El PR #2 sigue sin fusionar con `e3/integracion`.
+
 ## Qué no está demostrado todavía
 
 - No hay registros `DOWN/UP` conservados en las evidencias de failover ni un **RTO/RPO medido**.
