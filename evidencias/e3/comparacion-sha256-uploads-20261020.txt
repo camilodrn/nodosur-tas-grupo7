@@ -1,0 +1,24 @@
+# E3 — Comparación SHA-256 de archivos regulares uploads (VM268, 20/10/2026)
+# Transcripción del resumen proporcionado por el equipo. Prueba de solo lectura.
+# Origen actual: /srv/nodosur/uploads
+# Copia: /var/backups/nodosur-remote/web/wordpress-files-20261019-205742.tar.gz
+# Ruta en TAR: html/wp-content/uploads/
+# Método: Python tarfile en streaming, sha256 por archivo regular con misma ruta relativa,
+# conjuntos de rutas actuales/respaldadas, conteos de duplicados y enlaces TAR.
+# No se extrajo ni publicó contenido ni wp-config.php.
+
+=== COMPARACION DE UPLOADS ===
+Archivos actuales: 126
+Archivos respaldados: 126
+Faltantes en respaldo: 0
+Extras en respaldo: 0
+Contenido diferente: 0
+Nombres duplicados: 0
+Enlaces en respaldo: 0
+RESULTADO: COINCIDENCIA COMPLETA
+
+# Alcance: equivalencia de rutas y contenido SHA-256 para los 126 archivos regulares
+# incluidos en la comparación. No prueba permisos/metadatos, directorios vacíos,
+# consistencia bajo modificaciones concurrentes, integridad de WP completo o
+# recuperación funcional. El script excluye symlinks del filesystem actual.
+# El TAR de respaldo y NFS siguen en VM268; se necesita copia independiente.

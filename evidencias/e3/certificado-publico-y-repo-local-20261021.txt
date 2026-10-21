@@ -1,0 +1,39 @@
+# E3 — Certificado público de Nodo Sur y diagnóstico del workspace Fedora
+# Salidas de solo lectura aportadas por el equipo; no incluyen clave privada PEM ni secretos.
+
+# Fedora: openssl s_client -> openssl x509 (lectura del certificado presentado por VM308)
+subject=CN=nodosur07.tas
+issuer=CN=nodosur07.tas
+notBefore=Oct 20 19:53:53 2026 GMT
+notAfter=Oct 20 19:53:53 2027 GMT
+X509v3 Subject Alternative Name:
+    DNS:nodosur07.tas, DNS:www.nodosur07.tas
+sha256 Fingerprint=50:94:9B:14:08:18:6A:C9:56:61:EC:A0:23:D7:64:C2:B4:56:38:FE:57:AE:A1:09:FF:82:AA:E5:2F:D5:74:B8
+
+# Alcance: nombre, vigencia e identidad pública del certificado observados.
+# issuer=subject apunta a certificado autofirmado; NO es demostración de
+# confianza de CA del cliente. La salida no incluye validación verify_return_error
+# ni hostname verification independiente.
+
+# Fedora repo local: ~/Proyectos/nodosur-tas-grupo7-e3-integracion
+$ git branch --show-current
+audit/e3-codex
+# git status --short: decenas de archivos M y ?? (trabajo local de Codex);
+# no hacer reset/clean/checkout. No necesariamente coincide con la rama PR remoto
+# audit/e3-codex-revisada ni con la rama estable e3/integracion.
+
+$ find compose -maxdepth 3 -type f \( -name '*.yaml' -o -name '*.yml' \) -print | sort
+compose/db-stage/compose.prod.yaml
+compose/db-stage/compose.yaml
+compose/proxy/compose.prod.yaml
+compose/proxy/compose.yaml
+compose/web1/compose.yaml
+compose/web2/compose.yaml
+
+# Búsqueda hasta profundidad 4:
+# (*.env.example, *.env.sample, *example*.yaml)
+# No devolvió rutas. No demuestra ausencia de otros archivos .example:
+# existen ejemplos sanos de WordPress, DNS, NFS y sudoers en configs/.
+# Los Compose E3 incluyen valores no secretos en YAML y referencias a archivos
+# de secretos externos en /etc/nodosur; ausencia de .env.example no implica fallo
+# mientras se documenten y reproduzcan variables y secretos fuera de Git.

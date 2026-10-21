@@ -1,0 +1,58 @@
+# Evidencia E3: inventario local y remoto de respaldos — 20/10/2026
+# Transcripción de consultas realizadas por el equipo en VM279 y VM268.
+# Consultas de solo lectura; no se creó/restauró ningún respaldo.
+#
+# VM268 — DNS/NFS/archivo remoto (tas_revision@nodosur-g7)
+# systemctl show nodosur-remote-backup-maintenance.service
+LoadState=loaded
+Result=success
+ExecMainStatus=0
+ExecMainExitTimestamp=Tue 2026-10-20 23:02:26 UTC
+#
+# systemctl list-timers --all --no-pager | grep nodosur-remote-backup
+Wed 2026-10-21 00:03:44 UTC    28min Tue 2026-10-20 23:02:26 UTC     32min ago nodosur-remote-backup-maintenance.timer nodosur-remote-backup-maintenance.service
+#
+# sudo find /var/backups/nodosur-remote/archive -maxdepth 1 -type f (...) -printf ... | sort -r | head -10
+2026-10-20 19:03 nodo_sur_final-20261020-190237.sql.gz.sha256
+2026-10-20 19:03 nodo_sur_final-20261020-190237.sql.gz
+2026-10-20 18:23 nodo_sur_final-20261020-182306.sql.gz.sha256
+2026-10-20 18:23 nodo_sur_final-20261020-182306.sql.gz
+2026-10-20 18:11 nodo_sur_final-20261020-181117.sql.gz.sha256
+2026-10-20 18:11 nodo_sur_final-20261020-181117.sql.gz
+2026-10-20 04:23 nodo_sur_final-20261020-040534.sql.gz.sha256
+2026-10-20 04:23 nodo_sur_final-20261020-040534.sql.gz
+2026-10-19 04:20 nodo_sur_final-20261019-040634.sql.gz.sha256
+2026-10-19 04:20 nodo_sur_final-20261019-040634.sql.gz
+#
+# VM279 — MariaDB (tas_revision@svr-db-nodosur07)
+# systemctl show nodosur-db-backup.service
+LoadState=loaded
+Result=success
+ExecMainStatus=0
+ExecMainExitTimestamp=
+#
+# systemctl show nodosur-backup-replicate.service
+LoadState=loaded
+Result=success
+ExecMainStatus=0
+ExecMainExitTimestamp=
+#
+# sudo find /var/backups/nodosur/daily -maxdepth 1 -type f (...) -printf ... | sort -r | head -10
+2026-10-20 19:02 nodo_sur_final-20261020-190237.sql.gz.sha256
+2026-10-20 19:02 nodo_sur_final-20261020-190237.sql.gz
+2026-10-20 18:23 nodo_sur_final-20261020-182306.sql.gz.sha256
+2026-10-20 18:23 nodo_sur_final-20261020-182306.sql.gz
+2026-10-20 18:11 nodo_sur_final-20261020-181117.sql.gz.sha256
+2026-10-20 18:11 nodo_sur_final-20261020-181117.sql.gz
+2026-10-20 04:05 nodo_sur_final-20261020-040534.sql.gz.sha256
+2026-10-20 04:05 nodo_sur_final-20261020-040534.sql.gz
+2026-10-19 04:06 nodo_sur_final-20261019-040634.sql.gz.sha256
+2026-10-19 04:06 nodo_sur_final-20261019-040634.sql.gz
+#
+# Interpretación:
+# - Coinciden cinco identificadores de dumps con sus manifiestos .sha256 en ambos destinos.
+# - VM268 reporta una ejecución exitosa del mantenimiento remoto a las 23:02:26 UTC.
+# - En VM279, Result=success y ExecMainStatus=0 por sí solos no prueban fecha exacta de última ejecución (ExecMainExitTimestamp está vacío).
+# - El inventario de archivos no demuestra integridad individual, restaurabilidad, periodicidad sostenida o retención.
+# - La integridad SHA/GZIP y 52 tablas del dump 20261020-190237 fueron comprobadas en sesiones previas; esta consulta solo inventarió nombres.
+# - NO se han comprobado copias de uploads NFS, configuraciones, permisos, ni grants.

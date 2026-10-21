@@ -8,10 +8,11 @@ PartOf=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/home/tas_revision/nodosur-tas-grupo7
+WorkingDirectory=/opt/nodosur
 
 # No arrancar Docker productivo mientras MariaDB nativa esté activa.
 ExecStartPre=/usr/bin/bash -c '! systemctl is-active --quiet mariadb.service'
+ExecStartPre=/usr/bin/docker compose -f compose/db-stage/compose.prod.yaml config --quiet
 
 ExecStart=/usr/bin/docker compose -f compose/db-stage/compose.prod.yaml up -d --wait --wait-timeout 120
 ExecStop=/usr/bin/docker compose -f compose/db-stage/compose.prod.yaml stop -t 30

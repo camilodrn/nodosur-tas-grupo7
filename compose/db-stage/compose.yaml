@@ -1,9 +1,10 @@
-name: nodosur-db-staging
+# Laboratorio aislado. Nunca usar el proyecto/volumen histórico de producción.
+name: nodosur-db-lab
 
 services:
   mariadb:
     image: mariadb:10.11
-    container_name: nodosur-db-staging
+    container_name: nodosur-db-lab
     restart: "no"
 
     environment:
@@ -18,7 +19,7 @@ services:
       - root_password
 
     volumes:
-      - db_stage_data:/var/lib/mysql
+      - db_lab_data:/var/lib/mysql
 
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
@@ -34,8 +35,8 @@ services:
         max-file: "3"
 
 volumes:
-  db_stage_data:
+  db_lab_data:
 
 secrets:
   root_password:
-    file: /etc/nodosur/secrets/db-stage-root.password
+    file: /etc/nodosur/secrets/db-lab-root.password

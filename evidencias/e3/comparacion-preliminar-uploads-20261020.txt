@@ -1,0 +1,27 @@
+# E3 — Análisis preliminar del TAR de uploads (VM268), 20/10/2026
+# Transcripción de resultados proporcionados por el equipo; no hay nombres individuales de ficheros.
+# TAR: /var/backups/nodosur-remote/web/wordpress-files-20261019-205742.tar.gz
+#
+# Agrupación de miembros en TAR (nombre de ruta hasta uploads/):
+137 html/wp-content/uploads/
+#
+# Archivos actuales del NFS:
+$ sudo find /srv/nodosur/uploads -type f | wc -l
+126
+#
+# Cinco marcas temporales más recientes de archivos NFS:
+2026-09-10 00:55
+2026-09-12 01:26
+2026-09-25 16:40
+2026-09-26 20:54
+2026-09-27 14:54
+#
+# sudo stat -c 'Modificado: %y | Permisos: %a | Dueño: %U' "$archivo"
+Modificado: 2026-10-19 21:23:44.669348569 +0000 | Permisos: 600 | Dueño: root
+#
+# Interpretación y límites:
+# - 137 es número de entradas bajo uploads/ en TAR, que pueden incluir directorios.
+# - 126 es cantidad de archivos regulares en NFS; estas métricas no son directamente equiparables.
+# - La fecha de modificación del TAR es posterior a la modificación más reciente observada en NFS,
+#   pero esto no comprueba equivalencia de contenido ni integridad temporal.
+# - Pendiente comparación exhaustiva de rutas y checksums, sin extraer el TAR.

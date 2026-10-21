@@ -1,0 +1,29 @@
+# E3 — Capacidad de VM279 como posible segunda ubicación de respaldo web (20/10/2026)
+# Salidas de consulta proporcionadas por el equipo, sin cambios en la VM.
+
+# tas_revision@svr-db-nodosur07
+$ df -hT /var/backups
+Filesystem                        Type  Size  Used Avail Use% Mounted on
+/dev/mapper/ubuntu--vg-ubuntu--lv ext4   97G  4.9G   88G   6% /
+
+$ sudo ls -ld /var/backups /var/backups/nodosur
+drwxr-xr-x 3 root root 4096 Oct 21 00:00 /var/backups
+drwx------ 4 root root 4096 Oct 20 16:07 /var/backups/nodosur
+
+$ lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINTS
+NAME                       SIZE FSTYPE      MOUNTPOINTS
+sda                        200G
+├─sda1                       1M
+├─sda2                       2G ext4        /boot
+└─sda3                     198G LVM2_member
+  ├─ubuntu--vg-ubuntu--lv   99G ext4        /
+  └─ubuntu--vg-swap--lv      2G swap        [SWAP]
+sr0                        2.6G iso9660
+
+# Interpretación:
+# - El root de VM279 ofrece 88 GB libres, suficientes para una copia cifrada
+#   del TAR WordPress de ~59 MB localizado en VM268.
+# - /var/backups/nodosur está restringido a root (modo 0700).
+# - Todavía NO se ha copiado el archivo ni comprobado método de cifrado y recuperación.
+# - Mismo entorno institucional: la copia en otra VM reduce un punto de fallo,
+#   pero no es un respaldo geográficamente externo o independiente del clúster.

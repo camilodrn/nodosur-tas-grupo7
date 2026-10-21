@@ -1,0 +1,3 @@
+# PROPUESTA para VM263/VM310: ajustar origen a exportfs -v real en VM268.
+# NFSv4, montaje duro: una caída NFS puede bloquear operaciones de la aplicación.
+10.33.199.59:/srv/nodosur/exports/uploads /srv/nodosur/nfs/uploads nfs4 rw,hard,_netdev,nosuid,nodev,noexec,vers=4.2 0 0

@@ -1,5 +1,7 @@
 # Prueba reproducible — Logs y observabilidad
 
+> Registro histórico E2 (septiembre de 2026). Para la arquitectura y las pruebas E3, consultar [operación E3](../docs/OPERACION-E3.md). Los resultados de este archivo no certifican el estado actual de las cinco VMs.
+
 ## Objetivo
 
 Demostrar que los servicios críticos generan registros útiles y que es posible correlacionar un evento con su log sin ampliar innecesariamente los privilegios de las cuentas operativas.

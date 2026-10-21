@@ -1,6 +1,8 @@
 # Política sudo limitada por rol
 
-Este directorio documenta la política operativa aplicada a las tres VMs de Nodo Sur.
+Los archivos `web.sudoers.example`, `dns.sudoers.example` y `db.sudoers.example` conservan la política histórica E2 de tres VMs. No describen permisos Docker de E3.
+
+Para E3, `db-e3.sudoers.example` propone únicamente la consulta fija `/usr/local/sbin/nodosur-db-check-e3` sin argumentos. Instalar el script y todos sus padres como root, sin escritura de cuentas operativas. Verificar con `visudo -cf` antes de instalar con modo 0440. Nunca autorizar el comando Docker completo ni añadir operadores al grupo `docker`: permite privilegios equivalentes a root. Las políticas de las cinco VMs requieren comprobación en producción.
 
 ## Principio
 

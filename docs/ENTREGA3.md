@@ -1,151 +1,58 @@
-# Entrega 3 — Nodo Sur
+# Entrega 3 — Nodo Sur, Grupo 7
 
-## Objetivo
+Entrega: **23-10-2026**. Consolidación/auditoría local: **20-10-2026**. Base Git `279466d`, rama de revisión `audit/e3-codex`, creada desde `e3/integracion` en ese mismo commit. No se accedió por SSH, no se modificó infraestructura ni se ejecutaron pruebas con escrituras sobre la aplicación.
 
-Implementar y validar una arquitectura distribuida para
-WordPress y WooCommerce, utilizando contenedores Docker,
-balanceo de carga, almacenamiento compartido, base de
-datos separada y mecanismos de recuperación.
+## Arquitectura implementada según el equipo
 
-## Arquitectura implementada
-
-| Rol | VM | IP administrativa | IP interna |
+| VM | Función | Administración | Interna |
 |---|---|---|---|
-| DNS, NFS y respaldos | 268 | 10.33.195.205 | 10.33.199.59 |
-| WordPress 1 | 263 | 10.33.195.202 | 10.33.199.58 |
-| WordPress 2 | 310 | 10.33.195.208 | 10.33.199.62 |
-| MariaDB Docker | 279 | 10.33.195.226 | 10.33.199.60 |
-| HAProxy | 308 | 10.33.195.194 | 10.33.199.61 |
+| 268 | DNS BIND9, NFS, respaldos remotos | 10.33.195.205 | 10.33.199.59 |
+| 263 | WordPress/WooCommerce web1 Docker | 10.33.195.202 | 10.33.199.58 |
+| 310 | WordPress/WooCommerce web2 Docker | 10.33.195.208 | 10.33.199.62 |
+| 279 | MariaDB Docker | 10.33.195.226 | 10.33.199.60 |
+| 308 | HAProxy Docker con HTTPS | 10.33.195.194 | 10.33.199.61 |
 
-## Funcionamiento
+BIND resuelve `nodosur07.tas` y `www` al proxy `.194`. HAProxy redirige HTTP a HTTPS y balancea roundrobin a `.58:18081` y `.62:18080`; HEAD `/` con Host de la tienda y status 200 controla salud. Ambos web usan MariaDB `.60:3306` y uploads NFS compartidos. El certificado es autofirmado con SAN para ambos nombres según el registro del equipo; falta salida pública saneada de SAN/vigencia.
 
-BIND9 administra la zona nodosur07.tas y resuelve
-el dominio principal y www a 10.33.195.194.
+## Evidencia disponible y su alcance
 
-HAProxy recibe HTTP y HTTPS, redirige HTTP a HTTPS
-y distribuye las solicitudes mediante roundrobin:
+No se modificaron ni recrearon los archivos de pruebas originales. Las afirmaciones anteriores se conservan en [el documento previo](historia/E3-ENTREGA3-preauditoria.md); aquí se precisan según lo efectivamente versionado.
 
-- web1: 10.33.199.58:18081
-- web2: 10.33.199.62:18080
+| Prueba | Evidencia original | Alcance comprobable al leerla |
+|---|---|---|
+| Balanceo inicial | [balanceo-roundrobin.txt](../evidencias/e3/balanceo-roundrobin.txt) | 8 respuestas 200, 4 web1 / 4 web2 |
+| Falla web2 | [failover-web2-detenido.txt](../evidencias/e3/failover-web2-detenido.txt) | 8 respuestas 200 de web1; el archivo no incluye comando de parada ni log DOWN |
+| Recuperación web2 | [recuperacion-web2.txt](../evidencias/e3/recuperacion-web2.txt) | 8 respuestas 200, 4/4; falta log UP y medición de tiempo |
+| HTTPS | [https-haproxy.txt](../evidencias/e3/https-haproxy.txt) | 6 respuestas HTTP/2 200, 3/3; no demuestra confianza ni SAN |
+| Carrito después de migrar DB | [carrito-coherencia-postmigracion.txt](../evidencias/e3/carrito-coherencia-postmigracion.txt) | Producto 43 añadido en web1, leído y retirado en web2; resultado textual exitoso |
+| Firewall DB tras reinicio | [firewall-db-tras-reinicio.txt](../evidencias/e3/firewall-db-tras-reinicio.txt) | TCP desde ambos web permitido, desde proxy no conecta; no contiene reglas/contadores completos |
+| Backup vía systemd | [backup-mariadb-systemd.txt](../evidencias/e3/backup-mariadb-systemd.txt) | Servicio de **staging anterior** exitoso, 52 tablas; no acredita timer productivo ni réplica remota |
+| Restauración aislada | [restauracion-mariadb-docker.txt](../evidencias/e3/restauracion-mariadb-docker.txt) | `network none`, sin puertos, 52 tablas, 51 posts, 512 opciones, 4 usuarios |
 
-Los health checks HTTP retiran temporalmente un
-backend cuando deja de responder y lo reincorporan
-cuando vuelve a estar disponible.
+El usuario/equipo confirmó adicionalmente **balanceo 5/5**, continuidad, reglas DOCKER-USER, bloqueo DB→HTTPS del proxy y copia remota `nodo_sur_final-20261020-190237.sql.gz` en `archive` de VM268 con SHA-256/GZIP correctos y 52 tablas. Se conserva como **resultado reportado**, pendiente de salida saneada que permita auditarlo independientemente. Los dos archivos de carrito tienen contenido idéntico; sus commits indican etapas distintas, pero el texto por sí solo no distingue las ejecuciones.
 
-Ambos WordPress utilizan MariaDB Docker en
-10.33.199.60:3306 y almacenamiento NFS compartido
-para los archivos subidos.
+## Correcciones de esta rama
 
-El tráfico HTTPS utiliza un certificado autofirmado
-con SAN para nodosur07.tas y www.nodosur07.tas.
+Se corrigieron dependencias de firewall web inexistentes, rutas de ejecución root desde homes, colisión de staging/productivo, creación accidental de mounts vacíos, secreto web2 sin enlace `_FILE`, DNS de ejemplo apuntando a web1 y validadores que no propagaban errores. Se añadieron prechequeo NFS, publicación de respaldos con lock/checksum, verificador de copias, servicio/timer base de respaldo, reglas de firewall por destino original y restricciones Apache en uploads. Estas correcciones **no están desplegadas**; el detalle y sus riesgos están en [auditoría](AUDITORIA-E3.md).
 
-## Validaciones realizadas
+## Validación Compose y código de ejemplo (21/10/2026)
 
-### Balanceo
+En Fedora se comprobó sintaxis Bash, Python, DNS de ejemplo, cuatro sudoers, **seis Compose** mediante el cliente Docker y dos fragmentos PHP mediante `php -l`; se ejecutaron **25 pruebas unitarias** exitosas y un escaneo heurístico de secretos con **cero candidatos**. [Salida Fedora](../evidencias/e3/validacion-local-fedora-20261021.txt) y [lint PHP final](../evidencias/e3/compose-productivo-web1-web2-y-php-20261021.txt). Las pruebas locales no instancian los servicios productivos.
 
-Se realizaron diez solicitudes HTTPS consecutivas:
+En cada VM Docker se ejecutó `docker compose -f ARCHIVO config --quiet`, con resultado válido: **VM263 web1** commit `8b067ef` y **VM310 web2** commit `667d7d9`, ambos `wordpress:7.1.2-php8.3-apache`, contenedores running y mount `/srv/nodosur/nfs/uploads` RW ([evidencia](../evidencias/e3/compose-productivo-web1-web2-y-php-20261021.txt)); **VM279 DB** commit `488cb27` con `mariadb:10.11` running y volumen `nodosur-db-staging_db_stage_data`, y **VM308 proxy** commit `fdaba39` con `haproxy:3.2.23-alpine` running ([evidencia](../evidencias/e3/compose-productivo-db-proxy-20261021.txt)).
 
-- 10 respuestas HTTP 200.
-- 5 respuestas desde web1.
-- 5 respuestas desde web2.
+Los cuatro commits instalados son distintos; la rama de auditoría local `audit/e3-codex` tenía cambios sin confirmar y las propuestas del PR **no están desplegadas**. La validación de Compose acredita sintaxis y estructura, no una reconstrucción integral desde cero ni igualdad exacta de todas las opciones de runtime. El despliegue depende de certificados/credenciales fuera de Git, WordPress HTML, NFS y configuración de red. No se intervino producción para efectuar estas verificaciones.
 
-### Falla y recuperación
+## Procedimientos y cumplimiento
 
-Se detuvo de forma controlada web2.
+- [Instalación](INSTALACION-E3.md): dependencias, archivos privados, roles, orden de arranque y adopción sin perder el volumen DB.
+- [Operación](OPERACION-E3.md): comprobaciones, failover, recuperación de backend, carrito y diagnóstico.
+- [Recuperación](RECUPERACION-E3.md): respaldo íntegro, restauración aislada, coordinación DB/uploads y rollback.
+- [Matriz E3](MATRIZ-E3.md) y [checklist de la pauta base E3](CHECKLIST-PAUTA-E3.md): exigencias del proyecto original y evidencias pendientes; falta corroborar desglose oficial de puntajes si existe una rúbrica independiente.
+- [Verificación local](../evidencias/e3/auditoria-local.txt): salida generada por esta auditoría, separada de las evidencias de VMs.
 
-HAProxy detectó el backend como DOWN.
-Durante la falla, ocho solicitudes consecutivas
-respondieron HTTP 200 desde web1.
+## Evaluación técnica
 
-Al iniciar nuevamente web2, HAProxy detectó
-su recuperación mediante un health check HTTP 200.
+La evidencia apoya distribución del tráfico, continuidad ante caída de un web, estado compartido del carrito y recuperación aislada de DB. La arquitectura **no ofrece alta disponibilidad integral**: un único proxy, MariaDB, DNS y NFS siguen siendo SPOF; VM268 concentra tres funciones críticas. No hay RPO/RTO medidos, copia fuera del laboratorio acreditada, restauración completa de uploads/configuración, ni supervisión centralizada demostrada.
 
-Se realizaron otras diez solicitudes exitosas,
-distribuidas cinco por cada backend.
-
-### Coherencia del carrito
-
-Se creó un carrito WooCommerce en web1, se agregó
-el producto de prueba ID 43 y se verificó su presencia
-desde web2.
-
-El producto fue retirado correctamente y la prueba
-finalizó con código de salida 0.
-
-Evidencia:
-evidencias/e3/carrito-coherencia-postmigracion.txt
-
-### Seguridad de red
-
-Se verificó que:
-
-- Los backends autorizados acceden a MariaDB.
-- El proxy no puede conectarse directamente a MariaDB.
-- La VM de MariaDB no puede conectarse al HTTPS del proxy
-  por la interfaz administrativa.
-- Las reglas DOCKER-USER muestran paquetes descartados.
-- El acceso HTTPS desde la VPN institucional funciona.
-
-### Respaldos
-
-La VM de MariaDB genera respaldos comprimidos y
-sus archivos SHA-256.
-
-Se verificó la réplica externa del respaldo
-nodo_sur_final-20261020-190237.sql.gz.
-
-Resultados:
-- Copia disponible en VM268, directorio archive.
-- SHA-256 correcto.
-- Compresión GZIP válida.
-- 52 tablas identificadas en el respaldo.
-
-El servicio nodosur-remote-backup-maintenance realiza
-validaciones periódicas de los respaldos recibidos.
-
-## Servicios persistentes
-
-Los servicios productivos utilizan systemd para
-gestionar los contenedores y las tareas de respaldo.
-
-La configuración versionada se encuentra en:
-
-- compose/proxy/compose.prod.yaml
-- compose/proxy/haproxy.prod.cfg
-- compose/db-stage/compose.prod.yaml
-- configs/systemd/
-- configs/firewall/
-- scripts/e3/
-
-Los certificados, las credenciales y los secretos
-se mantienen fuera del repositorio.
-
-## Limitaciones
-
-La implementación tolera la caída de un backend web,
-pero no ofrece alta disponibilidad de todos los servicios.
-
-Persisten puntos únicos de fallo:
-
-- HAProxy.
-- MariaDB.
-- DNS autoritativo.
-- Servidor NFS y repositorio de respaldos.
-
-El certificado TLS es autofirmado y requiere confianza
-explícita del cliente.
-
-La reproducción completa depende de las redes,
-volúmenes, certificados y secretos configurados en
-las VMs de laboratorio. El repositorio no constituye
-un aprovisionamiento automático completo.
-
-## Conclusión
-
-La arquitectura de cinco VMs permite distribuir
-las solicitudes, conservar el estado compartido
-de WooCommerce y mantener la atención del sitio
-ante la caída de uno de los servidores web.
-
-Las pruebas se realizaron sobre los servicios
-productivos de la Entrega 3.
+E3 es defendible como implementación distribuida con tolerancia al fallo de un backend y evidencia funcional acotada. El cierre E3 debe centrarse en las evidencias mínimas de la pauta encontrada: validación HAProxy, secuencia de distribución, retiro/reintegración, prueba explícita del mismo archivo en ambos backends y matriz de flujos; la adopción de cambios propuestos por Codex requiere revisión y no es prerrequisito automático. No es justificable declararlo íntegramente reproducible o totalmente conforme todavía.

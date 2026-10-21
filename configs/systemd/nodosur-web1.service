@@ -1,18 +1,21 @@
 [Unit]
 Description=Nodo Sur - WordPress Backend 1
 Wants=network-online.target
-After=network-online.target docker.service
-Requires=docker.service
+After=network-online.target docker.service nodosur-docker-firewall-web1.service
+Requires=docker.service nodosur-docker-firewall-web1.service
+PartOf=docker.service
 RequiresMountsFor=/srv/nodosur/nfs/uploads
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/home/tas_revision/nodosur-tas-grupo7
-ExecStartPre=/usr/bin/mountpoint -q /srv/nodosur/nfs/uploads
+WorkingDirectory=/opt/nodosur
+ExecStartPre=/usr/local/sbin/nodosur-check-web-storage web1
+ExecStartPre=/usr/bin/docker compose -f compose/web1/compose.yaml config --quiet
 ExecStart=/usr/bin/docker compose -f compose/web1/compose.yaml up -d
 ExecStop=/usr/bin/docker compose -f compose/web1/compose.yaml stop
 TimeoutStartSec=120
+TimeoutStopSec=90
 
 [Install]
 WantedBy=multi-user.target

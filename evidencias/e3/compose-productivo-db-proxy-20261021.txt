@@ -1,0 +1,27 @@
+# E3 — Comparación preliminar de Compose en dos VMs productivas
+# Salidas compartidas por el equipo. Comandos de solo lectura.
+# No se realizaron despliegues, recreaciones ni cambios de volumen.
+#
+# VM279 MariaDB: ssh tas_revision@10.33.195.226
+$ cd "$HOME/nodosur-tas-grupo7"
+$ git rev-parse --short HEAD
+488cb27
+$ sudo docker compose -f compose/db-stage/compose.prod.yaml config --quiet
+COMPOSE MARIADB: VALIDO
+$ sudo docker inspect nodosur-db-staging --format 'Imagen={{.Config.Image}} Estado={{.State.Status}} {{range .Mounts}}{{if eq .Destination "/var/lib/mysql"}}Volumen={{.Name}}{{end}}{{end}}'
+Imagen=mariadb:10.11 Estado=running Volumen=nodosur-db-staging_db_stage_data
+#
+# VM308 HAProxy: ssh nodosur-g7-proxy@10.33.195.194
+$ cd "$HOME/nodosur-tas-grupo7"
+$ git rev-parse --short HEAD
+fdaba39
+$ sudo docker compose -f compose/proxy/compose.prod.yaml config --quiet
+COMPOSE PROXY: VALIDO
+$ sudo docker inspect nodosur-haproxy --format 'Imagen={{.Config.Image}} Estado={{.State.Status}}'
+Imagen=haproxy:3.2.23-alpine Estado=running
+#
+# Alcance: el cliente Docker Compose valida los ficheros presentes EN CADA VM;
+# las imágenes y estado reflejan contenedores efectivos. No prueba que todos
+# los mounts, variables y etiquetas del contenedor correspondan al Compose.
+# Los commits difieren y deben revisarse según función; no implican falla.
+# Los cambios locales de Codex en Fedora y el PR remoto no están instalados.

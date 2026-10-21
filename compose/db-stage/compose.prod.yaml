@@ -1,3 +1,4 @@
+# Nombre histórico conservado: cambiarlo sin migración seleccionaría otros datos.
 name: nodosur-db-staging
 
 services:
@@ -35,6 +36,8 @@ services:
 
 volumes:
   db_stage_data:
+    external: true
+    name: nodosur-db-staging_db_stage_data
 
 secrets:
   root_password:

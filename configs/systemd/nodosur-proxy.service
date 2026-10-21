@@ -8,7 +8,7 @@ PartOf=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/home/nodosur-g7-proxy/nodosur-tas-grupo7
+WorkingDirectory=/opt/nodosur
 
 ExecStartPre=/usr/bin/docker compose -f compose/proxy/compose.prod.yaml config --quiet
 ExecStart=/usr/bin/docker compose -f compose/proxy/compose.prod.yaml up -d --wait --wait-timeout 90

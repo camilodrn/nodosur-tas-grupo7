@@ -11,6 +11,12 @@ services:
 
     volumes:
       - type: bind
+        source: ../../configs/apache/nodosur-uploads.conf
+        target: /etc/apache2/conf-enabled/nodosur-uploads.conf
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
         source: /srv/nodosur/web1/html
         target: /var/www/html
         bind:

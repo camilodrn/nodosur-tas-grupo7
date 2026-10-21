@@ -1,0 +1,32 @@
+# Evidencia E3 — verificación remota de SQL y exploración de uploads (20/10/2026)
+# Transcripción de salida facilitada por el equipo desde VM268 (tas_revision@nodosur-g7).
+# Esta evidencia no fue ejecutada por el asistente en la VM. Solo comandos de lectura.
+#
+# Timers observados:
+Wed 2026-10-21 00:00:00 UTC    21min Tue 2026-10-20 00:00:02 UTC       23h ago dpkg-db-backup.timer                    dpkg-db-backup.service
+Wed 2026-10-21 00:03:44 UTC    25min Tue 2026-10-20 23:02:26 UTC     36min ago nodosur-remote-backup-maintenance.timer nodosur-remote-backup-maintenance.service
+#
+# Directorios hallados por la búsqueda de nombres bajo /var/backups y /srv/nodosur
+# (maxdepth=4, directorios cuyo nombre contiene backup/upload/snapshot/archive):
+/srv/nodosur/uploads
+/srv/nodosur/uploads/woocommerce_uploads
+/var/backups
+/var/backups/nodosur-remote/archive
+#
+# sudo ls -ld /srv/nodosur/uploads
+drwxrwsr-x 8 www-data www-data 4096 Oct 20 04:25 /srv/nodosur/uploads
+#
+# Comprobación en /var/backups/nodosur-remote/archive:
+# sha256sum -c nodo_sur_final-20261020-190237.sql.gz.sha256
+nodo_sur_final-20261020-190237.sql.gz: OK
+# gzip -t nodo_sur_final-20261020-190237.sql.gz
+# Se completa sin errores, y el script imprime:
+SHA256 Y GZIP: CORRECTOS
+#
+# Interpretación:
+# - El archivo SQL remoto registrado supera verificación SHA256 y validación gzip.
+# - Este paso no valida la posibilidad de restaurarlo ni los contenidos SQL.
+# - No se identificó copia independiente de uploads entre los directorios coincidentes
+#   con los filtros usados; esta búsqueda no demuestra inexistencia de otros respaldos.
+# - El timer dpkg-db-backup es del sistema operativo y no se atribuye a Nodo Sur.
+# - Archivos SQL por sí solos no restauran uploads, WordPress, configuración ni grants.

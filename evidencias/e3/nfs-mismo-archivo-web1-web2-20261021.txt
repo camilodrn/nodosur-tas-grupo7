@@ -1,0 +1,28 @@
+# E3 — Prueba de persistencia NFS: mismo archivo servido por los dos backends
+# Salidas proporcionadas por el equipo. Operaciones de solo lectura (sha256sum y curl GET).
+# Origen NFS: VM268 (DNS/NFS), /srv/nodosur/uploads
+# Pruebas HTTP directas desde VM308 (proxy autorizado a web1 y web2).
+# Archivo: woocommerce-placeholder-768x768.webp
+#
+# VM268:
+$ sudo sha256sum /srv/nodosur/uploads/woocommerce-placeholder-768x768.webp
+bf0adb2caef65c6321690650203c488996f2f1c766bc9497ca25b171db1b4aa0  /srv/nodosur/uploads/woocommerce-placeholder-768x768.webp
+#
+# VM308 -> web1 10.33.199.58:18081
+# curl --noproxy '*' -fsS -H 'Host: nodosur07.tas' -H 'X-Forwarded-Proto: https' \
+# http://10.33.199.58:18081/wp-content/uploads/woocommerce-placeholder-768x768.webp | sha256sum
+SHA-256: bf0adb2caef65c6321690650203c488996f2f1c766bc9497ca25b171db1b4aa0
+RESULTADO: DESCARGA CORRECTA
+#
+# VM308 -> web2 10.33.199.62:18080
+# mismo GET a /wp-content/uploads/woocommerce-placeholder-768x768.webp
+SHA-256: bf0adb2caef65c6321690650203c488996f2f1c766bc9497ca25b171db1b4aa0
+RESULTADO: DESCARGA CORRECTA
+#
+# El comando de búsqueda también identificó un archivo distinto del placeholder:
+# 2026/09/images-2-150x150.jpg (todavía no se hizo comparación GET/SHA-256).
+#
+# CONCLUSION: los dos servidores web respondieron con contenido byte a byte igual
+# al archivo existente en el directorio de uploads de VM268.
+# LIMITES: esta prueba de lectura no verifica escrituras cruzadas, propagación
+# de archivos nuevos ni coherencia de sesiones autenticadas, pedidos o checkout.

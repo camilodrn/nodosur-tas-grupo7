@@ -2,6 +2,7 @@
 Description=Nodo Sur - Firewall Docker Backend 2
 Requires=docker.service
 After=docker.service
+PartOf=docker.service
 Before=nodosur-web2.service
 
 [Service]

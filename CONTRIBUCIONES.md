@@ -1,5 +1,7 @@
 # Contribuciones del equipo
 
+> Registro histórico de E2. El cierre E3 y sus pendientes están en [docs/ENTREGA3.md](docs/ENTREGA3.md); no extrapolar estas validaciones de tres VMs a cinco.
+
 Este registro reconstruye el trabajo **realmente realizado** por el equipo durante la implementación de Nodo Sur. No se asignan tareas ficticias ni commits retroactivos. Como el repositorio se consolidó al final del hito, no todas las contribuciones quedaron asociadas a commits individuales; por eso se indican también otras evidencias disponibles.
 
 | Integrante | Trabajo realizado | Evidencia disponible |

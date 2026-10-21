@@ -1,0 +1,39 @@
+# Evidencia E3 — HTTP -> HTTPS y consulta HAProxy, 20/21-10-2026
+# Salidas compartidas por el equipo. No se recargó ni reinició HAProxy.
+#
+# Cliente Fedora:
+$ curl --noproxy '*' -sS -D - -o /dev/null --resolve nodosur07.tas:80:10.33.195.194 http://nodosur07.tas/
+HTTP/1.1 301 Moved Permanently
+content-length: 0
+location: https://nodosur07.tas/
+#
+# VM308 proxy:
+$ sudo docker ps --filter name=nodosur-haproxy --format 'table {{.Names}}\t{{.Status}}'
+NAMES             STATUS
+nodosur-haproxy   Up 6 hours
+$ sudo docker exec nodosur-haproxy haproxy -c -f /usr/local/etc/haproxy/haproxy.cfg
+# Sin salida visible; no se capturó explícitamente el código de salida.
+$ sudo docker logs --since "2026-10-20T03:45:00Z" --until "2026-10-20T04:05:00Z" nodosur-haproxy 2>&1 | grep -Ei 'Server .* is (UP|DOWN)' | tail -n 30 || true
+# Sin coincidencias DOWN/UP; no se puede afirmar ausencia del evento ni de healthcheck.
+#
+# Límites:
+# - Se comprobó el status HTTP 301 y la cabecera Location correcta.
+# - Aún pendiente comprobar explícitamente el exit code de haproxy -c.
+# - El filtro de logs termina 0 por '|| true', por tanto no acredita salud ni historial.
+# - El contenedor actual indica 'Up 6 hours'; puede no conservar registros anteriores.
+
+# Confirmación posterior del equipo — HAProxy en VM308
+$ sudo docker exec nodosur-haproxy haproxy -c -f /usr/local/etc/haproxy/haproxy.cfg
+RESULTADO: CONFIGURACION VALIDA
+$ sudo docker inspect nodosur-haproxy --format 'Inicio={{.State.StartedAt}} Logs={{.HostConfig.LogConfig.Type}}'
+Inicio=2026-10-20T20:03:27.648704167Z Logs=json-file
+#
+# La validación explícita confirma éxito por estado 0 del docker exec.
+# El contenedor actual inició después de la prueba histórica de balanceo/falla.
+# No inferir que los logs previos necesariamente se perdieron, pero las búsquedas
+# en el contenedor actual no devolvieron DOWN/UP del intervalo solicitado.
+#
+# VM268 — NFS: elección de archivo existente (solo lectura):
+$ sudo find /srv/nodosur/uploads -type f -iname '*.webp' -printf '%P\n' -quit
+woocommerce-placeholder-768x768.webp
+# Todavía no hay hash ni HTTP de web1/web2 en esta evidencia.

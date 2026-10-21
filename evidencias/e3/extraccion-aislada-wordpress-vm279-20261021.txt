@@ -1,0 +1,37 @@
+# Entrega 3 — Ensayo de extracción aislada de WordPress, VM279
+# Transcripción de salida aportada por el equipo (21/10/2026 UTC).
+# No se ejecutaron contenedores WordPress ni conexiones a la BD de producción.
+#
+# Copia fuente: /var/backups/nodosur/web-secondary/wordpress-files-20261019-205742.tar.gz
+# Destino del ensayo: /var/backups/nodosur/restore-web-check-20261021
+# Umask 077; mkdir privado root:root 0700; tar --no-same-owner --no-same-permissions
+# --no-overwrite-dir. El proceso se completó sin errores reportados.
+#
+=== COMPROBAR PRECONDICIONES ===
+=== CREAR DIRECTORIO AISLADO ===
+=== EXTRAER RESPALDO SIN RESTAURAR PROPIETARIOS ===
+=== COMPROBAR ARCHIVOS RESTAURADOS ===
+Archivos WordPress recuperados: 10313
+Archivos uploads recuperados: 126
+=== PERMISOS DEL DIRECTORIO ===
+root:root 700 /var/backups/nodosur/restore-web-check-20261021
+RESULTADO: EXTRACCION Y RECUENTOS CORRECTOS
+#
+# Alcance:
+# - Acredita extracción real, presencia de wp-config.php (no contenido) y recuentos.
+# - No acredita puesta en marcha de WordPress, conexión a DB recuperada,
+#   restauración de metadata ni ensayo funcional integrado. La verificación SHA-256
+#   posterior sí comprobó equivalencia bit a bit de los 10.313 archivos.
+# - El directorio del ensayo persiste: contiene wp-config.php posiblemente sensible.
+# - No se publica TAR, secretos ni datos del archivo en GitHub.
+
+# Validación posterior de integridad SHA-256, aportada por el equipo:
+# Se comparó cada archivo regular del TAR contra el archivo extraído
+# en /var/backups/nodosur/restore-web-check-20261021.
+=== INTEGRIDAD POST-RESTAURACION ===
+Archivos comparados: 10313
+Diferencias detectadas: 0
+RESULTADO: RESTAURACION DE ARCHIVOS VERIFICADA
+#
+# Esto acredita coincidencia de contenido de los 10.313 archivos regulares.
+# No constituye arranque integrado WordPress+MariaDB ni verificación de metadatos.

@@ -1,0 +1,12 @@
+[Unit]
+Description=Nodo Sur - Respaldo MariaDB Docker produccion
+Requisite=nodosur-db-prod.service
+After=nodosur-db-prod.service
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+UMask=0077
+ExecStart=/usr/local/sbin/nodosur-backup-db-prod
+TimeoutStartSec=15min
