@@ -35,6 +35,14 @@ El usuario/equipo confirmó adicionalmente **balanceo 5/5**, continuidad, reglas
 
 Se corrigieron dependencias de firewall web inexistentes, rutas de ejecución root desde homes, colisión de staging/productivo, creación accidental de mounts vacíos, secreto web2 sin enlace `_FILE`, DNS de ejemplo apuntando a web1 y validadores que no propagaban errores. Se añadieron prechequeo NFS, publicación de respaldos con lock/checksum, verificador de copias, servicio/timer base de respaldo, reglas de firewall por destino original y restricciones Apache en uploads. Estas correcciones **no están desplegadas**; el detalle y sus riesgos están en [auditoría](AUDITORIA-E3.md).
 
+## Validación Compose y código de ejemplo (21/10/2026)
+
+En Fedora se comprobó sintaxis Bash, Python, DNS de ejemplo, cuatro sudoers, **seis Compose** mediante el cliente Docker y dos fragmentos PHP mediante `php -l`; se ejecutaron **25 pruebas unitarias** exitosas y un escaneo heurístico de secretos con **cero candidatos**. [Salida Fedora](../evidencias/e3/validacion-local-fedora-20261021.txt) y [lint PHP final](../evidencias/e3/compose-productivo-web1-web2-y-php-20261021.txt). Las pruebas locales no instancian los servicios productivos.
+
+En cada VM Docker se ejecutó `docker compose -f ARCHIVO config --quiet`, con resultado válido: **VM263 web1** commit `8b067ef` y **VM310 web2** commit `667d7d9`, ambos `wordpress:7.1.2-php8.3-apache`, contenedores running y mount `/srv/nodosur/nfs/uploads` RW ([evidencia](../evidencias/e3/compose-productivo-web1-web2-y-php-20261021.txt)); **VM279 DB** commit `488cb27` con `mariadb:10.11` running y volumen `nodosur-db-staging_db_stage_data`, y **VM308 proxy** commit `fdaba39` con `haproxy:3.2.23-alpine` running ([evidencia](../evidencias/e3/compose-productivo-db-proxy-20261021.txt)).
+
+Los cuatro commits instalados son distintos; la rama de auditoría local `audit/e3-codex` tenía cambios sin confirmar y las propuestas del PR **no están desplegadas**. La validación de Compose acredita sintaxis y estructura, no una reconstrucción integral desde cero ni igualdad exacta de todas las opciones de runtime. El despliegue depende de certificados/credenciales fuera de Git, WordPress HTML, NFS y configuración de red. No se intervino producción para efectuar estas verificaciones.
+
 ## Procedimientos y cumplimiento
 
 - [Instalación](INSTALACION-E3.md): dependencias, archivos privados, roles, orden de arranque y adopción sin perder el volumen DB.
