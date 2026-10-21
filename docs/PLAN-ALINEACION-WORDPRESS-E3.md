@@ -21,6 +21,10 @@ Los Compose de ambas VMs usan `wordpress:7.1.2-php8.3-apache`, pero cada host ha
 - Artefacto oficial **candidato** para staging **solo en Fedora**: `https://wordpress.org/wordpress-7.1.3.tar.gz`. WordPress.org publica su SHA-1 en `https://wordpress.org/wordpress-7.1.3.tar.gz.sha1` con valor `491a78c7676b15dffcc69130c6054b8f49228a91` (consultado el 21/10/2026). **Descargado y verificado en Fedora**: la descarga oficial del tar.gz y su SHA-1 desde HTTPS WordPress.org terminó correctamente, `sha1sum -c` indicó OK, `gzip -t` no reportó errores y el `version.php` contenido declara 7.1.3 ([evidencia](../evidencias/e3/wordpress-713-paquete-oficial-fedora-20261021.txt)). Todavía no se ha copiado ni instalado en ninguna VM. El SHA-1 sirve para comparar con el checksum publicado por WordPress.org, **no para garantizar criptográficamente por sí solo ausencia de ataques**; usar HTTPS y conservar procedencia y digest SHA-256 local.
 - La [guía oficial de actualización](https://wordpress.org/documentation/article/updating-wordpress/) exige respaldar y advierte que no se debe borrar `wp-content`, ni perder `wp-config.php` o personalizaciones al reemplazar core.
 
+## Preparación adicional de web2 — completada
+
+El operador transfirió a VM310 `wordpress-7.1.3.tar.gz`, lo volvió a verificar por SHA-1 oficial, Gzip y lectura de `version.php`, y obtuvo SHA-256 `d2a09acb6a15e3b9c471d72557753c266d6f41a79ed19bfe04cbfe49e283b2a5` ([evidencia](../evidencias/e3/wordpress-713-transferido-web2-20261021.txt)). Después extrajo el paquete en un directorio de staging privado **fuera de** `/srv/nodosur/web2/html`: `/var/tmp/nodosur-e3-wp713-staging/wordpress`. Verificó directorios `wp-admin`, `wp-includes`, archivo `wp-login.php`, versión 7.1.3 y herramienta `rsync` del host. WordPress activo **continúa en 7.1.2** ([evidencia](../evidencias/e3/wordpress713-staging-web2-20261021.txt)).
+
 ## Puertas de seguridad antes de un cambio
 
 1. Confirmar en ambos nodos versiones, localidad/idioma del paquete y `$wp_db_version`; comprobar que el core 7.1.3 de referencia es íntegro frente a checksums del proveedor, no copiar a ciegas desde web1.
