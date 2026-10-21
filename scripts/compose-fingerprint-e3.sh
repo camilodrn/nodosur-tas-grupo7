@@ -17,10 +17,14 @@ esac
 
 test -f "$repo/$archivo" || { echo "Falta archivo $repo/$archivo" >&2; exit 1; }
 
-if docker info >/dev/null 2>&1; then
+# La orden 'compose config' es local: no depende de que el daemon este activo.
+if docker compose version >/dev/null 2>&1; then
   cmd=(docker)
-else
+elif sudo docker compose version >/dev/null 2>&1; then
   cmd=(sudo docker)
+else
+  echo 'ERROR: Docker Compose no esta disponible' >&2
+  exit 1
 fi
 
 # No se muestra el JSON completo: solo una huella de su representación
