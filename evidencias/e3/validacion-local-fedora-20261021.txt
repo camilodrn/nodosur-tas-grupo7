@@ -1,0 +1,44 @@
+# Evidencia E3 — Validación local en Fedora
+# Salida textual facilitada por el equipo; workspace local audit/e3-codex.
+# No se ejecutaron los tests en las VMs ni se desplegaron cambios desde este bloque.
+#
+$ bash scripts/validate-repository.sh
+PASS: sintaxis Bash
+PASS: sintaxis Python
+PASS: seis Compose (cliente; sin daemon ni validación de imágenes)
+zone nodosur07.tas/IN: loaded serial 2026102001
+OK
+configs/sudo/db-e3.sudoers.example: parsed OK
+configs/sudo/db.sudoers.example: parsed OK
+configs/sudo/dns.sudoers.example: parsed OK
+configs/sudo/web.sudoers.example: parsed OK
+SKIP: falta PHP para lint de fragmentos
+PASS: whitespace diff
+ALCANCE: no valida runtime HAProxy/Apache/BIND, systemd instalado ni red; ver auditoría.
+
+$ python3 -m unittest discover -s tests -v
+# 25 pruebas, incluyendo backups, checksum, fail-safe, concurrencia,
+# aislamiento Compose/volumen, FirewallTests (dobles de iptables),
+# validadores de red/DNS/HTTP y prechequeo NFS.
+----------------------------------------------------------------------
+Ran 25 tests in 1.247s
+OK
+
+$ python3 scripts/audit-secrets.py
+Archivos árbol=113; blobs alcanzables --all=181; candidatos=0
+Heurístico: no demuestra ausencia absoluta; excluye .git físico, objetos inalcanzables y contenido remoto.
+
+=== RESUMEN DE RESULTADOS ===
+Repositorio: 0
+Pruebas: 0
+Secretos: 0
+
+# LIMITACIONES
+# - Fedora: árbol local con archivos modificados y no rastreados,
+#   rama audit/e3-codex. No se asume identidad exacta con el PR remoto
+#   audit/e3-codex-revisada ni con e3/integracion.
+# - Test suite ejercita simulaciones; no prueba instalación ni comportamiento
+#   de VMs/productivo, ni seguridad perfecta, ni validez PHP.
+# - Se omitió lint de fragmentos PHP porque no estaba instalado php.
+# - Zone check es del archivo versionado; no prueba zona servida en VM268.
+# - Compose config valida estructura con el cliente, no arranque de imágenes.
