@@ -1,6 +1,6 @@
 # Matriz de cumplimiento E3 y evidencia
 
-**La rúbrica oficial no está en el repositorio ni fue proporcionada.** Esta matriz provisional cubre las áreas solicitadas y demostrables; no inventa criterios oficiales, números, ponderaciones ni puntajes. Al obtener el enunciado, añadir la correspondencia exacta y revisar requisitos que aquí podrían faltar.
+**La pauta base E3 fue localizada entre los archivos compartidos del equipo**: `Proyecto_Integrador_TAS_2026_Nodo_Sur(2).docx`, páginas 12–13. La [correspondencia literal con las seis evidencias mínimas obligatorias](CHECKLIST-PAUTA-E3.md) es la referencia principal para el cierre. Esta matriz extensa incluye elementos anticipados de E4 y de auditoría; **no todos son requisitos E3**. El desglose de puntajes de un resumen anterior no se ha contrastado contra una rúbrica de puntuación separada.
 
 Estados: **Evidenciado** = salida histórica versionada, no repetida por la auditoría; **Parcial** = cubre una parte; **Reportado** = declaración del equipo sin salida completa; **Local** = revisión/prueba de archivos; **Pendiente** = falta comprobación.
 
@@ -26,6 +26,6 @@ Estados: **Evidenciado** = salida histórica versionada, no repetida por la audi
 | Seguridad del repositorio | Local | Barrido heurístico árbol + blobs Git; [salida local](../evidencias/e3/auditoria-local.txt) | Repetir antes de publicar y revisar manualmente adjuntos; no sustituye escaneo de VMs |
 | Documentación y reproducibilidad | Local / parcial | README, arquitectura, runbooks, historia E2 preservada y [auditoría](AUDITORIA-E3.md) | Material privado custodiado y configuración externa pendiente; adopción de fixes |
 | Aportes/defensa individual | E2 documentado; E3 pendiente | [contribuciones históricas](../CONTRIBUCIONES.md), historial real | Relacionar aportes E3 con evidencia sin asignar autoría ficticia |
-| Correspondencia con rúbrica oficial | Pendiente | No se encontró documento oficial | Obtener rúbrica y mapear literalmente cada criterio; no estimar nota |
+| Correspondencia con pauta E3 | Pauta base E3 contrastada; desglose de puntos no corroborado | [Checklist de E3 literal](CHECKLIST-PAUTA-E3.md) elaborado a partir del documento de proyecto proporcionado por el equipo, páginas 12–13 | Obtener únicamente la rúbrica de puntaje separada si existe; no asignar nota estimada ni confundir E3 con E4 |
 
 Las correcciones locales no reemplazan las evidencias de operación. Mantener cada evidencia con fecha, VM, configuración/commit y resultado; excluir tokens, claves, SQL y datos de clientes. El cierre de un pendiente requiere evidencia verificable, no cambiar su etiqueta a “validado”.
