@@ -12,6 +12,14 @@ Los Compose de ambas VMs usan `wordpress:7.1.2-php8.3-apache`, pero cada host ha
 - **Web2 VM310:** respaldo privado del árbol local `/srv/nodosur/web2/html`, excluyendo `uploads` NFS, en `/var/backups/nodosur-e3/web2-html-pre-upgrade-20261021T175636Z.tar.gz`; tamaño 55.351.002 bytes, root:root 0600, `gzip -t`, `sha256sum -c` y rutas de `wp-config.php` / `version.php` verificadas ([evidencia](../evidencias/e3/respaldo-html-web2-pre-upgrade-20261021.txt)). Contiene **secretos en wp-config.php**, nunca compartir ni subir a GitHub. Es respaldo en el **mismo host**, no redundante ante pérdida de VM.
 - **NFS uploads:** se comparte desde VM268. No se incluye en ese archivo tar; su protección y respaldos deben considerarse separadamente.
 
+## Comprobaciones oficiales de la versión objetivo
+
+- WordPress.org confirma que **7.1.3 fue publicada el 6 de octubre de 2026** como actualización de seguridad, con siete correcciones: https://wordpress.org/documentation/wordpress-version/version-7.1.3/.
+- La [tabla oficial de versiones](https://wordpress.org/documentation/article/wordpress-versions/) registra **DB version 61833 tanto para 7.1.2 como para 7.1.3**, coincidiendo con los `wp_db_version` leídos en ambas VMs; todavía no se leyó el valor del esquema almacenado en MariaDB.
+- Los núcleos de ambos WordPress reportaron `$wp_local_package` **no declarado**; esto por sí solo **no confirma el idioma de interfaz configurado en WordPress**. No descargar paquetes de idioma a ciegas.
+- Artefacto oficial **candidato** para staging **solo en Fedora**: `https://wordpress.org/wordpress-7.1.3.tar.gz`. WordPress.org publica su SHA-1 en `https://wordpress.org/wordpress-7.1.3.tar.gz.sha1` con valor `491a78c7676b15dffcc69130c6054b8f49228a91` (consultado el 21/10/2026). **No se ha descargado aún el artefacto en Fedora** según evidencia disponible. El SHA-1 sirve para comparar con el checksum publicado por WordPress.org, **no para garantizar criptográficamente por sí solo ausencia de ataques**; usar HTTPS y conservar procedencia y digest SHA-256 local.
+- La [guía oficial de actualización](https://wordpress.org/documentation/article/updating-wordpress/) exige respaldar y advierte que no se debe borrar `wp-content`, ni perder `wp-config.php` o personalizaciones al reemplazar core.
+
 ## Puertas de seguridad antes de un cambio
 
 1. Confirmar en ambos nodos versiones, localidad/idioma del paquete y `$wp_db_version`; comprobar que el core 7.1.3 de referencia es íntegro frente a checksums del proveedor, no copiar a ciegas desde web1.
