@@ -1,0 +1,56 @@
+# E3 — Validación local completa PHP, Compose web1/web2 y mounts reales
+# Transcripción saneada de resultados facilitados por el equipo. Se omiten
+# prompts de contraseñas, sin valores de secretos. Fecha de registro 21/10/2026.
+#
+# HOST: Fedora 44, carpeta ~/Proyectos/nodosur-tas-grupo7-e3-integracion
+$ sudo dnf install php-cli
+# php-cli 8.5.11-1.fc44 y php-common instalados correctamente.
+# Aviso DNF: "Pending offline transaction has been invalidated."
+# No relación con cambios en las VMs Nodo Sur.
+$ php -l configs/wordpress/wp-config-e3.example.php
+No syntax errors detected in configs/wordpress/wp-config-e3.example.php
+$ bash scripts/validate-repository.sh
+PASS: sintaxis Bash
+PASS: sintaxis Python
+PASS: seis Compose (cliente; sin daemon ni validación de imágenes)
+zone nodosur07.tas/IN: loaded serial 2026102001
+OK
+configs/sudo/db-e3.sudoers.example: parsed OK
+configs/sudo/db.sudoers.example: parsed OK
+configs/sudo/dns.sudoers.example: parsed OK
+configs/sudo/web.sudoers.example: parsed OK
+No syntax errors detected in configs/wordpress/wp-config-db.example.php
+No syntax errors detected in configs/wordpress/wp-config-e3.example.php
+PASS: whitespace diff
+ALCANCE: no valida runtime HAProxy/Apache/BIND, systemd instalado ni red; ver auditoría.
+#
+# VM263 WEB1 — ssh tas_revision@10.33.195.202
+$ cd "$HOME/nodosur-tas-grupo7"
+$ git rev-parse --short HEAD
+8b067ef
+$ sudo docker compose -f compose/web1/compose.yaml config --quiet
+COMPOSE WEB1: VALIDO
+$ sudo docker inspect nodosur-web1 [formato seguro Imagen Estado Uploads RW]
+Imagen=wordpress:7.1.2-php8.3-apache Estado=running Uploads=/srv/nodosur/nfs/uploads RW=true
+#
+# VM310 WEB2 — ssh nodosur-g7-web2@10.33.195.208
+$ cd "$HOME/nodosur-tas-grupo7"
+$ git rev-parse --short HEAD
+667d7d9
+$ sudo docker compose -f compose/web2/compose.yaml config --quiet
+COMPOSE WEB2: VALIDO
+$ sudo docker inspect nodosur-web2 [formato seguro Imagen Estado Uploads RW]
+Imagen=wordpress:7.1.2-php8.3-apache Estado=running Uploads=/srv/nodosur/nfs/uploads RW=true
+#
+# Observaciones y límites:
+# - Los dos WordPress en ejecución comparten nombre/tag de imagen, punto de montaje
+#   del host y estado RW. El tag WordPress dice php8.3; el PHP CLI de Fedora es
+#   8.5 y solo se usó para verificar sintaxis de ejemplos.
+# - Docker inspect confirma bind mount RW, no por sí mismo el protocolo NFS;
+#   sesiones previas findmnt y SHA-256 verificaron la fuente NFS y
+#   el mismo archivo servido por ambos backends.
+# - Los HEAD de Git son distintos por VM. No afirmar que el árbol de Fedora con
+#   cambios locales Codex equivale al árbol instalado en las VMs.
+# - La configuración local validada de cada VM no garantiza aprovisionamiento
+#   automático del laboratorio desde un checkout nuevo.
+# - No se ejecutaron up, down, reinicios, mutaciones NFS ni DB.
