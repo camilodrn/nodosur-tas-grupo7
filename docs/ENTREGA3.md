@@ -54,7 +54,7 @@ Evidencia: [resultado final de los dos backends](../evidencias/e3/apache-uploads
 - El montaje NFS y las lecturas idénticas no certifican por sí solos que todos los plugins, salts, sesiones o pedidos concurrentes sean coherentes.
 - Los cuatro Compose funcionan donde están instalados, pero un checkout nuevo no reconstruye automáticamente la VPN, las VMs, los secretos, el TLS, los datos y el almacenamiento.
 - HAProxy, MariaDB, DNS y NFS son **SPOF**. No se ha demostrado continuidad ante caída de cualquiera de esas dependencias compartidas.
-- Las mejoras de Codex de firewall, systemd, Apache, HAProxy y backup **no se han aplicado a las VMs**. Se evalúan separadamente para evitar alterar la entrega funcional.
+- La protección Apache de `uploads` **sí está instalada** en ambos WordPress, con evidencia aislada y productiva. Otras propuestas de Codex para firewall, systemd, HAProxy y backups **no se han aplicado a las VMs** y requieren validación separada.
 
 ## Antes de la defensa
 
