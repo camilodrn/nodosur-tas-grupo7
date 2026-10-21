@@ -1,0 +1,31 @@
+# Matriz de autoevaluación — Entrega 3 (Nodo Sur, Grupo 7)
+
+**Fecha de revisión:** 21/10/2026. **Base:** rúbrica proporcionada por el equipo, implementación y evidencia versionada en `e3/cierre-tecnico`. **No es una nota otorgada por el docente.** La rúbrica exige **verificación en implementación, no solo capturas**, con niveles 100, 80, 60, 30 y 0.
+
+Esta matriz no reemplaza la demostración en vivo. La implementación usa cinco VMs: VM268 BIND9/NFS; VM263 WordPress web1; VM310 WordPress web2; VM279 MariaDB; VM308 HAProxy/HTTPS.
+
+| Criterio literal de la rúbrica | Peso | Evaluación provisional (no oficial) | Evidencia que sí existe | Brecha que importa para el nivel 100 |
+|---|---:|---|---|---|
+| Aplicación multicontenedor reproducible | 15 | 60–80 | Compose por servicio y host (web1, web2, MariaDB, HAProxy), `docker compose config --quiet` en hosts, imagen declarada, rutas documentadas; cambios de Apache versionados | No se ha reconstruido el entorno completo en VMs limpias. Secretos, archivos, NFS, TLS, BIND9, firewall y systemd requieren provisión/documentación manual; checkouts instalados requieren reconciliación con el PR |
+| Dos backends funcionales | 15 | 80–100 | [Prueba final](../evidencias/e3/apache-uploads-web1-web2-final-20261021.txt): portada/tienda/imagen compartida HTTP 200 en ambos; [balanceo original](../evidencias/e3/balanceo-roundrobin.txt) | La misma imagen Docker no garantiza mismo WordPress, plugins, temas, salts ni configuración montada; comparar equivalencia funcional y versiones, sin mostrar secretos |
+| HAProxy, TLS y health checks | 20 | 80 | [Redirección HTTPS y config](../evidencias/e3/http-redirect-y-validacion-proxy-20261021.txt), [TLS](../evidencias/e3/https-haproxy.txt), [distribución](../evidencias/e3/balanceo-roundrobin.txt); `HEAD /` con 200, `inter 3s fall 3 rise 2` | `HEAD /` prueba disponibilidad HTTP, no integridad total de BD/NFS/checkout. Certificado autofirmado sin confianza pública. Capturar logs de health check DOWN/UP al hacer ensayo autorizado |
+| Persistencia y coherencia del estado | 15 | 80 | Misma MariaDB y volumen histórico; [SHA-256 del upload](../evidencias/e3/nfs-mismo-archivo-web1-web2-20261021.txt) en NFS y ambos backends; [carrito compartido](../evidencias/e3/carrito-coherencia-postmigracion.txt) | No está probado checkout concurrente, persistencia de todas las sesiones, sincronía de plugins/configs ni RPO/RTO de datos. No alterar la BD ni carritos sin autorización |
+| Segmentación, firewall y secretos | 15 | 80 | [Matriz de flujos](MATRIZ-FLUJOS-E3.md); [DOCKER-USER activo en ambas webs](../evidencias/e3/firewall-docker-user-web1-web2-20261021.txt), secretos externos a repo; [bloqueo Apache activo en ambos](../evidencias/e3/apache-uploads-web1-web2-final-20261021.txt) | Completar evidencia no destructiva de política SSH/DB/DNS y explicar qué capa bloquea el tráfico; escáner de secretos es heurístico, no una certificación |
+| Prueba de falla y recuperación | 15 | 80 | [Ocho respuestas 200 atendidas por web1](../evidencias/e3/failover-web2-detenido.txt) durante falla de web2; [recuperación 4/4](../evidencias/e3/recuperacion-web2.txt) | Evidencias guardadas carecen de orden de detención y logs HAProxy de `DOWN`/`UP`, tiempos y reversión explícita. Ensayar en ventana autorizada, con web1 y DB sanos y plan de recuperación |
+| Análisis de disponibilidad y documentación | 5 | 100 defendible | [Arquitectura](../ARQUITECTURA.md), [decisiones](decisiones-arquitectura.md), [riesgos](ENTREGA3.md): distinguen balanceo/tolerancia de falla y HA completa; identifican SPOF HAProxy, DB, DNS y NFS | Evitar llamar “alta disponibilidad integral” al sistema o inventar RTO/RPO; argumentar cómo evolucionaría a redundancia adicional |
+
+## Orden razonado de cierre
+
+**Prioridad 1 — Reproducibilidad y coherencia con Git:** resolver/revisar el PR #2 y reconciliar los checkouts de VM263/VM310 **sin reemplazar sus configuraciones operativas**; verificar que las instrucciones de despliegue enumeren prerequisitos secretos, montajes y certificación de manera reproducible aunque los valores privados queden fuera del repositorio.
+
+**Prioridad 2 — Preparar evidencia de la demo:** tener lista una secuencia legible de DNS, HTTP 301, HTTPS, cabecera `X-NodoSur-Backend`, ambos web `200`, archivo NFS, conectividad y reglas. Planificar fallo/reincorporación **solo cuando esté autorizada** y conservar evidencia `DOWN`/`UP` sin tocar DB/volúmenes.
+
+**Prioridad 3 — Defensa oral:** explicar función de cada VM y de cada flujo, diferencias entre Docker Compose por host y orquestación, dependencia de servicios compartidos, limitación del `HEAD /` y certificado autofirmado. Mostrar resultados reales, no atribuir garantías de seguridad/HA que no fueron ensayadas.
+
+## Escenario numérico únicamente orientativo
+
+Si el docente asignara 60 a reproducibilidad, 80 a los cinco criterios centrales restantes y 100 a disponibilidad/documentación, el ponderado sería:
+
+`15×0.60 + 15×0.80 + 20×0.80 + 15×0.80 + 15×0.80 + 15×0.80 + 5×1.00 = 78/100`.
+
+Es un **escenario de referencia**, no la nota asegurada: la inspección en vivo puede acreditar niveles mayores o evidenciar fallos actualmente no detectados. Los rangos provisionales de la tabla son juicios técnicos, no selecciones oficiales de la columna H.
