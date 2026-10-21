@@ -71,6 +71,14 @@ En producción, systemd sigue leyendo el repositorio desde los `/home/USUARIO/no
 
 Las contraseñas, salts, certificados con claves privadas y `wp-config.php` real permanecen fuera de Git. En el equipo Fedora se ejecutó un escaneo **heurístico** de los archivos de la auditoría sin candidatos detectados; no es una garantía absoluta.
 
+## Protección de los archivos compartidos (E3)
+
+El directorio NFS `uploads` se comparte como datos, **no como un directorio autorizado para ejecutar PHP**. Se añadió a ambos contenedores WordPress la configuración Apache `configs/apache/nodosur-uploads.conf`, instalada en el host bajo `/etc/nodosur/apache/` y montada en solo lectura hacia `/etc/apache2/conf-enabled/nodosur-uploads.conf`. Deniega archivos PHP/PHTML/PHAR, CGI y listado de directorios en esa ubicación.
+
+Primero se validó en un contenedor efímero aislado (archivo de texto existente `200`, PHP inocuo existente `403`). Después se recreó **web2 y, una vez comprobado, web1**. En ambos permanecieron accesibles portada, tienda e imagen compartida (`200`); una URL PHP inexistente bajo uploads obtuvo `403`. El proxy siguió entregando seis respuestas HTTPS `200` en reparto `3/3`. [Evidencia](evidencias/e3/apache-uploads-web1-web2-final-20261021.txt).
+
+Esta protección es preventiva y no equivale a afirmar que se haya encontrado malware o demostrado una vulnerabilidad explotable. La continuidad funcional completa del checkout no se ha probado aquí.
+
 ## Tolerancia a fallos: alcance y limitaciones
 
 La arquitectura permite que HAProxy saque un **web** defectuoso del balanceo y sirva tráfico mediante el otro backend. Existen [solicitudes exitosas durante la falla de web2](evidencias/e3/failover-web2-detenido.txt) y [distribución recuperada 4/4](evidencias/e3/recuperacion-web2.txt). Esas evidencias no incluyen logs originales `DOWN/UP` ni medición de RTO.
