@@ -18,6 +18,17 @@
 | WordPress web1 VM263 `.58` | NFS VM268 `.59` | NFSv4.1 TCP 2049 | Permitir | **Montaje NFS RW reportado por findmnt**, y contenido de uploads vía HTTP idéntico al NFS original | [NFS/webs](../evidencias/e3/nfs-mismo-archivo-web1-web2-20261021.txt); montaje y exports vistos en sesiones previas, sin captura textual aquí |
 | WordPress web2 VM310 `.62` | NFS VM268 `.59` | NFSv4.1 TCP 2049 | Permitir | **Montaje NFS RW reportado por findmnt**, contenido idéntico | Misma evidencia y límite anterior |
 
+## Políticas DOCKER-USER efectivas en los dos backends
+
+El equipo ejecutó `systemctl is-active`, `is-enabled`, `iptables -S DOCKER-USER` y `iptables -nvL DOCKER-USER` en ambas VMs. [Evidencia completa](../evidencias/e3/firewall-docker-user-web1-web2-20261021.txt).
+
+| VM | Servicio | Regla efectiva de denegación | Contador DROP |
+|---|---|---|---|
+| VM263 web1 | `nodosur-docker-firewall.service` `active/enabled` | Origen distinto de `10.33.199.61/32`, destino original `10.33.199.58:18081/TCP`, `-j DROP` | 4 paquetes, 240 bytes |
+| VM310 web2 | `nodosur-docker-firewall.service` `active/enabled` | Origen distinto de `10.33.199.61/32`, destino original `10.33.199.62:18080/TCP`, `-j DROP` | 4 paquetes, 240 bytes |
+
+La regla no afecta a otros puertos por sí misma; el tráfico que no coincide puede quedar sujeto a otras cadenas y capas. Los contadores acreditan descartes, pero no determinan qué orígenes concretos causaron cada incremento. La conectividad de VM308 hacia ambos WordPress está comprobada con GET y hashes.
+
 ## Reglas y flujos adicionales aún por corroborar
 
 | Flujo | Política esperada | Pendiente |
@@ -32,4 +43,4 @@
 
 Las reglas del firewall propuestas en `audit/e3-codex-revisada` son **código no desplegado**. En producción se ha observado `nodosur-docker-firewall.service` activo en web1/web2 y reglas DOCKER-USER; no confundir esos servicios reales con las nuevas unidades `nodosur-docker-firewall-web1.service`/web2 propuestas por Codex.
 
-Para completar la evidencia mínima de la pauta E3, capturar reglas efectivas en **web1 y web2** (`iptables -S DOCKER-USER`), y la política del proxy/DB, sin modificar iptables, systemd, Docker o red. Conservar resultados y fecha de la prueba.
+Las reglas efectivas de **web1 y web2 ya se capturaron**. Como mejora, contrastar políticas del proxy/DB y, si fuese requisito, persistencia de los filtros ante reinicios planificados. No modificar iptables, systemd, Docker ni red para recolectar evidencia. Conservar resultados y fecha de la prueba.
