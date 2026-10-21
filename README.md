@@ -19,7 +19,7 @@ Entrega 3: **23 de octubre de 2026**. Arquitectura implementada de cinco VMs, se
 - [Instalación y adopción de las correcciones](docs/INSTALACION-E3.md).
 - [Operación, pruebas y diagnóstico](docs/OPERACION-E3.md).
 - [Respaldos, recuperación y reversión](docs/RECUPERACION-E3.md).
-- [Matriz de cumplimiento y evidencia pendiente](docs/MATRIZ-E3.md).
+- [Checklist E3 según la pauta base proporcionada](docs/CHECKLIST-PAUTA-E3.md) y [matriz técnica ampliada](docs/MATRIZ-E3.md).
 - [Informe de auditoría P0/P1/P2](docs/AUDITORIA-E3.md) y [bitácora](BITACORA.md).
 
 ## Verificación local sin VMs
