@@ -51,7 +51,7 @@ Evidencia: [resultado final de los dos backends](../evidencias/e3/apache-uploads
 ## Qué no está demostrado todavía
 
 - No hay registros `DOWN/UP` conservados en las evidencias de failover ni un **RTO/RPO medido**.
-- El montaje NFS y las lecturas idénticas no certifican por sí solos que todos los plugins, salts, sesiones o pedidos concurrentes sean coherentes.
+- El montaje NFS y las lecturas idénticas no certifican por sí solos que todos los plugins, salts, sesiones o pedidos concurrentes sean coherentes. **Se detectó discrepancia del WordPress instalado**: web1 7.1.3 frente a web2 7.1.2; coinciden versión y archivo principal de WooCommerce ([evidencia](../evidencias/e3/wordpress-equivalencia-web1-web2-20261021.txt)).
 - Los cuatro Compose funcionan donde están instalados, pero un checkout nuevo no reconstruye automáticamente la VPN, las VMs, los secretos, el TLS, los datos y el almacenamiento.
 - HAProxy, MariaDB, DNS y NFS son **SPOF**. No se ha demostrado continuidad ante caída de cualquiera de esas dependencias compartidas.
 - La protección Apache de `uploads` **sí está instalada** en ambos WordPress, con evidencia aislada y productiva. Otras propuestas de Codex para firewall, systemd, HAProxy y backups **no se han aplicado a las VMs** y requieren validación separada.
