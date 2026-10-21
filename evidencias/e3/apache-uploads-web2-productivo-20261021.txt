@@ -1,0 +1,42 @@
+# E3 — Activación de hardening Apache uploads en web2 (VM310)
+# Salida proporcionada por el operador. Cambio productivo, contenedor web2 únicamente.
+# Fecha local declarada: 21/10/2026.
+
+# Precondiciones:
+# - VM310 web2: systemd active, contenedor running, Compose válido,
+#   NFSv4.1 rw desde 10.33.199.59, HEAD local sin modificaciones.
+# - Config candidata probada en Apache aislado (Syntax OK, HTTP 200/403).
+# - Archivo en host /etc/nodosur/apache/nodosur-uploads.conf,
+#   root:root 0644; SHA-256
+#   ceac4ca76941235039e5b8c321a923050360b101b19866fd2b55246e0fa05e14
+# - Compose original respaldado y verificado en:
+#   /var/backups/nodosur-e3/web2-compose-pre-uploads-20261021-042917.yaml
+# - Compose web2 modificado localmente para bind de conf a
+#   /etc/apache2/conf-enabled/nodosur-uploads.conf,
+#   read_only: true, create_host_path: false.
+# - docker compose config --quiet: OK. Revisión de montaje JSON: OK.
+
+# Cambio realizado:
+$ sudo docker compose -f compose/web2/compose.yaml up -d --no-deps --force-recreate --pull never wordpress
+[+] up 1/1
+ ✔ Container nodosur-web2 Started 1.9s
+
+# Verificación del contenedor y la aplicación:
+Estado=running Imagen=wordpress:7.1.2-php8.3-apache
+Origen=/etc/nodosur/apache/nodosur-uploads.conf Escritura=false
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.18.0.2. Set the 'ServerName' directive globally to suppress this message
+Syntax OK
+Portada: HTTP 200
+Imagen: HTTP 200
+PHP: HTTP 403
+
+# Alcance:
+# - Reglas Apache instaladas en web2, volumen PHP de uploads montado solo lectura
+#   y pruebas HTTP en puerto interno completadas.
+# - El archivo PHP de consulta era inexistente: confirma respuesta 403
+#   pero NO constituye prueba de ejecución/denegación de PHP existente.
+# - La prueba aislada previa sí verificó respuesta 200 para .txt y 403
+#   para .php existente de contenido inocuo.
+# - No se ha validado carrito ni checkout ni monitoreado reincorporación
+#   a HAProxy con logs durante esta salida. No se ha modificado web1 aún.
+# - Se preservaron mounts WordPress y NFS; no se manipularon DB/volúmenes.
