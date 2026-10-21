@@ -1,0 +1,29 @@
+# Nodo Sur — validación de cierre local en Fedora, rama e3/cierre-tecnico
+# Registro de salida textual compartida por el operador, 21/10/2026.
+# Consultas locales de lectura: sin comandos Docker destructivos ni VMs intervenidas.
+#
+# git pull --ff-only
+# Actualización: 68e102f..f380333, Fast-forward.
+#
+$ bash -n scripts/preflight-e3.sh scripts/compose-fingerprint-e3.sh
+# Sin salida: exit 0 (continuación de la sesión; no se reportó error)
+#
+$ git diff --check origin/e3/integracion...HEAD
+# Sin salida: no se detectaron errores de espacios/formato
+#
+$ NODOSUR_REPO_DIR="$PWD" bash scripts/compose-fingerprint-e3.sh web1
+HUELLA_COMPOSE_E3=df504c323b546fc6d38909ec0a1e5f9d5a4a33adbf8abd665ba688eb531b4ec6
+
+$ NODOSUR_REPO_DIR="$PWD" bash scripts/compose-fingerprint-e3.sh web2
+HUELLA_COMPOSE_E3=6f2060327b5fbf1e46785e67c77180c583aa20a2fc172f215ca7df32c3d7b496
+
+$ python3 scripts/audit-secrets.py
+Archivos árbol=101; blobs alcanzables --all=184; candidatos=0
+Heurístico: no demuestra ausencia absoluta; excluye .git físico, objetos inalcanzables y contenido remoto.
+
+# Alcance:
+# - Huellas calculadas sobre las DEFINICIONES del clon Fedora actualizadas
+#   a f380333. Falta comprobar equivalencia de Compose configurados
+#   actualmente en los hosts web1 VM263 y web2 VM310.
+# - La salida git diff --check no certifica contenido ni secreto alguno.
+# - Escaneo de secretos es heurístico y no demuestra seguridad íntegra.
