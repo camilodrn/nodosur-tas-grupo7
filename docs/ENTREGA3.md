@@ -54,6 +54,10 @@ Tras respaldar archivos privados de web2 y generar/verificar un respaldo recient
 
 La secuencia completa incluye [evento DOWN y continuidad atendida por web1](../evidencias/e3/prueba-falla-web2-haproxy-web1-20261021.txt) y [evento UP y regreso del balanceo](../evidencias/e3/wordpress713-recuperacion-web2-haproxy-20261021.txt), respaldada por el [plan de alineación](PLAN-ALINEACION-WORDPRESS-E3.md). No se cuantificaron errores durante el intervalo previo al DOWN ni se ensayó restauración funcional integrada. Se auditaron las cuatro huellas de directorios postactualización: los 9817 archivos de `wp-admin`, `wp-includes`, plugins y temas presentan cantidades y hashes idénticos en web1/web2 ([evidencia](../evidencias/e3/comparacion-post-upgrade-web1-web2-20261021.txt)). Los archivos principales seleccionados de la raíz de WordPress también tienen [SHA-256 idéntico](../evidencias/e3/wordpress-raiz-sha256-igual-web1-web2-20261021.txt), excluyendo `wp-config.php`; continúa pendiente evaluar configuración efectiva y estado dinámico.
 
+## Comprobación adicional de MariaDB y HAProxy (21/10/2026)
+
+Desde sus VMs, el operador comprobó `git status --short` sin cambios locales y `docker compose config --quiet` correcto en ambos roles. MariaDB `running/healthy` con imagen `mariadb:10.11`, volumen histórico exacto y secreto root externo presente. HAProxy `running` con imagen `haproxy:3.2.23-alpine`, validación `haproxy -c` correcta y archivo TLS presente. [Evidencia](../evidencias/e3/preflight-db-proxy-compose-20261021.txt). Se verificó únicamente presencia/no vacío de archivos privados; no sus permisos o contenido. Un estado Git limpio no asegura igualdad de ramas o commits con el PR.
+
 ## Qué no está demostrado todavía
 
 - Sí hay registros `DOWN/UP` conservados en la nueva prueba controlada de falla y recuperación; no se ha medido formalmente un **RTO/RPO** ni la posible pérdida de solicitudes durante el umbral de detección.
