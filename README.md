@@ -53,6 +53,7 @@ Las evidencias se presentan con su alcance real: las capturas históricas no inc
 - `evidencias/e3/`: resultados verificables de pruebas.
 - [Estado y pruebas E3](docs/ENTREGA3.md), [matriz de flujos](docs/MATRIZ-FLUJOS-E3.md) y [decisiones](docs/decisiones-arquitectura.md).
 - [Revisión selectiva de mejoras de Codex](docs/REVISION-CODEX-E3.md): qué se incorporó, qué requiere pruebas y qué no se debe desplegar todavía.
+- [Historial de Entrega 2](docs/historia/CHECKLIST_ENTREGA2.md): checklist original conservado fuera de la raíz, para no confundir E2 con E3.
 
 Las credenciales, certificados con claves privadas y `wp-config.php` reales permanecen **fuera de Git**. La reproducción de un host requiere también su configuración externa, los montajes NFS y sus datos; `docker compose config --quiet` verifica la definición, **no reconstruye por sí solo toda la infraestructura**.
 
