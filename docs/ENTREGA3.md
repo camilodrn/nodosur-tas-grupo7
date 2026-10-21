@@ -8,7 +8,7 @@ Esta página ordena lo que podemos **mostrar y defender técnicamente** de Nodo 
 
 Escalar WordPress/WooCommerce de la instalación tradicional a dos backends en Docker, con HAProxy como entrada HTTPS, MariaDB única, uploads NFS compartidos y controles de red. La condición principal de E3 es **mantener la atención del sitio cuando uno de los dos backends web deja de funcionar**; no se exige afirmar redundancia de toda la infraestructura.
 
-[Arquitectura](../ARQUITECTURA.md) · [Inventario de hosts](../INVENTARIO.md) · [Matriz de accesos](MATRIZ-FLUJOS-E3.md)
+[Arquitectura](../ARQUITECTURA.md) · [Inventario de hosts](../INVENTARIO.md) · [Matriz de accesos](MATRIZ-FLUJOS-E3.md) · [Rúbrica y autoevaluación](RUBRICA-E3.md)
 
 ## Resultado de las pruebas disponibles
 
