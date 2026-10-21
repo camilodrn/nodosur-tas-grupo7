@@ -1,0 +1,35 @@
+# Nodo Sur E3 — Respaldo privado WordPress web2 previo a alineación del core
+# 21/10/2026. Comandos ejecutados en VM310 por operador.
+# No se subieron archivos confidenciales al repositorio.
+#
+# Host VM310: nodosur-g7-web2
+# Origen: /srv/nodosur/web2/html
+# Destino: /var/backups/nodosur-e3/ (root, modo 0700)
+# Backup de archivos WordPress local, EXCLUYENDO ./wp-content/uploads
+# (directorio en NFS compartido; resguardo distinto).
+# Método: tar --create --gzip --one-file-system
+# --exclude=./wp-content/uploads --acls --xattrs --numeric-owner
+# -C /srv/nodosur/web2/html .
+# Se comprobaron presencia de wp-config.php, version.php y directorios.
+#
+=== RESPALDO CREADO ===
+/var/backups/nodosur-e3/web2-html-pre-upgrade-20261021T175636Z.tar.gz:
+  55351002 bytes, permisos=600, propietario=root
+/var/backups/nodosur-e3/web2-html-pre-upgrade-20261021T175636Z.tar.gz.sha256:
+  136 bytes, permisos=600, propietario=root
+=== COMPROBACIÓN ===
+/var/backups/nodosur-e3/web2-html-pre-upgrade-20261021T175636Z.tar.gz: OK
+RESPALDO WEB2 VERIFICADO
+
+# Además: gzip -t y tar -tzf para wp-config.php y version.php dieron
+# estado exitoso; validación que ningún path ./wp-content/uploads
+# estuviera incluido dio estado exitoso.
+#
+# ALCANCE: copia de archivos local verificada. NO es respaldo de
+# uploads NFS ni un respaldo SQL, y no se ha ensayado una restauración
+# real con la aplicación. Contiene wp-config.php y secretos:
+# solo existe en host privado root, NO subir ni distribuir.
+# La copia reside en el mismo host: para resiliencia ante pérdida
+# total de VM sería necesaria copia adicional fuera del host,
+# a almacenamiento privado y autorizado.
+# Ningún core de WordPress fue actualizado durante la operación.
