@@ -152,3 +152,41 @@ CONCLUSION Y LIMITACIONES:
 - Cambio propuesto (NO aplicado): allow-transfer { none; };
   dentro de zone nodosur07.tas, con backup, validacion, recarga
   controlada y comprobacion DNS UDP/TCP y rechazo de AXFR.
+
+=== VM268 — APLICACION Y VALIDACION DE RESTRICCION AXFR (21/10/2026) ===
+Antes:
+  AXFR desde Fedora VPN: XFR size: 9 records (messages 1, bytes 290).
+  Zona primaria BIND9 9.18.39, sin allow-transfer explicito.
+  Un solo NS publicado: ns1.nodosur07.tas.
+
+Preparacion:
+  Respaldo privado root en VM268:
+    /root/nodosur-e3-axfr-20261021/named.conf.local.original
+  Candidato privado:
+    /root/nodosur-e3-axfr-20261021/named.conf.local.candidate
+  named-checkconf -z sobre configuracion candidata: correcto.
+  cmp entre configuracion activa y respaldo: identicos ANTES de aplicar.
+
+Cambio realizado:
+  Archivo: /etc/bind/named.conf.local
+  Solo zona "nodosur07.tas":
+    allow-transfer { none; };
+  Instalacion atomica conservando 644 root:bind.
+  Validacion named-checkconf -z sobre archivo activo: correcta.
+  rndc reconfig: retorno exitoso.
+  systemctl is-active bind9: correcto.
+
+Pruebas despues del cambio DESDE FEDORA:
+  SOA UDP: status NOERROR, flags qr aa rd,
+           serial 2026102001.
+  SOA TCP: status NOERROR, flags qr aa rd,
+           serial 2026102001.
+  www.nodosur07.tas A: 10.33.195.194.
+  AXFR nodosur07.tas: status REFUSED; Transfer failed.
+
+RESULTADO:
+  Se rechazo el AXFR desde el cliente Fedora que antes lo completaba,
+  manteniendo operativas las consultas autoritativas UDP/TCP observadas.
+  No se reinicio BIND9 ni se tocaron registros DNS, NFS o MariaDB.
+  No se ensayaron consultas desde todos los clientes, ni otros segmentos,
+  ni redundancia DNS. Respaldo privado disponible en VM268.
