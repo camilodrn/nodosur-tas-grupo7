@@ -40,11 +40,11 @@ Se corrigieron dependencias de firewall web inexistentes, rutas de ejecución ro
 - [Instalación](INSTALACION-E3.md): dependencias, archivos privados, roles, orden de arranque y adopción sin perder el volumen DB.
 - [Operación](OPERACION-E3.md): comprobaciones, failover, recuperación de backend, carrito y diagnóstico.
 - [Recuperación](RECUPERACION-E3.md): respaldo íntegro, restauración aislada, coordinación DB/uploads y rollback.
-- [Matriz E3](MATRIZ-E3.md): evidencia por área y pendientes; falta rúbrica oficial para certificar criterios/puntajes.
+- [Matriz E3](MATRIZ-E3.md) y [checklist de la pauta base E3](CHECKLIST-PAUTA-E3.md): exigencias del proyecto original y evidencias pendientes; falta corroborar desglose oficial de puntajes si existe una rúbrica independiente.
 - [Verificación local](../evidencias/e3/auditoria-local.txt): salida generada por esta auditoría, separada de las evidencias de VMs.
 
 ## Evaluación técnica
 
 La evidencia apoya distribución del tráfico, continuidad ante caída de un web, estado compartido del carrito y recuperación aislada de DB. La arquitectura **no ofrece alta disponibilidad integral**: un único proxy, MariaDB, DNS y NFS siguen siendo SPOF; VM268 concentra tres funciones críticas. No hay RPO/RTO medidos, copia fuera del laboratorio acreditada, restauración completa de uploads/configuración, ni supervisión centralizada demostrada.
 
-E3 es defendible como implementación distribuida con tolerancia al fallo de un backend y evidencia funcional acotada. El cierre requiere capturar configuración/evidencia faltante, validar las correcciones en laboratorio y contrastar la rúbrica oficial; no es justificable declararlo íntegramente reproducible o totalmente conforme todavía.
+E3 es defendible como implementación distribuida con tolerancia al fallo de un backend y evidencia funcional acotada. El cierre E3 debe centrarse en las evidencias mínimas de la pauta encontrada: validación HAProxy, secuencia de distribución, retiro/reintegración, prueba explícita del mismo archivo en ambos backends y matriz de flujos; la adopción de cambios propuestos por Codex requiere revisión y no es prerrequisito automático. No es justificable declararlo íntegramente reproducible o totalmente conforme todavía.
