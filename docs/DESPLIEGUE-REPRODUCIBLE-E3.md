@@ -47,14 +47,14 @@ Las unidades systemd reales referencian `/home/USUARIO/nodosur-tas-grupo7`; **no
 
 1. Preparar IP, ruta, VPN, cuenta SSH y acceso administrativo. Confirmar DNS y transporte NFS donde corresponda.
 2. Instalar Docker Engine y Compose plugin en las cuatro VMs Docker; BIND9 y servidor NFS donde corresponda. Registrar las versiones efectivamente usadas.
-3. Clonar una **revisión aprobada** de este repositorio en el `HOME` de cada cuenta operadora. La rama `e3/cierre-tecnico` aún es un PR; evitar mezclar checkouts y no reemplazar configuraciones existentes.
+3. Clonar una **revisión aprobada** de este repositorio en el `HOME` de cada cuenta operadora. Trabajar con una revisión aprobada; evitar mezclar checkouts y no reemplazar configuraciones existentes. La integración Git **no actualiza automáticamente** los checkouts productivos de cada VM.
 4. Provisionar **por canal privado** los archivos y permisos exigidos por la tabla anterior; restaurar el WordPress/BD/archivos de una fuente autorizada. Nunca publicar esas copias.
 5. Confirmar que NFS esté montado y que los bind mounts HTML de WordPress existan **antes** de crear contenedores. En web2 un bind HTML histórico usa sintaxis abreviada que podría crear directorio vacío si falta; comprobar explícitamente su existencia.
 6. Validar cada Compose con `docker compose -f RUTA config --quiet` y revisar `docker compose -f RUTA config --format json` **sin imprimir variables de entorno con secretos**.
 7. Comprobar la política de firewall de host, permisos, servicio systemd efectivo y arranque controlado. Hacerlo rol por rol, tras respaldo y plan de reversión.
 8. Verificar aplicación y almacenamiento **antes de publicar el proxy**: salud MariaDB, WordPress por backend, imagen NFS con SHA-256, DNS, HAProxy `haproxy -c`, TLS, balanceo y rechazo de PHP en uploads.
 
-Estos pasos describen los requisitos. **No existe evidencia de una instalación limpia automatizada ni una prueba end-to-end de restauración integrada.** No prometer “reconstrucción sin ajustes manuales” ante el docente.
+Estos pasos describen los requisitos. **No existe evidencia de una instalación limpia automatizada de las cinco VMs del iLab ni una prueba end-to-end de restauración integrada.** Un segundo ensayo aislado de la **capa Docker local**, realizado el 22/10, sí arrancó automáticamente `uploads-init` con volúmenes nuevos y confirmó lectura cruzada SHA-256. [Arranque limpio](../evidencias/e3/arranque-limpio-uploads-init-fedora-20261022.txt) · [hash cruzado](../evidencias/e3/lectura-cruzada-arranque-limpio-fedora-20261022.txt). No prometer “reconstrucción sin ajustes manuales” ante el docente.
 
 ## Validaciones de solo lectura en el entorno existente
 
