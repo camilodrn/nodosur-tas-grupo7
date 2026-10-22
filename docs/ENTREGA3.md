@@ -64,6 +64,10 @@ La [evidencia de firewall MariaDB y DNS](../evidencias/e3/auditoria-firewall-db-
 
 BIND9 contestó SOA autoritativo por UDP/TCP (`aa`, `NOERROR`). Inicialmente AXFR desde Fedora por VPN permitió transferir nueve registros (`XFR size: 9 records`). Se verificó BIND 9.18.39, zona primaria sin `allow-transfer` explícito y un solo NS publicado. Tras preparar y validar una copia con respaldo privado, **se aplicó `allow-transfer { none; };` únicamente a `nodosur07.tas`**, se validó con `named-checkconf -z` y se ejecutó `rndc reconfig` sin reinicio. **Verificación posterior desde Fedora: SOA UDP/TCP autoritativo `NOERROR`, `www` hacia `10.33.195.194` y AXFR `REFUSED`** ([evidencia](../evidencias/e3/auditoria-firewall-db-dns-20261021.txt)). El resultado no certifica pruebas desde todas las redes ni redundancia DNS; se preserva respaldo para reversión.
 
+## Verificación integral de lectura desde Fedora (21/10/2026)
+
+[Último control funcional](../evidencias/e3/validacion-integral-fedora-20261021.txt): los registros A de DNS resolvieron correctamente por UDP y TCP (8/8), HTTP devolvió 301 a HTTPS, el proxy respondió 6/6 HTTP/2 200 repartidos 3/3 entre los dos backends y WooCommerce `/tienda/` devolvió HTTP 200. Estas consultas no generaron pedidos, no recrearon servicios ni validaron todas las funciones de la tienda.
+
 ## Qué no está demostrado todavía
 
 - Sí hay registros `DOWN/UP` conservados en la nueva prueba controlada de falla y recuperación; no se ha medido formalmente un **RTO/RPO** ni la posible pérdida de solicitudes durante el umbral de detección.
