@@ -1,9 +1,7 @@
 # Plan controlado de accesos de revisión docente — E3
 
-**Estado: cuentas E3 creadas y validadas por SSH/sudo en las cinco VMs.**
-Rotación interactiva completada en cinco VMs. Accesos SSH/sudo tras rotación verificados 5/5. Pendiente: confirmar claves distintas,
-entrega segura y revocación E2 tras revisión de dependencias. No se han revocado cuentas anteriores.
-No incluir contraseñas, hashes, tokens, claves privadas ni credenciales en Git.
+**Estado actualizado:** cinco accesos Linux E3 verificados por SSH/sudo y rotados; E2 Linux caducado reversiblemente en VM268/263/279, preservando HOME. WordPress E2 rebajado a suscriptor, contraseña aleatoria y sesiones invalidadas; WordPress E3 administrador creado, pendiente probar inicio de sesión por HTTPS. Pendiente entregar nuevas credenciales por canal privado y revocar E3 tras evaluación. Nunca subir secretos a Git.
+
 
 ## Antecedente de Entrega 2
 
@@ -82,6 +80,34 @@ no le devolvería automáticamente permisos administrativos.
 funciones administrativas, inspección de ambos backends,
 y comprobación del rol E2 después de la mutación. No afirmar
 que el login web E3 ya se probó.
+
+## Revocación WordPress E2 aplicada (22/10/2026)
+
+Operador ejecutó **dos veces** por SSH, en VM263 y en el contenedor
+`nodosur-web1`, código WordPress que:
+- verificó que `tas_revision_e3` conserva `administrator`;
+- asignó a `tas_revision` el rol `subscriber`;
+- reemplazó la contraseña E2 con `wp_generate_password(48, true, true)`
+  sin mostrarla y aplicó `wp_set_password`;
+- invalidó sesiones E2 mediante
+  `WP_Session_Tokens::get_instance($e2->ID)->destroy_all()`.
+
+En ambas ejecuciones la salida fue:
+```text
+E2: rol administrativo retirado, contraseña rotada y sesiones invalidadas.
+E3: administrator
+```
+
+**Resultado observado:** privilegios WordPress E2 revocados y contraseña
+aleatoria cambiada de nuevo en la segunda ejecución, sin borrar cuenta
+ni datos. Los dos backends usan la misma MariaDB, pero aún falta leer
+roles directamente desde Web2 y comprobar inicio de sesión E3 por
+HTTPS desde navegador. Tampoco se ha comprobado la imposibilidad de
+recuperación de contraseña de E2: sigue existiendo como suscriptor.
+El estado de las cuentas Linux E2 es **caducado, no eliminado**
+en VM268/263/279; sus HOME siguen siendo necesarios para
+`WorkingDirectory` de servicios. Al concluir la evaluación, caducar
+también las identidades E3 de acuerdo con la política institucional.
 
 ## Confirmación del administrador WordPress E3 (22/10/2026)
 
