@@ -1,0 +1,31 @@
+# Nodo Sur E3 — intento de validación de segmentación bloqueado antes de la prueba
+# Fecha: 21/10/2026 (Fedora). Transcripción proporcionada por el operador.
+# Resultado: INCONCLUSO. No se accedió por SSH a los hosts universitarios.
+#
+# Prueba planificada:
+# Origen autorizado: VM308 10.33.195.194 (SSH), luego HTTP contra
+#   web1 10.33.199.58:18081 y web2 10.33.199.62:18080.
+# Origen no autorizado: VM268 10.33.195.205 (SSH), misma comprobación HTTP.
+#
+# Salida real:
+# ssh nodosur-g7-proxy@10.33.195.194
+#   ssh: connect to host 10.33.195.194 port 22: Connection timed out
+# ssh tas_revision@10.33.195.205
+#   ssh: connect to host 10.33.195.205 port 22: Connection timed out
+#
+# Ambas conexiones SSH fallaron ANTES de ejecutar los curl remotos.
+# No hay código HTTP, rechazo TCP desde VM268 ni acceso verificado desde VM308.
+# Esto NO acredita segmentación DOCKER-USER ni la refuta.
+# El origen del timeout SSH tampoco está determinado: comprobar VPN,
+# rutas, disponibilidad iLab y acceso de puerto 22 desde Fedora.
+#
+# Contexto Git local Fedora:
+# git fetch origin && git merge --ff-only origin/e3/cierre-tecnico exitoso;
+# fast-forward de dc8f3d9 hasta ebfb992.
+# Sin cambios voluntarios en VMs, contenedores o reglas de seguridad.
+#
+# Siguiente paso:
+# En Fedora, sólo lectura: ip route get para SSH 10.33.195.194 y
+# 10.33.195.205; interfaces VPN activas; pruebas TCP 22 acotadas.
+# Si no existe ruta institucional, NO continuar con diagnósticos
+# de DOCKER-USER hasta recuperar acceso legítimo.
