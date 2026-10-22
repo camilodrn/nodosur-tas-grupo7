@@ -26,10 +26,10 @@ El equipo ejecutó `systemctl is-active`, `is-enabled`, `iptables -S DOCKER-USER
 
 | VM | Servicio | Regla efectiva de denegación | Contador DROP |
 |---|---|---|---|
-| VM263 web1 | `nodosur-docker-firewall.service` `active/enabled` | Origen distinto de `10.33.199.61/32`, destino original `10.33.199.58:18081/TCP`, `-j DROP` | 4 paquetes, 240 bytes |
-| VM310 web2 | `nodosur-docker-firewall.service` `active/enabled` | Origen distinto de `10.33.199.61/32`, destino original `10.33.199.62:18080/TCP`, `-j DROP` | 4 paquetes, 240 bytes |
+| VM263 web1 | `nodosur-docker-firewall.service` `active` (anteriormente `enabled`) | Origen distinto de `10.33.199.61/32`, destino original `10.33.199.58:18081/TCP`, `-j DROP` | **7 paquetes, 420 bytes** (antes 4/240) |
+| VM310 web2 | `nodosur-docker-firewall.service` `active` (anteriormente `enabled`) | Origen distinto de `10.33.199.61/32`, destino original `10.33.199.62:18080/TCP`, `-j DROP` | **7 paquetes, 420 bytes** (antes 4/240) |
 
-La regla no afecta a otros puertos por sí misma; el tráfico que no coincide puede quedar sujeto a otras cadenas y capas. Los contadores acreditan descartes, pero no determinan qué orígenes concretos causaron cada incremento. La conectividad de VM308 hacia ambos WordPress está comprobada con GET y hashes.
+La regla no afecta a otros puertos por sí misma; el tráfico que no coincide puede quedar sujeto a otras cadenas y capas. La [relectura del 21/10](../evidencias/e3/firewall-docker-user-web1-web2-20261021.txt) muestra el firewall activo en ambos hosts, las mismas reglas de descarte y un incremento de **+3 paquetes/+180 bytes por web** respecto de la captura anterior. Esto es coherente con los dos timeouts desde VM268, pero los contadores agregados no identifican por sí solos qué origen los causó. Desde VM308 se observaron HTTP 200 en las dos webs.
 
 ## Confirmaciones de puertos y permisos — VM279/VM308
 
