@@ -4,6 +4,36 @@
 [Entrega 3](ENTREGA3.md), [guía de reconstrucción](DESPLIEGUE-REPRODUCIBLE-E3.md)
 y [rúbrica](RUBRICA-E3.md).
 
+## Diagnóstico de prueba de escritura en ensayo limpio (22/10/2026)
+
+La primera prueba de escritura cruzada usó un script `bash <<'BASH'`
+con `docker compose exec -T` sin redirección `</dev/null`.
+Tras `web1: AISLAMIENTO OK` y `web2: AISLAMIENTO OK` imprimió
+`LIMPIEZA: OK` sin llegar a la verificación SHA. **Hipótesis técnica
+principal:** `docker compose exec -T` mantiene stdin abierto y consumió
+líneas restantes del *here-document*. No interpretar la salida como
+fallo de permisos ni como verificación cruzada exitosa.
+
+El operador ejecutó entonces un diagnóstico autónomo directamente
+en `web1` con `docker compose exec -T -u www-data`:
+
+```text
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+drwxr-xr-x. 1 www-data www-data ... /var/www/html/wp-content/uploads
+MKTEMP_RC=0
+ESCRITURA_RC=0
+f6690230650581d67ea9a943514fcd2dd00443be136726ce0de9f7f53290c6d2  /var/www/html/wp-content/uploads/.prueba-e3-tPHS1evV.txt
+LIMPIEZA: OK
+DOCKER_EXEC_RC=0
+```
+
+**Probado:** el usuario 33 puede crear, escribir, calcular hash
+y eliminar un archivo temporal en el volumen nuevo desde Web1.
+**No probado todavía:** lectura del mismo archivo desde Web2 y
+coincidencia de hashes en este segundo ensayo limpio. Para el
+siguiente script, usar `</dev/null` para las llamadas `exec` sin
+necesidad de stdin; mantener pipes explícitos solo para datos.
+
 ## Ensayo nuevo de arranque automático con volúmenes limpios (22/10/2026)
 
 Se inició un **segundo proyecto de Docker Compose en Fedora**, distinto del
