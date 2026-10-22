@@ -28,6 +28,10 @@ El DNS resuelve el nombre; **no es un intermediario del tráfico HTTP**. Ambos W
 
 Consulta [ARQUITECTURA.md](ARQUITECTURA.md) para el diagrama, protocolos y límites; e [INVENTARIO.md](INVENTARIO.md) para los identificadores efectivos de las VMs.
 
+## Modalidad de evaluación docente (informada por el equipo el 22/10/2026)
+
+El profesor revisará **puesto por puesto**, preguntará **a integrantes elegidos al azar** y puede pedir **comandos de terminal** y localizar directorios y configuraciones reales (NFS, Docker, WordPress, HAProxy, BIND y firewall). **No se prepara una presentación formal a toda la sala.** Todos deben poder explicar y comprobar la implementación. Usar la [guía individual](docs/GUIA-ESTUDIO-INDIVIDUAL-E3.md) y la [tarjeta de comandos](docs/TARJETA-COMANDOS-E3.md). La automatización de creación de cinco VMs es una exploración **posterior** a E3, no un requisito ya implementado.
+
 ## Evidencias de Entrega 3
 
 | Prueba | Resultado sustentado |
@@ -63,7 +67,9 @@ El 22/10 se creó y probó `tas_revision_e3` con SSH/sudo en las cinco VMs, con 
 - [`pruebas/`](pruebas/README.md): índice de procedimientos, con la prueba de carrito protegida por autorización explícita y la separación E2/E3.
 - `evidencias/e3/`: resultados verificables de pruebas.
 - [Estado y pruebas E3](docs/ENTREGA3.md), [matriz de flujos](docs/MATRIZ-FLUJOS-E3.md), [autoevaluación de rúbrica](docs/RUBRICA-E3.md) y [decisiones](docs/decisiones-arquitectura.md).
-- [Defensa oral de 12–15 minutos](docs/DEFENSA-ORAL-E3.md): guion por criterios, preguntas y límites reales.
+- **[Guía de estudio individual E3](docs/GUIA-ESTUDIO-INDIVIDUAL-E3.md)**: arquitectura, rutas reales, comandos por VM, siete criterios y 40 preguntas sorpresa.
+- **[Tarjeta rápida de comandos E3](docs/TARJETA-COMANDOS-E3.md)**: referencia para consulta segura durante la revisión en el puesto.
+- [Guion de explicación por criterios](docs/DEFENSA-ORAL-E3.md): apoyo opcional, **no** una exposición frente a toda la sala.
 - [Guía de reconstrucción y prerequisitos](docs/DESPLIEGUE-REPRODUCIBLE-E3.md), [plan de alineación controlada de WordPress](docs/PLAN-ALINEACION-WORDPRESS-E3.md) y [demostración de 12–15 minutos](docs/PLAN-DEMOSTRACION-E3.md).
 - [Revisión selectiva de mejoras de Codex](docs/REVISION-CODEX-E3.md): qué se incorporó, qué requiere pruebas y qué no se debe desplegar todavía.
 - [Historial de Entrega 2](docs/historia/CHECKLIST_ENTREGA2.md): checklist original conservado fuera de la raíz, para no confundir E2 con E3.
