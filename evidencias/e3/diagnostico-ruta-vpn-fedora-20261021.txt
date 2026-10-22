@@ -38,3 +38,25 @@ IMPLICANCIA RÚBRICA:
 SIGUIENTE:
   Reconectar la VPN institucional usando su perfil existente;
   luego comprobar tun0, ip -4 route get y TCP/22 antes de SSH.
+
+=== RECUPERACION POSTERIOR DE VPN (21/10/2026) ===
+El operador ejecutó:
+  nmcli connection down id "VPN USM"
+  nmcli --ask connection up id "VPN USM"
+Ambos comandos informaron éxito. Las credenciales, si fueron
+solicitadas, se introdujeron localmente y NO se compartieron.
+
+Verificaciones posteriores:
+  Perfil VPN USM aparece activo en NetworkManager.
+  tun0 aparece operativo ("UNKNOWN" en ip -br addr, con IPv4 /24).
+  ip -4 route get 10.33.195.194: dev tun0.
+  ip -4 route get 10.33.195.205: dev tun0.
+  TCP/22 a 10.33.195.194: ACCESIBLE.
+  TCP/22 a 10.33.195.205: ACCESIBLE.
+
+INTERPRETACION:
+  Se recuperó ruta vía túnel y accesibilidad TCP al puerto 22
+  en ambas VMs. La comprobación TCP no equivale a autenticación
+  SSH ni a validación de accesos HTTP entre VMs. Próxima etapa:
+  realizar pruebas desde cada VM a los dos backends y correlacionar
+  con reglas DOCKER-USER sin alterar la infraestructura.
