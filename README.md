@@ -22,7 +22,7 @@ El DNS resuelve el nombre; **no es un intermediario del tráfico HTTP**. Ambos W
 
 - **DNS:** `nodosur07.tas` y `www.nodosur07.tas` apuntan al proxy `10.33.195.194`.
 - **Proxy:** HTTP 80 redirige a HTTPS 443; distribuye tráfico `roundrobin` a web1 `10.33.199.58:18081` y web2 `10.33.199.62:18080`. Usa health checks HTTP.
-- **WordPress:** ambos contenedores declaran `wordpress:7.1.2-php8.3-apache`, pero el core realmente montado **difiere**: web1 7.1.3 y web2 7.1.2, observado el 21/10. WooCommerce 11.1.0 coincide en ambos ([evidencia](evidencias/e3/wordpress-equivalencia-web1-web2-20261021.txt)). Requiere revisión antes de declarar equivalencia completa.
+- **WordPress:** ambos contenedores declaran la imagen `wordpress:7.1.2-php8.3-apache`, pero el core persistido que se comprobó en web1 y web2 es **7.1.3** tras la actualización controlada del 21/10. Se verificaron huellas SHA-256 iguales en **9.817 archivos** de core, plugins y temas ([evidencia](evidencias/e3/comparacion-post-upgrade-web1-web2-20261021.txt)); la versión WooCommerce 11.1.0 también coincidía. No se ha demostrado igualdad integral de sesiones, salts ni configuración efectiva.
 - **Datos:** MariaDB compartida en `10.33.199.60:3306`. Su volumen productivo mantiene el nombre histórico **`nodosur-db-staging_db_stage_data`**: no renombrar ni borrar.
 - **Uploads:** `/srv/nodosur/nfs/uploads` está montado en ambos servidores web con lectura/escritura. Los archivos son servidos por los dos backends.
 
@@ -33,8 +33,8 @@ Consulta [ARQUITECTURA.md](ARQUITECTURA.md) para el diagrama, protocolos y lími
 | Prueba | Resultado sustentado |
 |---|---|
 | [Balanceo](evidencias/e3/balanceo-roundrobin.txt) | 8 respuestas HTTP 200: 4 de web1 y 4 de web2 |
-| [Falla de web2](evidencias/e3/failover-web2-detenido.txt) | 8 respuestas HTTP 200 atendidas por web1 durante la prueba |
-| [Reincorporación de web2](evidencias/e3/recuperacion-web2.txt) | 8 respuestas HTTP 200, distribuidas 4/4 |
+| [Falla controlada de web2](evidencias/e3/prueba-falla-web2-haproxy-web1-20261021.txt) | HAProxy registró `DOWN`; 8/8 respuestas HTTPS 200 atendidas por web1 tras detectar la caída |
+| [Reincorporación de web2](evidencias/e3/wordpress713-recuperacion-web2-haproxy-20261021.txt) | HAProxy registró `UP` por check HTTP 200; 8/8 respuestas HTTPS 200, distribuidas 4/4 |
 | [HTTPS](evidencias/e3/https-haproxy.txt), [HTTP 301 y config válida](evidencias/e3/http-redirect-y-validacion-proxy-20261021.txt) | HTTPS operativo; redirección a `https://nodosur07.tas/`; `haproxy -c` válido |
 | [Certificado público](evidencias/e3/certificado-publico-y-repo-local-20261021.txt) | SAN para apex y `www`; certificado **autofirmado**, sin confianza automática de terceros |
 | [Carrito WooCommerce](evidencias/e3/carrito-coherencia-postmigracion.txt) | Producto de prueba añadido en web1, consultado y retirado en web2 |
@@ -43,7 +43,7 @@ Consulta [ARQUITECTURA.md](ARQUITECTURA.md) para el diagrama, protocolos y lími
 | [Compose en las cuatro VMs](evidencias/e3/compose-productivo-db-proxy-20261021.txt), [web1/web2 y PHP](evidencias/e3/compose-productivo-web1-web2-y-php-20261021.txt) | Compose válido en los cuatro hosts Docker; contenedores en ejecución |
 | [Validación de Codex en Fedora](evidencias/e3/validacion-local-fedora-20261021.txt) | 25/25 pruebas locales pasaron; barrido heurístico no detectó candidatos a secretos. **Corresponde al árbol local de auditoría, no a la rama estable ni a las VMs** |
 
-Las evidencias se presentan con su alcance real: las capturas históricas no incluyen por sí solas los logs `DOWN/UP` del proxy ni una medición formal de RTO.
+Las evidencias recientes **sí incluyen logs originales `DOWN/UP`** y continuidad del servicio tras detectar la falla de web2. No demuestran ausencia de errores durante el intervalo de detección ni una medición formal de RTO/RPO.
 
 ## Organización del repositorio
 
@@ -73,7 +73,9 @@ python3 scripts/audit-secrets.py
 
 Para un diagnóstico **sin comprobar confianza TLS**, se puede usar `NODOSUR_INSECURE=1 bash scripts/validate-web.sh`. Este modo no demuestra la identidad del servidor. No copiar claves privadas, contraseñas ni el PEM combinado de HAProxy a Fedora: usar únicamente el certificado público distribuido por un canal confiable.
 
-Los validadores DNS y web son lecturas. En **VM279** (no en Fedora), el nuevo `bash scripts/validate-db-local.sh` revisa solo la estructura Compose, el estado, health check y nombre del volumen MariaDB mediante `sudo docker inspect`; ejecutar únicamente cuando el código actualizado esté disponible en esa VM. La prueba de carrito es **diferente**: escribe temporalmente, exige `--permitir-escritura --producto ID` y se reserva para una ventana de pruebas. La prueba de failover que afecta web2 se realizará en el ensayo final.
+Los validadores DNS y web son lecturas. En **VM279** (no en Fedora), el nuevo `bash scripts/validate-db-local.sh` revisa solo la estructura Compose, el estado, health check y nombre del volumen MariaDB mediante `sudo docker inspect`; ejecutar únicamente cuando el código actualizado esté disponible en esa VM. La prueba de carrito es **diferente**: escribe temporalmente, exige `--permitir-escritura --producto ID` y se reserva para una ventana de pruebas. La prueba controlada de failover ya se realizó y registró el 21/10/2026; **no repetirla sin una ventana y autorización explícitas**. En la defensa se pueden mostrar las evidencias `DOWN/UP` y, si se autoriza una nueva prueba en vivo, seguir el procedimiento de reversión documentado.
+
+**DNS:** tras observar una transferencia AXFR de nueve registros desde Fedora mediante VPN, se restringió esa operación con `allow-transfer { none; };` en la zona `nodosur07.tas`. Se verificaron SOA UDP/TCP autoritativos, resolución A y AXFR posterior `REFUSED` ([evidencia](evidencias/e3/auditoria-firewall-db-dns-20261021.txt)).
 
 ## Límites de disponibilidad
 
