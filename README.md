@@ -63,6 +63,7 @@ El 22/10 se creó y probó `tas_revision_e3` con SSH/sudo en las cinco VMs, con 
 - [`pruebas/`](pruebas/README.md): índice de procedimientos, con la prueba de carrito protegida por autorización explícita y la separación E2/E3.
 - `evidencias/e3/`: resultados verificables de pruebas.
 - [Estado y pruebas E3](docs/ENTREGA3.md), [matriz de flujos](docs/MATRIZ-FLUJOS-E3.md), [autoevaluación de rúbrica](docs/RUBRICA-E3.md) y [decisiones](docs/decisiones-arquitectura.md).
+- [Defensa oral de 12–15 minutos](docs/DEFENSA-ORAL-E3.md): guion por criterios, preguntas y límites reales.
 - [Guía de reconstrucción y prerequisitos](docs/DESPLIEGUE-REPRODUCIBLE-E3.md), [plan de alineación controlada de WordPress](docs/PLAN-ALINEACION-WORDPRESS-E3.md) y [demostración de 12–15 minutos](docs/PLAN-DEMOSTRACION-E3.md).
 - [Revisión selectiva de mejoras de Codex](docs/REVISION-CODEX-E3.md): qué se incorporó, qué requiere pruebas y qué no se debe desplegar todavía.
 - [Historial de Entrega 2](docs/historia/CHECKLIST_ENTREGA2.md): checklist original conservado fuera de la raíz, para no confundir E2 con E3.
