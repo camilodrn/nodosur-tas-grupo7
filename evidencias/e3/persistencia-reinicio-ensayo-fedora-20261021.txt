@@ -61,3 +61,52 @@ FAIL/NO DETERMINADO: reparto de HAProxy tras reinicio; no se debe
 marcar como balanceo postreinicio aceptado.
 FurgoPlus no fue reiniciado por el script; falta inspeccion final.
 No se probo NFS, TLS de USM ni reconstruccion de cinco VMs.
+
+=== COMPROBACION POSTERIOR SIN NUEVOS REINICIOS (21/10/2026) ===
+El operador consulto 4 minutos despues del reinicio los contenedores
+del ensayo Fedora y los logs HAProxy (ventana 30 min).
+Todos los servicios: database healthy, web1 Up, web2 Up, proxy Up.
+Puerto proxy: 127.0.0.1:19090->8080/tcp.
+
+HAProxy produjo estos eventos relativos a web1:
+  Server lab_wordpress/web1 is DOWN,
+    reason: Layer4 connection problem, info: "Connection refused"
+  Server lab_wordpress/web1 is UP,
+    reason: Layer7 check passed, code: 200, check duration: 63ms.
+  2 active and 0 backup servers online.
+
+Consultas GET HTTP locales en AMBOS contenedores:
+  web1 HTTP/1.1 200 OK
+  web2 HTTP/1.1 200 OK
+
+8 solicitudes posteriores GET a http://127.0.0.1:19090/:
+  HTTP/1.1 200, X-NodoSur-Lab-Backend: web2
+  HTTP/1.1 200, X-NodoSur-Lab-Backend: web1
+  HTTP/1.1 200, X-NodoSur-Lab-Backend: web2
+  HTTP/1.1 200, X-NodoSur-Lab-Backend: web1
+  HTTP/1.1 200, X-NodoSur-Lab-Backend: web2
+  HTTP/1.1 200, X-NodoSur-Lab-Backend: web1
+  HTTP/1.1 200, X-NodoSur-Lab-Backend: web2
+  HTTP/1.1 200, X-NodoSur-Lab-Backend: web1
+Resultado posterior: HTTP 200 8/8; roundrobin web1=4, web2=4.
+
+FurgoPlus: seis contenedores presentes, Up (healthy), consultados
+despues de la prueba sin alterarlos.
+
+INTERPRETACION ACTUALIZADA:
+  La ausencia inicial de web1 en 6/6 GET no significa perdida de datos.
+  HAProxy registro una indisponibilidad temporal de conexion (L4
+  Connection refused) seguida de reintegracion por check Layer7 200.
+  La prueba posterior confirma reparto restaurado sin nueva intervencion.
+  Es consistente con un periodo de arranque y health checks, aunque no
+  se midio su duracion exacta ni se capturo la marca temporal de cada GET.
+  El validador de reinicio exigia presencia inmediata de ambos apenas
+  detectaba HTTP 200 en el proxy; falta esperar hasta que ambos pasen
+  health checks. No repetir la prueba destructivamente para obtener
+  una segunda evidencia: basta corregir su logica futura.
+  El resultado integral de pruebas observadas es:
+  - persistencia DB/WordPress/uploads despues de restart: SI
+  - HAProxy eventualmente reincorporo web1: SI
+  - balanceo posterior observado: 4/4
+  - medicion de tiempo de recuperacion: NO
+  - full HA productiva / reconstruccion de cinco VMs: NO
