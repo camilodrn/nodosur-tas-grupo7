@@ -53,7 +53,7 @@ Otros símbolos de terminal:
 | \ al final de línea | Continúa un comando largo en la línea siguiente. | No agregar espacios después de la barra. |
 | opción corta -x | Parámetro abreviado de un programa. | Su significado depende del programa. |
 | opción larga --nombre | Parámetro descriptivo de un programa. | No hay significado universal. |
-| | (pipe) | Envía salida estándar de un programa al siguiente. | El segundo comando puede filtrar y ocultar parte de la salida. |
+| Barra vertical (pipe) | Envía salida estándar de un programa al siguiente. Ejemplo: ls seguido de una barra vertical y head. | El segundo comando puede filtrar y ocultar parte de la salida. |
 | > | Redirige salida a un archivo **sobrescribiéndolo/truncándolo**. | Puede destruir contenido previo; NO usar en evaluación. |
 | >> | Agrega salida al final de un archivo. | Modifica el archivo; NO es solo lectura. |
 | < | Da un archivo como entrada estándar. | Leer entrada no implica modificar el archivo, pero el programa receptor podría cambiar otras cosas. |
