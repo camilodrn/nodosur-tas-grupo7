@@ -112,6 +112,8 @@ No modificar políticas de firewall, NAT o rutas durante la defensa.
 
 Además de NFS, [esta evidencia de lectura de la configuración efectiva](../evidencias/e3/wordpress-opciones-productivas-web1-web2-20261021.txt) muestra desde ambos WordPress 7.1.3, la misma URL pública en `home`/`siteurl`, WooCommerce activo y el mismo destino configurado de MariaDB. Aclara que **una misma BD y un mismo almacenamiento de imágenes** evitan divergencia de productos y uploads, pero no prueban sesiones privadas ni checkout concurrente. Para la defensa, basta mostrar la evidencia versionada: no repetir cambios ni pruebas que generen pedidos.
 
+**Control de esquema adicional:** [Web1 y Web2 comparten los valores `wp_`, WooCommerce `11.1.0`, versión BD WC `11.1.0-1` y versión BD WP `61833`](../evidencias/e3/coherencia-esquema-wp-woocommerce-20261021.txt). Son opciones leídas desde los contenedores reales sin modificar pedidos ni tablas.
+
 ## Preguntas que conviene responder brevemente
 
 - **¿Qué diferencia hay entre balanceo y HA?** Roundrobin reparte tráfico entre backends. La tolerancia probada se limita a falla de uno de ellos; HA integral requeriría eliminar los SPOF de HAProxy, DB, DNS y NFS.
