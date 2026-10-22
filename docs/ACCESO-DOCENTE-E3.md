@@ -53,6 +53,16 @@ al profesor, verificar usuario WordPress administrativo, comprobar si
 existen llaves SSH E2 aún autorizadas ni validar sesión docente desde
 su red. No borrar HOME E2 ni cambiar usuarios operativos del equipo.
 
+## Caducidad completada E2 en VM263 y VM279 (22/10/2026)
+
+**Evidencia de ejecución del operador por SSH como `tas_revision_e3`:**
+
+- **VM263 Web1:** `sudo usermod --expiredate 1970-01-02 tas_revision` terminó sin error y `sudo chage -l tas_revision` mostró `Account expires: Jan 02, 1970`. `nodosur-web1.service` dio `active`; `nodosur-web1` reportó `running`. NFSv4 sigue montado desde `10.33.199.59:/srv/nodosur/uploads`.
+- **VM279 MariaDB:** mismo cambio y fecha comprobada. `nodosur-db-prod.service` dio `active`; contenedor `nodosur-db-staging` reportó `running` y `healthy`.
+- **VM268 DNS/NFS:** caducidad comprobada previamente con `chage`, servicio `named active` y resolución A posterior correcta.
+
+**Estado de transición Linux:** cuenta E2 caducada en los **tres hosts en que existía**. Las cinco cuentas E3 probaron SSH y sudo tras rotación. No se borraron cuentas, HOME, ficheros, imágenes ni volúmenes; no se reiniciaron servidores ni se migraron rutas `WorkingDirectory`. Una caducidad de cuenta **no demuestra por sí sola** la denegación SSH efectiva: revisar `UsePAM` y, si se requiere, un intento autorizado sin provocar bloqueos por fallos repetidos. El administrador WordPress E2, la entrega privada de credenciales E3 y el vencimiento futuro de E3 son **pendientes independientes**.
+
 ## Verificación DNS, NFS, Web1 y unidades antiguas antes de revocar E2 (22/10/2026)
 
 Nueva evidencia por terminal, **sin cambios adicionales en hosts**:
