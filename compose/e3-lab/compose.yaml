@@ -44,6 +44,12 @@ services:
     volumes:
       - web1_html:/var/www/html
       - shared_uploads:/var/www/html/wp-content/uploads
+      - type: bind
+        source: ../../configs/apache/nodosur-uploads.conf
+        target: /etc/apache2/conf-enabled/nodosur-uploads.conf
+        read_only: true
+        bind:
+          create_host_path: false
     networks:
       - frontend_net
       - database_net
@@ -67,6 +73,12 @@ services:
     volumes:
       - web2_html:/var/www/html
       - shared_uploads:/var/www/html/wp-content/uploads
+      - type: bind
+        source: ../../configs/apache/nodosur-uploads.conf
+        target: /etc/apache2/conf-enabled/nodosur-uploads.conf
+        read_only: true
+        bind:
+          create_host_path: false
     networks:
       - frontend_net
       - database_net
