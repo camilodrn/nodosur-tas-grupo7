@@ -1,8 +1,40 @@
 # Matriz de autoevaluación — Entrega 3 (Nodo Sur, Grupo 7)
 
-**Fecha de revisión:** 21/10/2026. **Base:** rúbrica proporcionada por el equipo, implementación y evidencia versionada en `e3/cierre-tecnico`. **No es una nota otorgada por el docente.** La rúbrica exige **verificación en implementación, no solo capturas**, con niveles 100, 80, 60, 30 y 0.
+**Fecha de revisión:** 22/10/2026 (actualización del ensayo; auditoría base 21/10/2026). **Base:** rúbrica proporcionada por el equipo, implementación y evidencia versionada en `e3/cierre-tecnico`. **No es una nota otorgada por el docente.** La rúbrica exige **verificación en implementación, no solo capturas**, con niveles 100, 80, 60, 30 y 0.
 
 Esta matriz no reemplaza la demostración en vivo. La implementación usa cinco VMs: VM268 BIND9/NFS; VM263 WordPress web1; VM310 WordPress web2; VM279 MariaDB; VM308 HAProxy/HTTPS.
+
+## Actualización de reproducibilidad tras ensayo limpio (22/10/2026)
+
+El nuevo proyecto aislado `nodosur-e3-init-limpio` se creó en
+**Docker Engine default de Fedora, con volúmenes nuevos**:
+`docker compose up -d --no-build web1 web2` arrancó automáticamente
+`database` (`healthy`), `uploads-init` (`Exited (0)`,
+`UPLOADS_INIT_OK`) y los dos WordPress (`running`).
+`uploads-init` corrigió automáticamente la raíz del volumen
+compartido a UID/GID 33/33, modo 755; `test -w` pasó en ambos backends.
+Después, Web1 escribió un archivo temporal real como `www-data` y
+Web1/Web2/Fedora calcularon exactamente el mismo SHA-256;
+se confirmó `RESULTADO: ESCRITURA Y LECTURA COMPARTIDA OK` y
+`LIMPIEZA: OK`. Sin retoques manuales en este proyecto limpio.
+[Arranque limpio](../evidencias/e3/arranque-limpio-uploads-init-fedora-20261022.txt) ·
+[Lectura cruzada SHA-256](../evidencias/e3/lectura-cruzada-arranque-limpio-fedora-20261022.txt) ·
+[análisis técnico](ENSAYO-REPRODUCIBILIDAD-E3.md).
+
+**Efecto en autoevaluación:** desaparece la brecha específica de
+inicialización manual de permisos de `uploads` en el laboratorio;
+el nivel **100% / 15 puntos resulta más defendible** si el docente
+acepta la reproducción controlada de la capa de contenedores más los
+cuatro Compose/hosts iLab y la documentación de requisitos externos.
+No equivale a garantizar ese nivel. Queda una brecha: las cinco VMs,
+BIND9, NFS/TLS y datos históricos no se han recreado desde cero;
+algunos prerrequisitos externos son manuales y el tag Docker
+productivo WordPress 7.1.2 no coincide con el núcleo persistido 7.1.3.
+El nivel 80% / 12 puntos sigue siendo una lectura conservadora
+si el docente considera estas omisiones; no afirmar que la nota
+oficial aumentó. La rúbrica literal no exige explícitamente crear
+cinco VMs desde cero, pero sí una aplicación que se reconstruya
+sin ajustes ocultos y derive de la instalación tradicional.
 
 | Criterio literal de la rúbrica | Peso | Evaluación provisional (no oficial) | Evidencia que sí existe | Brecha que importa para el nivel 100 |
 |---|---:|---|---|---|
