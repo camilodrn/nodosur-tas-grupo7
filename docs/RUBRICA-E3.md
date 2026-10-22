@@ -18,6 +18,10 @@ Esta matriz no reemplaza la demostración en vivo. La implementación usa cinco 
 
 **Evidencia de coherencia de archivos del ensayo ya completada:** [mismo volumen Docker RW, permisos www-data corregidos, escritura Web1, SHA-256 idéntico desde Web2 y limpieza del archivo ficticio](../evidencias/e3/volumen-compartido-ensayo-fedora-20261021.txt). Los seis contenedores FurgoPlus seguían saludables. Esto respalda reproducibilidad de la capa Docker, pero no sustituye NFS de producción, WordPress instalado ni reinicio/persistencia del CMS.
 
+## Instalación WordPress ficticia y HTTP 200 (21/10/2026)
+
+Se ejecutó [instalación controlada](../evidencias/e3/wordpress-instalado-ensayo-fedora-20261021.txt) usando `wp_install()` con usuario y clave ficticios: `WORDPRESS_LAB_INSTALL_OK`. Aunque faltó `sendmail`, no impidió completar la instalación. HAProxy del ensayo respondió **6/6 HTTP 200** repartidos **3/3** entre las webs, en lugar del 302 de WordPress no inicializado. Queda pendiente verificar persistencia después de reiniciar solamente los contenedores del ensayo; esto sigue sin demostrar NFS o TLS/VMs USM desde cero.
+
 ## Evidencia adicional del ensayo: HTTP y SQL (21/10/2026)
 
 El [ensayo aislado](../evidencias/e3/balanceo-sql-ensayo-fedora-20261021.txt) acreditó **balanceo 3/3** con seis respuestas `302` hacia el instalador WordPress y **`SELECT 1` correcto desde cada backend** contra MariaDB ficticia. La instalación del CMS, el acceso al volumen compartido y el estado posterior de FurgoPlus aún deben confirmarse. Esta prueba refuerza reproducibilidad de la capa multicontenedor **sin acreditar reconstrucción de toda la infraestructura**.
