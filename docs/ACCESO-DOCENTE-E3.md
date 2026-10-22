@@ -1,9 +1,8 @@
 # Plan controlado de accesos de revisión docente — E3
 
 **Estado: cuentas E3 creadas y validadas por SSH/sudo en las cinco VMs.**
-Rotación interactiva completada en cinco VMs. Pendiente: revalidar accesos tras rotación
-(en VM268/VM310/VM308), confirmar claves distintas, entrega segura y revocación E2 tras
-revisión de dependencias. No se han revocado cuentas anteriores.
+Rotación interactiva completada en cinco VMs. Accesos SSH/sudo tras rotación verificados 5/5. Pendiente: confirmar claves distintas,
+entrega segura y revocación E2 tras revisión de dependencias. No se han revocado cuentas anteriores.
 No incluir contraseñas, hashes, tokens, claves privadas ni credenciales en Git.
 
 ## Antecedente de Entrega 2
@@ -53,6 +52,30 @@ dependencia exacta de `nodosur-web1.service` y `nodosur-db-stage.service`
 al profesor, verificar usuario WordPress administrativo, comprobar si
 existen llaves SSH E2 aún autorizadas ni validar sesión docente desde
 su red. No borrar HOME E2 ni cambiar usuarios operativos del equipo.
+
+## Comprobaciones posteriores a rotación y conservación de HOME E2 (22/10/2026)
+
+- Las **cinco cuentas `tas_revision_e3`** iniciaron sesión por SSH y
+  pasaron `sudo -v` y `sudo -n id -u = 0` **después de la rotación**:
+  VM268, VM263, VM310, VM279 y VM308.
+- En Fedora, el operador ejecutó `sudo userdel -r tas_revision`, que
+  respondió `user 'tas_revision' does not exist`; el comando **no
+  afectó las VMs**, ya que se ejecutó localmente y falló.
+- En VM263 y VM279, `stat` comprobó:
+  `/home/tas_revision` propiedad `tas_revision:tas_revision`,
+  permisos `750`; y `/home/tas_revision/nodosur-tas-grupo7`,
+  mismo propietario y permisos `775`. Las unidades systemd activas
+  Web1/DB referencian este directorio como `WorkingDirectory`.
+  **No ejecutar `userdel -r`, no borrar/cambiar propietario del HOME
+  ni migrar directorios a última hora.**
+- Recomendación pendiente de autorización/ejecución: **caducidad
+  reversible** de la cuenta `tas_revision` E2 en VM268/VM263/VM279
+  (no cuenta E3), preservando UID y HOME. Antes verificar sesión E3
+  operativa y copia de las unidades/rutas. La caducidad de cuenta puede
+  impedir autenticación por SSH con contraseña y clave vía PAM; no
+  elimina sesiones existentes. Verificar el bloqueo efectivo en una
+  conexión SSH nueva y mantener reversión administrativa disponible.
+  WordPress E2 se gestiona por separado.
 
 ## Rotación E3 y dependencias systemd E2 (22/10/2026)
 
