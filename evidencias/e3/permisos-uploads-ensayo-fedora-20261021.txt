@@ -82,3 +82,32 @@ OBSERVACION:
   WordPress, y medir retorno de docker compose exec -T con true.
   No volver a ejecutar inicialización ni recrear servicios hasta
   obtener esas observaciones.
+
+=== COMPROBACION POSTERIOR EN AMBAS WEBS (21/10/2026) ===
+Se ejecuto en Fedora un bloque de lectura SIN reiniciar contenedores,
+tras haber corrido uploads-init una vez.
+Web1, como www-data:
+  uid=33 gid=33
+  uploads: UID=33 GID=33 MODO=755
+  test -w uploads: ESCRITURA PERMITIDA
+  docker compose exec -T: EXIT 0
+Web2, como www-data:
+  uid=33 gid=33
+  uploads: UID=33 GID=33 MODO=755
+  test -w uploads: ESCRITURA PERMITIDA
+  docker compose exec -T: EXIT 0
+RESULTADO:
+  El ajuste de propiedad del directorio si quedo aplicado a ambos.
+  Esto no demuestra todavia crear y leer un archivo desde ambos,
+  ni que se haya iniciado automaticamente durante un despliegue limpio
+  con depends_on service_completed_successfully: en esta prueba se
+  invoco el inicializador manualmente con run.
+
+PROBLEMA DE ORQUESTACION DEL BLOQUE DE VALIDACION:
+  Igual que antes, el script bash <<'SH' regreso al prompt
+  despues del ultimo docker compose exec aunque devolvio EXIT 0.
+  Hipotesis: docker compose exec -T mantiene stdin abierto por defecto
+  y consume parte de la entrada heredoc del Bash invocador.
+  En siguiente prueba dirigir stdin de cada docker compose exec a
+  /dev/null; no afirmar aun que se haya medido causa exacta.
+  No se capturo estado posterior FurgoPlus en este bloque.
