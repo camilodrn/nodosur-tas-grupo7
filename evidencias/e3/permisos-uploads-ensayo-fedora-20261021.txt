@@ -59,3 +59,26 @@ CORRECCION REPRODUCIBLE PROPUESTA EN GIT (NO APLICADA):
   service_completed_successfully, además de MariaDB healthy.
   Debe validarse con config --quiet y después probarse
   explícitamente en el laboratorio. No afirmar que está desplegado.
+
+=== EJECUCION DEL INICIALIZADOR (21/10/2026) ===
+En Fedora, tras fast-forward hasta 99cd2d5:
+  docker compose -p nodosur-e3-ensayo -f compose/e3-lab/compose.yaml config --quiet
+    sin errores
+  volumen inspeccionado: nodosur-e3-ensayo_shared_uploads Driver=local
+  docker compose ... run --rm --no-deps uploads-init
+    Container nodosur-e3-ensayo-uploads-init-run-f6f456154da4 Creating
+    Container nodosur-e3-ensayo-uploads-init-run-f6f456154da4 Created
+    UPLOADS_INIT_OK
+OBSERVACION:
+  El bloque bash con set -euo pipefail regresó al prompt
+  inmediatamente después de UPLOADS_INIT_OK; NO imprimió la
+  siguiente sección de verificación de permisos.
+  No se capturó el código de salida de docker compose run.
+  No afirmar confirmación del modo/propiedad postcambio, prueba
+  de hashes o estado final de FurgoPlus.
+  Una causa posible a verificar es salida no-cero del CLI Compose
+  pese a salida aparentemente exitosa del proceso interno.
+  Siguiente paso de SOLO LECTURA: stat y test -w desde ambos
+  WordPress, y medir retorno de docker compose exec -T con true.
+  No volver a ejecutar inicialización ni recrear servicios hasta
+  obtener esas observaciones.
