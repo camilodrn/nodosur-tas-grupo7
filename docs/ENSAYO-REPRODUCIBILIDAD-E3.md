@@ -1,6 +1,6 @@
 # Plan de ensayo aislado de reproducibilidad — Nodo Sur E3
 
-**Estado:** diseño de prueba; **aún no ejecutada**. Documento de apoyo a
+**Estado:** ensayo en ejecución (21/10/2026); arranque y pruebas HTTP/SQL confirmadas; volumen compartido aún pendiente. Documento de apoyo a
 [Entrega 3](ENTREGA3.md), [guía de reconstrucción](DESPLIEGUE-REPRODUCIBLE-E3.md)
 y [rúbrica](RUBRICA-E3.md).
 
