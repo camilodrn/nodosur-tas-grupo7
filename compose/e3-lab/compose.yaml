@@ -25,12 +25,28 @@ services:
     networks:
       - database_net
 
+  # Preparacion idempotente del volumen EXCLUSIVO del laboratorio.
+  # Evita que un volumen nuevo root:root 755 niegue escritura a www-data.
+  # NO es chown recursivo; no toca volúmenes de las VMs ni de FurgoPlus.
+  uploads-init:
+    image: wordpress:7.1.3-php8.3-apache
+    user: "0:0"
+    restart: "no"
+    network_mode: "none"
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - 'test -d /uploads && chown 33:33 /uploads && chmod 0755 /uploads && echo "UPLOADS_INIT_OK"'
+    volumes:
+      - shared_uploads:/uploads
+
   web1:
     image: wordpress:7.1.3-php8.3-apache
     restart: "no"
     depends_on:
       database:
         condition: service_healthy
+      uploads-init:
+        condition: service_completed_successfully
     environment:
       WORDPRESS_DB_HOST: database:3306
       WORDPRESS_DB_NAME: nodosur_lab
@@ -60,6 +76,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      uploads-init:
+        condition: service_completed_successfully
     environment:
       WORDPRESS_DB_HOST: database:3306
       WORDPRESS_DB_NAME: nodosur_lab
