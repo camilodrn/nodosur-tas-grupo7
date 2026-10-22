@@ -1,7 +1,8 @@
 # Plan controlado de accesos de revisión docente — E3
 
 **Estado: cuentas E3 creadas y validadas por SSH/sudo en las cinco VMs.**
-Pendiente: rotación de contraseñas, entrega segura y revocación E2 tras
+Rotación interactiva completada en cinco VMs. Pendiente: revalidar accesos tras rotación
+(en VM268/VM310/VM308), confirmar claves distintas, entrega segura y revocación E2 tras
 revisión de dependencias. No se han revocado cuentas anteriores.
 No incluir contraseñas, hashes, tokens, claves privadas ni credenciales en Git.
 
@@ -52,6 +53,39 @@ dependencia exacta de `nodosur-web1.service` y `nodosur-db-stage.service`
 al profesor, verificar usuario WordPress administrativo, comprobar si
 existen llaves SSH E2 aún autorizadas ni validar sesión docente desde
 su red. No borrar HOME E2 ni cambiar usuarios operativos del equipo.
+
+## Rotación E3 y dependencias systemd E2 (22/10/2026)
+
+**Rotación interactiva completada por el operador:** `sudo passwd
+tas_revision_e3` devolvió `passwd: password updated successfully` en
+las cinco VMs. No se recibieron contraseñas ni es posible confirmar
+desde la transcripción que sean diferentes entre los servidores.
+Hubo intentos SSH rechazados durante el proceso; Web1 y VM279 **sí
+aceptaron login y sudo nuevamente después de la rotación**.
+**Pendiente revalidar** nuevos accesos en VM268, VM310 y VM308.
+
+**Revisión solo lectura de dependencias antiguas en systemd:**
+
+| VM | Unidad | WorkingDirectory | User= efectivo | ActiveState | UnitFileState |
+|---|---|---|---|---|---|
+| VM263 | `nodosur-web1.service` | `/home/tas_revision/nodosur-tas-grupo7` | vacío: servicio de sistema por defecto root | active | enabled |
+| VM279 | `nodosur-db-stage.service` | `/home/tas_revision/nodosur-tas-grupo7` | vacío: servicio de sistema por defecto root | inactive | disabled |
+| VM279 | `nodosur-db-prod.service` | `/home/tas_revision/nodosur-tas-grupo7` | vacío: servicio de sistema por defecto root | active | enabled |
+
+Se observaron las líneas de `WorkingDirectory` y
+`systemctl show`; aún no se ha revisado el contenido completo de las
+unidades, otros archivos dependientes ni los permisos de la ruta.
+El servicio `nodosur-db-stage.service` inactivo **no demuestra**
+que el contenedor `nodosur-db-staging` esté detenido; previamente
+`docker inspect` reportó `running/healthy`.
+
+**Restricción operativa:** no borrar el usuario E2 con `userdel -r`
+ni su HOME; se pondría en riesgo el inicio/reinicio de servicios.
+La desactivación del login E2 (p. ej. caducidad de cuenta reversible)
+deberá evaluarse tras comprobar accesos E3 y todas las dependencias,
+sin alterar `WorkingDirectory`, Docker, backups ni secretos.
+Bloquear solo contraseña no deshabilita necesariamente SSH con claves.
+Confirmar qué acceso WordPress E2 sigue activo antes de revocarlo.
 
 ## Auditoría de cuentas efectiva (22/10/2026)
 
