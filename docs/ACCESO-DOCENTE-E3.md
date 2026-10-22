@@ -17,6 +17,36 @@ estas tres VMs; no se ha confirmado su estado en VM308/VM310.
 No dar por hecho que los usuarios operativos `nodosur-g7-proxy`
 o `nodosur-g7-web2` sean cuentas exclusivas del docente.
 
+## Auditoría de cuentas efectiva (22/10/2026)
+
+Consulta de solo lectura ejecutada por el equipo, desde Fedora VPN, en las
+cinco VMs. No se crearon ni modificaron usuarios.
+
+| VM / hostname observado | Usuario E2 `tas_revision` | Privilegio visto | Usuario E3 `tas_revision_e3` |
+|---|---|---|---|
+| VM268 `nodosur-g7` | existe UID 1002 | miembro de `sudo`; `sudo -l` permite `(ALL : ALL) ALL` | ausente |
+| VM263 `nodosurtas07` | existe UID 1001 | miembro de `sudo`; `sudo -l` permite `(ALL : ALL) ALL` | ausente |
+| VM279 `svr-db-nodosur07` | existe UID 1001 | miembro de `sudo`; `sudo -l` permite `(ALL : ALL) ALL` | ausente |
+| VM310 `nodosur-g7-web2` | ausente | no aplica | ausente |
+| VM308 `nodosur-g7-proxy` | ausente | no aplica | ausente |
+
+En VM268/263/279 `tas_revision` pertenece además a `users`,
+`systemd-journal`, `ssh-nodosur` y `nodosur-ops`.
+Que aparezcan reglas `sudoers` más específicas **no limita**
+`(ALL : ALL) ALL`, por lo que el acceso de revisión antiguo
+equivale a administración completa de esos hosts.
+
+En VM310 y VM308 se usaron cuentas operativas existentes
+(`nodosur-g7-web2`, `nodosur-g7-proxy`) para auditar,
+**no consta que sean cuentas del docente y no deben revocarse**.
+
+**Antes de provisionar `tas_revision_e3`** verificar las políticas
+efectivas `sshd` (`AllowUsers`, `AllowGroups`, `Match`,
+autenticación por llave o contraseña), los grupos realmente presentes,
+y las dependencias de servicios en directorios personales de usuarios
+antiguos. No copiar ciegamente grupos `nodosur-ops` o `sudo`
+sin confirmar su necesidad. El equipo aún no ha hecho cambios.
+
 ## Destinos E3 y accesos a probar
 
 | VM | IP administración | Rol |
