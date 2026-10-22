@@ -42,6 +42,8 @@ Datos observados del operador:
 - La memoria **disponible ahora** y puerto 19090 aún requieren revisión
   antes de crear el proyecto.
 
+**Preflight completado el 21/10/2026 (sin desplegar):** [registro de Docker Engine, memoria, puerto libre, secretos ficticios, `config --quiet`, cuatro servicios declarados y tres imágenes descargadas](../evidencias/e3/preflight-ensayo-fedora-20261021.txt). Los seis contenedores de FurgoPlus continuaban `healthy`. Aún no hay evidencia de que arranquen los servicios del ensayo ni de que responda el proxy.
+
 ## Definición preparada, pendiente de ejecución
 
 Archivos exclusivos del ensayo:
