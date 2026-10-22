@@ -1,0 +1,55 @@
+# Ensayo nuevo: escritura Web1 y lectura Web2 con SHA-256 — 22/10/2026
+# Fuente: salida terminal Fedora compartida por operador. Datos ficticios.
+# Proyecto de prueba exclusivo: nodosur-e3-init-limpio (motor Docker default).
+# NO es la infraestructura iLab productiva y no revela secretos.
+
+Procedimiento:
+- En shell hijo bash <<'BASH', con set -euo pipefail.
+- Validado que docker context show = default.
+- docker compose -p nodosur-e3-init-limpio -f compose/e3-lab/compose.yaml.
+- docker inspect confirmó etiqueta de proyecto nodosur-e3-init-limpio y
+  volumen nodosur-e3-init-limpio_shared_uploads para web1 y web2.
+- Se abrió un archivo temporal único vía mktemp en
+  /var/www/html/wp-content/uploads/ desde web1 como www-data.
+- Se escribió el texto de prueba "NodoSur E3 - volumen compartido\n"
+  desde web1.
+- Se calculó sha256sum del mismo archivo desde web1 y web2 y se
+  comparó con SHA-256 local de Fedora.
+- Se eliminó el archivo de prueba mediante trap EXIT.
+- Entradas stdin desactivadas con </dev/null en llamadas Docker exec
+  que no necesitaban datos, evitando consumo del here-document.
+
+Salida relevante EXACTA:
+=== 1. VERIFICAR AISLAMIENTO ===
+web1: AISLAMIENTO OK
+web2: AISLAMIENTO OK
+=== 2. ESCRIBIR EN WEB1 ===
+ESCRITURA WEB1: OK
+=== 3. COMPARAR SHA-256 ===
+WEB1: f6690230650581d67ea9a943514fcd2dd00443be136726ce0de9f7f53290c6d2
+WEB2: f6690230650581d67ea9a943514fcd2dd00443be136726ce0de9f7f53290c6d2
+LOCAL: f6690230650581d67ea9a943514fcd2dd00443be136726ce0de9f7f53290c6d2
+RESULTADO: ESCRITURA Y LECTURA COMPARTIDA OK
+LIMPIEZA: OK
+=== TERMINAL FEDORA DISPONIBLE ===
+
+Confirmado:
+- Los dos WordPress de este proyecto leen los mismos bytes del volumen
+  compartido recién inicializado automáticamente.
+- Los tres SHA-256 idénticos prueban integridad del archivo temporal.
+- Se eliminó el archivo temporal, sin modificar base de datos ni
+  realizar instalaciones adicionales.
+- Una comprobación autónoma anterior en web1 también mostró
+  MKTEMP_RC=0 ESCRITURA_RC=0 DOCKER_EXEC_RC=0.
+- Los servicios se desplegaron previamente con arranque automático
+  uploads-init Exited (0), DB healthy y webs running
+  [arranque-limpio-uploads-init-fedora-20261022.txt].
+
+Límites:
+- Este proyecto ejecuta MariaDB, dos webs y uploads-init localmente;
+  NO se arrancó proxy en el nuevo ensayo para evitar puerto 19090 usado.
+- El volumen compartido es Docker local, no NFS de la USM.
+- No se levantaron ni reconstruyeron las cinco VMs iLab;
+  no se volvió a instalar WordPress/WooCommerce en este segundo ensayo.
+- Persistencia tras reinicios, HAProxy, TLS y NFS productivos tienen
+  evidencias independientes y alcances distintos.
