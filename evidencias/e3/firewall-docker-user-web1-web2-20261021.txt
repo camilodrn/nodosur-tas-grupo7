@@ -38,3 +38,37 @@ Chain DOCKER-USER (1 references)
 # confirmaron conectividad efectiva desde VM308.
 # No hay todavía evidencia de comportamiento tras reiniciar Docker en web1/web2.
 # Las unidades nuevas propuestas en audit/e3-codex-revisada NO están desplegadas.
+
+# === RELECTURA DE REGLAS DESPUES DE PRUEBA DIFERENCIAL (21/10/2026) ===
+# Comandos ejecutados via SSH en VM263 y VM310, sin cambiar reglas.
+# El operador no divulgó contraseñas.
+#
+# VM263 web1
+# sudo systemctl is-active nodosur-docker-firewall.service => active
+# sudo iptables -S DOCKER-USER:
+# -N DOCKER-USER
+# -A DOCKER-USER ! -s 10.33.199.61/32 -p tcp -m conntrack --ctorigdst 10.33.199.58 --ctorigdstport 18081 --ctdir ORIGINAL -j DROP
+# sudo iptables -nvL DOCKER-USER --line-numbers:
+# 1  7  420  DROP tcp !10.33.199.61  ctorigdst 10.33.199.58 ctorigdstport 18081 ctdir ORIGINAL
+#
+# VM310 web2
+# sudo systemctl is-active nodosur-docker-firewall.service => active
+# sudo iptables -S DOCKER-USER:
+# -N DOCKER-USER
+# -A DOCKER-USER ! -s 10.33.199.61/32 -p tcp -m conntrack --ctorigdst 10.33.199.62 --ctorigdstport 18080 --ctdir ORIGINAL -j DROP
+# sudo iptables -nvL DOCKER-USER --line-numbers:
+# 1  7  420  DROP tcp !10.33.199.61  ctorigdst 10.33.199.62 ctorigdstport 18080 ctdir ORIGINAL
+#
+# Comparación con contadores anteriores documentados en este archivo:
+# Web1: 4 paq / 240 B -> 7 paq / 420 B (+3 paq / +180 B)
+# Web2: 4 paq / 240 B -> 7 paq / 420 B (+3 paq / +180 B)
+# Compatible con intentos TCP desde VM268 que habían terminado con
+# timeout (HTTP=000, curl exit 28) y con una regla DROP efectiva.
+# La lectura inicial y la posterior no se hicieron como muestreo
+# simultáneo e inmediatamente antes/después de un único intento, así
+# que los contadores agregados NO identifican inequívocamente origen.
+# Los dos accesos HTTP 200 desde VM308 y dos timeouts desde VM268
+# están documentados en:
+# evidencias/e3/segmentacion-origen-proxy-vs-dns-nfs-20261021.txt
+#
+# No se reinició Docker, firewall, WordPress, DNS ni proxy.
