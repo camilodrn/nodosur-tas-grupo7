@@ -53,6 +53,35 @@ al profesor, verificar usuario WordPress administrativo, comprobar si
 existen llaves SSH E2 aún autorizadas ni validar sesión docente desde
 su red. No borrar HOME E2 ni cambiar usuarios operativos del equipo.
 
+## Auditoría de cuentas WordPress E2/E3 (22/10/2026)
+
+En VM263, dentro del contenedor `nodosur-web1` como `www-data`,
+se consultó la instalación WordPress actual mediante `wp-load.php`:
+- `tas_revision`: **EXISTE** con rol `administrator`.
+  En consulta `get_posts` sobre `post`, `page`, `product`,
+  `post_status=any`, `numberposts=1`, no se detectó contenido
+  directamente atribuido a ese ID. Esto **no prueba ausencia de
+  contenido en otros tipos, pedidos, metadatos o vínculos**.
+- `tas_revision_e3`: **NO EXISTE** en WordPress (es independiente
+  de las cinco identidades Linux E3 creadas y verificadas).
+
+La consulta fue de solo lectura. Los dos backends WordPress
+comparten MariaDB, de modo que una cuenta nueva debe crearse una
+sola vez. Plan pendiente:
+1. Crear `tas_revision_e3` como administrador WP con correo válido
+   y **contraseña única distinta de credenciales Linux**, preferentemente
+   desde el panel HTTPS de la aplicación.
+2. Probar login, acceso a panel, administración de usuarios y sección
+   WooCommerce por proxy, con sesión independiente.
+3. Solo entonces desprivilegiar `tas_revision` E2 y revocar sus
+   sesiones/contraseña sin borrar el usuario ni atribuciones.
+4. Verificar continuidad de la tienda desde HAProxy y auditoría de
+   administradores remanentes. Evitar mostrar secretos en chat,
+   GitHub, comandos o capturas.
+
+**Estado:** el administrador E3 WordPress aún no fue creado ni probado,
+y el antiguo administrador WP continúa vigente.
+
 ## Acceso WordPress E2 todavía administrador — verificación del 22/10/2026
 
 En la **VM263 Web1**, mediante consulta PHP a WordPress realizada con
