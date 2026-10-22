@@ -48,6 +48,12 @@ Datos observados del operador:
 
 El [intento desde Fedora](../evidencias/e3/permisos-uploads-ensayo-fedora-20261021.txt) comprobó que web1 y web2 montan el mismo volumen local `nodosur-e3-ensayo_shared_uploads` con `RW=true`, **pero una escritura desde web1 como `www-data` falló con `Permission denied`**. Esto impidió la comparación de SHA-256 y el control final de FurgoPlus de ese bloque. **Causa confirmada:** ambos contenedores ejecutan la aplicación como `www-data` (UID/GID 33), mientras la raíz de `shared_uploads` es `root:root` (UID/GID 0), modo `755`; por ello se niega la escritura. El Compose de ensayo ahora **declara** un servicio de inicialización `uploads-init` que ajusta **solo** la raíz del volumen a `33:33` / `755` con `chown` no recursivo y sale, sin red. Ambos WordPress declaran `depends_on` con `service_completed_successfully`. **Corrección ejecutada y comprobada el 21/10/2026:** se validó Compose, se ejecutó solamente `uploads-init` (respuesta `UPLOADS_INIT_OK`) y luego ambos WordPress mostraron raíz de uploads `UID=33 GID=33 MODO=755`, `test -w` permitido como `www-data` y `docker compose exec -T` con exit 0 ([evidencia](../evidencias/e3/permisos-uploads-ensayo-fedora-20261021.txt)). **Pendiente** completar escritura real y lectura cruzada del archivo, además de probar el inicializador automático en un arranque limpio; las webs actuales no se recrearon. No `chmod 777`, ni cambios en el NFS productivo.
 
+## Próxima etapa: instalación real WordPress con datos ficticios
+
+Se versionó [`scripts/install-e3-lab-wordpress.sh`](../scripts/install-e3-lab-wordpress.sh). **Todavía no se ha ejecutado**. El script exige `--permitir-instalacion`, comprueba contexto `default` y etiquetas `nodosur-e3-ensayo` en los cuatro contenedores, exige uploads escribible y genera una contraseña aleatoria de prueba en `~/.local/share/nodosur-e3-ensayo/wp_admin_password` con permiso 0600. Luego usa `wp_install()` únicamente en web1 para crear una instalación WordPress y su administrador ficticio en la base de datos **de ensayo**, sin mostrar la contraseña ni enviarla a Git. No cambia configuraciones productivas. Si la instalación falla, **no reintentar a ciegas**: WordPress podría haber creado tablas parcialmente.
+
+Después de éxito se comprobarán portada HTTP 200 atendida por ambos backends y estado persistente tras reiniciar **solo los contenedores del laboratorio**. Ambos WordPress comparten tablas SQL y uploads, pero mantienen bind/volúmenes HTML separados y potencialmente claves de sesión distintas; **no se afirma coherencia de sesiones autenticadas**.
+
 ## Almacenamiento compartido aprobado (21/10/2026)
 
 El [validador ejecutado desde Fedora](../evidencias/e3/volumen-compartido-ensayo-fedora-20261021.txt) **pasó**: web1/web2 montan el mismo volumen Docker en RW con UID/GID 33 y permisos 755, web1 creó un archivo ficticio, Web2 leyó el mismo contenido con SHA-256 idéntico, y el trap lo eliminó. Los cuatro contenedores de ensayo siguieron en ejecución (MariaDB `healthy`) y los seis contenedores FurgoPlus continuaron `healthy`. Esto **no acredita NFS** ni una instalación WordPress completada; el ensayo sigue sin WooCommerce.
@@ -64,7 +70,7 @@ La [evidencia del segundo control](../evidencias/e3/balanceo-sql-ensayo-fedora-2
 
 El [registro del primer arranque](../evidencias/e3/primer-arranque-ensayo-fedora-20261021.txt) confirma **cuatro contenedores levantados desde el Compose de laboratorio**, con MariaDB healthy, redes y cuatro volúmenes creados y puerto local 127.0.0.1:19090; la respuesta HTTP inicial fue **302**. Los seis contenedores FurgoPlus seguían healthy. **No se ha acreditado todavía el balanceo de ambos WordPress, su conexión SQL individual, estado de la instalación WordPress ni la lectura compartida del volumen de uploads.** Esta comprobación no modifica datos productivos.
 
-## Definición preparada, pendiente de ejecución
+## Definición del ensayo utilizada en Fedora
 
 Archivos exclusivos del ensayo:
 [`compose/e3-lab/compose.yaml`](../compose/e3-lab/compose.yaml) y
