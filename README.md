@@ -45,6 +45,12 @@ Consulta [ARQUITECTURA.md](ARQUITECTURA.md) para el diagrama, protocolos y lími
 
 Las evidencias recientes **sí incluyen logs originales `DOWN/UP`** y continuidad del servicio tras detectar la falla de web2. No demuestran ausencia de errores durante el intervalo de detección ni una medición formal de RTO/RPO.
 
+## Ensayo aislado de reproducibilidad en Fedora (21/10/2026)
+
+Se desplegó desde `compose/e3-lab/compose.yaml` un proyecto **separado de FurgoPlus y del iLab**: MariaDB 10.11, dos WordPress 7.1.3-PHP 8.3 y HAProxy 3.2.23, con redes, secretos y volúmenes de laboratorio. Ambos WordPress conectaron a la DB ficticia, la instalación inicial se completó, se validó un archivo compartido por SHA-256 y **la base y los uploads conservaron sus datos después de reiniciar únicamente estos servicios**. HAProxy detectó Web1 temporalmente `DOWN` (`Layer4 Connection refused`), luego `UP` por check `Layer7 HTTP 200`; la prueba posterior registró **8/8 HTTP 200, balanceados 4/4**, sin un segundo reinicio. FurgoPlus permaneció saludable ([evidencia](evidencias/e3/persistencia-reinicio-ensayo-fedora-20261021.txt)).
+
+**Límites:** el ensayo reprodujo la capa Docker en **un único host** con volumen local y HTTP loopback, **no** reconstruyó las cinco VMs, NFS, BIND9, TLS institucional, WooCommerce ni datos reales. La [guía de ensayo](docs/ENSAYO-REPRODUCIBILIDAD-E3.md) separa los requisitos productivos del laboratorio. `uploads-init` se ejecutó manualmente para remediar permisos y quedó declarado en el Compose para futuros despliegues; aún no se probó su arranque automático en un segundo entorno limpio.
+
 ## Organización del repositorio
 
 - `compose/`: Compose por rol y host. **No son un único Compose que despliegue cinco VMs automáticamente.**
