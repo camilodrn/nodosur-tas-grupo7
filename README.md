@@ -68,6 +68,7 @@ El 22/10 se creó y probó `tas_revision_e3` con SSH/sudo en las cinco VMs, con 
 - `evidencias/e3/`: resultados verificables de pruebas.
 - [Estado y pruebas E3](docs/ENTREGA3.md), [matriz de flujos](docs/MATRIZ-FLUJOS-E3.md), [autoevaluación de rúbrica](docs/RUBRICA-E3.md) y [decisiones](docs/decisiones-arquitectura.md).
 - **[Guía de estudio individual E3](docs/GUIA-ESTUDIO-INDIVIDUAL-E3.md)**: arquitectura, rutas reales, comandos por VM, siete criterios y 40 preguntas sorpresa.
+- **[Mapa de archivos y configuraciones E3](docs/MAPA-CONFIGURACIONES-E3.md)**: **qué archivo contiene cada regla y dónde está instalado** (NFS exports, BIND, Apache, firewall, HAProxy, systemd y Compose), con comandos de lectura y distinción entre comprobado y pendiente.
 - **[Tarjeta rápida de comandos E3](docs/TARJETA-COMANDOS-E3.md)**: referencia para consulta segura durante la revisión en el puesto.
 - [Guion de explicación por criterios](docs/DEFENSA-ORAL-E3.md): apoyo opcional, **no** una exposición frente a toda la sala.
 - [Guía de reconstrucción y prerequisitos](docs/DESPLIEGUE-REPRODUCIBLE-E3.md), [plan de alineación controlada de WordPress](docs/PLAN-ALINEACION-WORDPRESS-E3.md) y [demostración de 12–15 minutos](docs/PLAN-DEMOSTRACION-E3.md).

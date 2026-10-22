@@ -9,13 +9,19 @@
 
 1. Qué sistema hicimos y qué ocurre cuando un usuario entra.
 2. Inventario de cinco VMs, redes y puertos.
-3. Carpetas reales: NFS, WordPress, Docker, HAProxy, BIND9, MariaDB y systemd.
+3. Carpetas reales y **archivos de configuración activos:** NFS, WordPress, Docker, HAProxy, BIND9, MariaDB, firewall y systemd.
 4. Comandos que podrían pedir en la terminal, agrupados por VM.
 5. Los siete criterios de la rúbrica, con evidencia y límites.
 6. Preguntas sorpresa con respuestas defendibles.
 7. Diagnóstico de fallas por capas, sin romper servicios.
 8. Preparación práctica por integrante y comprobación final.
 9. Qué preguntar sobre infraestructura como código después de E3.
+
+---
+
+## Archivo de referencia: ¿qué archivo modificamos y dónde está la regla?
+
+**Antes de memorizar rutas, estudiar el [mapa de archivos y configuraciones de E3](MAPA-CONFIGURACIONES-E3.md)**. Reúne por cada VM: carpeta de datos, archivo de configuración, archivo versionado en Git, regla activa y comando de solo lectura para mostrarla. Es especialmente importante para NFS: se comprobó el export /srv/nodosur/uploads y los montajes de las webs, pero **no está acreditado cuál archivo de exports modificó el equipo**. El mapa indica cómo verificar /etc/exports o /etc/exports.d en VM268 y /etc/fstab o una unidad .mount en cada cliente, sin adivinar ni modificar.
 
 ---
 
@@ -589,8 +595,9 @@ El profesor puede elegir **cualquier integrante**. Todos deben poder hacer el re
 4. [Pruebas y límites por criterio](RUBRICA-E3.md).
 5. [Ensayo de reproducibilidad](ENSAYO-REPRODUCIBILIDAD-E3.md).
 6. [Matriz de flujos de red](MATRIZ-FLUJOS-E3.md).
-7. [Accesos temporales de revisión](ACCESO-DOCENTE-E3.md), **sin secretos**.
-8. [Evidencia completa de E3](../evidencias/README.md).
+7. [Mapa de archivos, reglas y rutas](MAPA-CONFIGURACIONES-E3.md): **qué archivo se modifica y qué comando lo demuestra**.
+8. [Accesos temporales de revisión](ACCESO-DOCENTE-E3.md), **sin secretos**.
+9. [Evidencia completa de E3](../evidencias/README.md).
 
 ---
 

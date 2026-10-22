@@ -1,6 +1,6 @@
 # Comprobaciones disponibles para revisión en el puesto — Entrega 3
 
-**Modalidad informada por el equipo (22/10):** el profesor pasará por los puestos y podrá escoger cualquier integrante y solicitar comandos de terminal al azar. **No hay exposición formal para toda la sala.** La tabla de tiempos que sigue es solo una referencia temática opcional, no un cronograma de presentación. [Guía individual](GUIA-ESTUDIO-INDIVIDUAL-E3.md) · [tarjeta de comandos](TARJETA-COMANDOS-E3.md).
+**Modalidad informada por el equipo (22/10):** el profesor pasará por los puestos y podrá escoger cualquier integrante y solicitar comandos de terminal al azar. **No hay exposición formal para toda la sala.** La tabla de tiempos que sigue es solo una referencia temática opcional, no un cronograma de presentación. [Guía individual](GUIA-ESTUDIO-INDIVIDUAL-E3.md) · [tarjeta de comandos](TARJETA-COMANDOS-E3.md) · [mapa de configuraciones instaladas](MAPA-CONFIGURACIONES-E3.md).
 
 **Este es un plan, no una bitácora de acciones ya realizadas.** Revisar el estado del laboratorio antes de la defensa. No automatizar una falla sin autorización del equipo/docente. Ejecutar los comandos desde el host indicado, usando una cuenta autorizada y VPN; no mostrar secretos ni `docker inspect` sin formato.
 
