@@ -1,0 +1,41 @@
+# Nodo Sur E3 — Coherencia de esquemas WordPress/WooCommerce entre backends
+# Fecha observada 21/10/2026; ejecutado por operador desde Fedora con SSH
+# hacia VM263 y VM310, PHP CLI dentro de ambos contenedores existentes.
+# Lectura de variables/constantes/opciones, sin escrituras, claves ni pedidos.
+
+=== VM263 nodosur-web1 ===
+TABLE_PREFIX=wp_
+WC_VERSION=11.1.0
+WC_DB_VERSION=11.1.0-1
+WP_DB_VERSION=61833
+
+=== VM310 nodosur-web2 ===
+TABLE_PREFIX=wp_
+WC_VERSION=11.1.0
+WC_DB_VERSION=11.1.0-1
+WP_DB_VERSION=61833
+
+=== CONSULTA ===
+require "/var/www/html/wp-load.php";
+global $wpdb;
+$wpdb->prefix
+defined("WC_VERSION") ? WC_VERSION : "NO"
+get_option("woocommerce_db_version", "NO")
+get_option("db_version", "NO")
+
+=== COMPROBACION ===
+Las cuatro salidas coinciden entre los dos backends.
+Sumar a evidencia ya registrada en
+evidencias/e3/wordpress-opciones-productivas-web1-web2-20261021.txt:
+- WordPress 7.1.3 y home/siteurl iguales.
+- WooCommerce declarado activo en ambos.
+- Condiciones compartidas de DB_HOST/DB_NAME satisfechas.
+También existen evidencias históricas de hash del mismo upload
+por NFS, carrito entre backends y MariaDB centralizada.
+
+=== LIMITES ===
+La coincidencia de prefijo/versiones no demuestra que cada
+sesión autenticada tenga el mismo estado, que checkout
+concurrente funcione sin errores ni que exista restauración
+integral probada. No se comprobaron salts, credenciales ni
+datos privados. No se modificó producción.
