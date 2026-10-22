@@ -1,0 +1,63 @@
+# Nodo Sur E3 — Ensayo de persistencia luego de reinicio acotado
+# Fecha del operador: 21/10/2026
+# Alcance: Docker Engine Fedora, proyecto EXCLUSIVO nodosur-e3-ensayo.
+# Resultado PARCIAL: persistencia OK; prueba de reparto al final NO PASO.
+
+=== SINCRONIZACION Y SINTAXIS ===
+Fast-forward rama e3/cierre-tecnico: 6201aa8..dc8f3d9
+bash -n scripts/validate-e3-lab-persistence.sh: sin errores.
+
+=== AISLAMIENTO ANTES DEL REINICIO ===
+Proyecto correcto nodosur-e3-ensayo en contenedores database, web1, web2,
+proxy. Volumen de BD: nodosur-e3-ensayo_database_data.
+
+=== WORDPRESS ANTES ===
+web1: WORDPRESS_INSTALADO: titulo=Nodo Sur - Ensayo E3 admin_presente=si
+web2: WORDPRESS_INSTALADO: titulo=Nodo Sur - Ensayo E3 admin_presente=si
+
+=== UPLOADS ANTES ===
+SHA256: 37ea4cb4aa017a8133f3843727cf7a8a01eaf36ebcd02568834c582c1cf872aa
+(archivo temporal exclusivamente de laboratorio).
+
+=== REINICIO CONTROLADO DE SERVICIOS DE ENSAYO ===
+docker compose -p nodosur-e3-ensayo restart database:
+  contenedor de BD reiniciado; health pasó a healthy.
+docker compose -p nodosur-e3-ensayo restart web1 web2 proxy:
+  se reiniciaron esos tres servicios.
+Consulta GET al proxy local:
+  PROXY: HTTP 200 TRAS REINICIO.
+
+=== WORDPRESS DESPUES ===
+web1: WORDPRESS_INSTALADO: titulo=Nodo Sur - Ensayo E3 admin_presente=si
+web2: WORDPRESS_INSTALADO: titulo=Nodo Sur - Ensayo E3 admin_presente=si
+Interpretación: estado WordPress/administrador conservado en DB de ensayo.
+
+=== ARCHIVO DESPUES ===
+web1 SHA256: 37ea4cb4aa017a8133f3843727cf7a8a01eaf36ebcd02568834c582c1cf872aa
+web2 SHA256: 37ea4cb4aa017a8133f3843727cf7a8a01eaf36ebcd02568834c582c1cf872aa
+PERSISTENCIA DE DATOS Y UPLOADS: OK.
+
+=== COMPROBACION FINAL DE REPARTO FALLIDA ===
+6 GET al proxy local: HTTP 200 en los seis; cabecera de backend=web2
+en los seis intentos; web1=0, web2=6.
+Salida del script:
+  ERROR: no participan los dos backends
+El validador termino NO CERO; no se imprimieron sus pasos finales
+de observacion de FurgoPlus ni docker compose ps.
+La causa de distribucion 0/6 de web1 NO esta confirmada. Puede tratarse
+de demora de los health checks al reiniciar o problema de Web1; se
+necesita inspeccionar estados de HAProxy, eventos DOWN/UP, y respuestas
+por backend sin reiniciar de nuevo.
+IMPORTANTE: hay evidencia de WordPress instalado y datos persistentes
+en web1, pero no de elegibilidad de web1 en HAProxy en esos seis GET.
+
+=== LIMPIEZA ===
+LIMPIEZA: MARCADOR TEMPORAL ELIMINADO (confirmado).
+
+=== CONCLUSION ===
+PASS: persistencia de DB WordPress y uploads ficticios luego de reiniciar.
+PASS: respuesta HTTP 200 de proxy local (6/6), sin caida total observada.
+FAIL/NO DETERMINADO: reparto de HAProxy tras reinicio; no se debe
+marcar como balanceo postreinicio aceptado.
+FurgoPlus no fue reiniciado por el script; falta inspeccion final.
+No se probo NFS, TLS de USM ni reconstruccion de cinco VMs.
