@@ -54,6 +54,10 @@ Se versionó [`scripts/install-e3-lab-wordpress.sh`](../scripts/install-e3-lab-w
 
 Después de éxito se comprobarán portada HTTP 200 atendida por ambos backends y estado persistente tras reiniciar **solo los contenedores del laboratorio**. Ambos WordPress comparten tablas SQL y uploads, pero mantienen bind/volúmenes HTML separados y potencialmente claves de sesión distintas; **no se afirma coherencia de sesiones autenticadas**.
 
+## Prueba de persistencia preparada (pendiente de ejecutar)
+
+Se añadió [`scripts/validate-e3-lab-persistence.sh`](../scripts/validate-e3-lab-persistence.sh). Requiere contexto Docker `default`, comprueba la etiqueta `com.docker.compose.project=nodosur-e3-ensayo` de los cuatro contenedores y los nombres de sus volúmenes ficticios, verifica WordPress instalado y administrador presente desde ambos backends, crea un marcador temporal en uploads y compara su hash. A continuación **reinicia únicamente `database`, espera `healthy`, y reinicia `web1 web2 proxy`** dentro del mismo proyecto. Verifica nuevamente la instalación, HTTP 200, hash del marcador y participación de los dos backends, y elimina el archivo temporal con `trap`. No usa `down -v`, `up --force-recreate` ni operaciones contra FurgoPlus o VMs USM. **La prueba todavía no se ha ejecutado**; no confundir preparación con persistencia demostrada.
+
 ## Almacenamiento compartido aprobado (21/10/2026)
 
 El [validador ejecutado desde Fedora](../evidencias/e3/volumen-compartido-ensayo-fedora-20261021.txt) **pasó**: web1/web2 montan el mismo volumen Docker en RW con UID/GID 33 y permisos 755, web1 creó un archivo ficticio, Web2 leyó el mismo contenido con SHA-256 idéntico, y el trap lo eliminó. Los cuatro contenedores de ensayo siguieron en ejecución (MariaDB `healthy`) y los seis contenedores FurgoPlus continuaron `healthy`. Esto **no acredita NFS** ni una instalación WordPress completada; el ensayo sigue sin WooCommerce.
