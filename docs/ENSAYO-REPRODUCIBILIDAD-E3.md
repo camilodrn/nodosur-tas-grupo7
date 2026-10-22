@@ -44,6 +44,10 @@ Datos observados del operador:
 
 **Preflight completado el 21/10/2026 (sin desplegar):** [registro de Docker Engine, memoria, puerto libre, secretos ficticios, `config --quiet`, cuatro servicios declarados y tres imágenes descargadas](../evidencias/e3/preflight-ensayo-fedora-20261021.txt). Los seis contenedores de FurgoPlus continuaban `healthy`. Aún no hay evidencia de que arranquen los servicios del ensayo ni de que responda el proxy.
 
+## Hallazgo en escritura del volumen compartido (21/10/2026)
+
+El [intento desde Fedora](../evidencias/e3/permisos-uploads-ensayo-fedora-20261021.txt) comprobó que web1 y web2 montan el mismo volumen local `nodosur-e3-ensayo_shared_uploads` con `RW=true`, **pero una escritura desde web1 como `www-data` falló con `Permission denied`**. Esto impidió la comparación de SHA-256 y el control final de FurgoPlus de ese bloque. **Causa probable, aún no verificada: UID/GID o permisos del directorio**. Revisar `stat` e `id` antes de cambiar solamente permisos de ese volumen de ensayo; no `chmod 777` ni cambios en NFS productivo.
+
 ## Prueba posterior: balanceo HTTP y conexiones SQL (21/10/2026)
 
 La [evidencia del segundo control](../evidencias/e3/balanceo-sql-ensayo-fedora-20261021.txt) confirmó seis respuestas `302` alternando web1/web2 **3/3**, con redirección al instalador inicial de WordPress. Tanto web1 como web2 ejecutaron `SELECT 1` satisfactoriamente contra la MariaDB de ensayo usando el usuario `www-data` y secreto ficticio sin mostrar. **El script terminó sin imprimir los pasos de archivo compartido y estado posterior de FurgoPlus**, por lo que esos controles siguen pendientes. No se atribuye una causa sin comprobar el estado de salida.
