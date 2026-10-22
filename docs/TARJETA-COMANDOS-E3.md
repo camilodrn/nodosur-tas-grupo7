@@ -1,6 +1,6 @@
 # Tarjeta rápida · Comandos seguros de Entrega 3
 **Para la revisión individual en el puesto · No ejecutar comandos destructivos.**
-[Guía explicada y 40 preguntas](GUIA-ESTUDIO-INDIVIDUAL-E3.md) · [Arquitectura](../ARQUITECTURA.md) · [Inventario](../INVENTARIO.md)
+[Guía explicada y 40 preguntas](GUIA-ESTUDIO-INDIVIDUAL-E3.md) · **[Mapa de archivos y reglas](MAPA-CONFIGURACIONES-E3.md)** · [Arquitectura](../ARQUITECTURA.md) · [Inventario](../INVENTARIO.md)
 
 ## Antes de tocar la terminal
 
@@ -33,6 +33,8 @@ curl --noproxy '*' -ksSI --resolve nodosur07.tas:443:10.33.195.194 \
 
 ## VM268 — DNS/NFS
 
+**¿Dónde está el código de las reglas?** La zona y la restricción AXFR comprobadas están en /etc/bind/named.conf.local y los registros en /etc/bind/db.nodosur07.tas. Para NFS, el export de datos /srv/nodosur/uploads está comprobado, pero falta confirmar el archivo exacto de exportación: consultar exportfs -v y /etc/exports o /etc/exports.d, como explica el [mapa](MAPA-CONFIGURACIONES-E3.md).
+
 ~~~bash
 hostname
 sudo systemctl is-active bind9
@@ -48,6 +50,8 @@ sudo ls /srv/nodosur/uploads | head
 **NFS servidor:** /srv/nodosur/uploads. **DNS zona:** /etc/bind/db.nodosur07.tas. **BIND:** /etc/bind/named.conf.local. **NO** editar ni reiniciar para demostrar.
 
 ## VM263 — Web1
+
+**¿Dónde está la regla?** Apache: /etc/nodosur/apache/nodosur-uploads.conf (también en configs/apache/ del repo). Firewall: reglas iptables DOCKER-USER, servicio nodosur-docker-firewall.service; usar systemctl cat para encontrar su script ejecutado.
 
 ~~~bash
 hostname
@@ -68,6 +72,8 @@ sudo docker inspect nodosur-web1 -f \
 **HTML host:** /srv/nodosur/web1/html. **NFS host:** /srv/nodosur/nfs/uploads. **uploads contenedor:** /var/www/html/wp-content/uploads.
 
 ## VM310 — Web2
+
+**¿Dónde está la regla?** Mismos roles y rutas de Apache/firewall que Web1; código WP local de Web2 en /srv/nodosur/web2/html. El NFS está montado en /srv/nodosur/nfs/uploads.
 
 ~~~bash
 hostname
@@ -101,6 +107,8 @@ sudo iptables -S DOCKER-USER
 **Base lógica:** nodo_sur_final. **Contenedor histórico:** nodosur-db-staging. **Volumen real:** nodosur-db-staging_db_stage_data. **Nunca borrarlo.**
 
 ## VM308 — HAProxy
+
+**Archivo de código del balanceo:** compose/proxy/haproxy.prod.cfg en Git; /usr/local/etc/haproxy/haproxy.cfg dentro del contenedor. No imprimir el archivo privado PEM.
 
 ~~~bash
 sudo docker inspect nodosur-haproxy -f 'Estado={{.State.Status}}'
