@@ -1,0 +1,31 @@
+# Nodo Sur E3 — Hallazgo de permisos en volumen uploads, ensayo Fedora
+# Fecha: 21/10/2026. Datos observados y entregados por el operador.
+# No hay evidencia de modificacion en las VMs universitarias o FurgoPlus.
+
+=== MONTAJES DOCKER OBSERVADOS ===
+web1: nodosur-e3-ensayo_shared_uploads:true
+web2: nodosur-e3-ensayo_shared_uploads:true
+Ambos servicios referencian el mismo volumen Docker local de ensayo;
+el indicador true solo acredita montaje RW, no permisos efectivos de UID/GID.
+
+=== PRUEBA DE ESCRITURA FALLIDA ===
+Desde web1 con docker compose exec -T -u www-data:
+  ruta: /var/www/html/wp-content/uploads/.nodosur-e3-probe-<epoch>-<pid>.txt
+  accion: escribir un texto ficticio con redireccion de shell
+  salida: sh: 1: cannot create ...: Permission denied
+set -euo pipefail detuvo el script. El trap de limpieza era best-effort.
+No se imprimieron hashes del mismo archivo ni se comprobo FurgoPlus
+despues de este error. No afirmar prueba compartida terminada.
+
+=== HIPOTESIS DE DIAGNOSTICO ===
+Un volumen montado RW puede denegar escritura por propiedad/permisos
+del directorio al UID www-data dentro del contenedor. Aun no se ha
+registrado salida de stat/id ni se ha demostrado la causa exacta.
+Antes de cambiar nada, verificar propietario, modo, identidad efectiva
+y coincidencia del volumen con el nombre EXCLUSIVO del ensayo.
+No ejecutar chmod 777, chown -R ni cambiar permisos de NFS productivo.
+
+=== ALCANCE ===
+Hallazgo real de reproducibilidad en el laboratorio aislado Fedora.
+Se preserva para justificar un ajuste minimo verificable y reversible;
+no demuestra defecto equivalente en VM263/VM310 (NFS productivo).
