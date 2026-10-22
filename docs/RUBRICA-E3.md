@@ -38,6 +38,23 @@ Se completó un **primer arranque reproducible de la capa Docker** desde un clon
 
 La [comprobación final sin escrituras](../evidencias/e3/validacion-integral-fedora-20261021.txt) verificó ocho respuestas DNS A correctas (UDP/TCP), HTTP 301 hacia HTTPS, seis respuestas HTTP/2 200 distribuidas 3/3 entre web1/web2 y `/tienda/` HTTP 200. La conectividad no representa por sí sola un despliegue nuevo desde cero ni un checkout real. No se repitieron fallas ni se modificó producción.
 
+## Ruta para aspirar a la nota máxima (sin cambios improvisados)
+
+**No confundir autoevaluación con nota docente.** Con los niveles 80–100 de la matriz, la combinación más favorable de las evidencias productivas existentes, tomando provisionalmente 100 para **dos backends, HAProxy/TLS/health checks, falla/recuperación y documentación**, y 80 para los otros tres criterios, sumaría **91/100**. Esta proyección de 91 **no es un resultado otorgado ni garantiza que el profesor reconozca 100 en los primeros criterios**. El extremo conservador continúa siendo 81/100.
+
+| Criterio desde nivel 80 a 100 | Mejora numérica potencial | Próxima evidencia segura | Esfuerzo / cautela |
+|---|---:|---|---|
+| Segmentación, firewall y secretos | +3 | Confirmar matriz de flujos con **prueba positiva desde proxy y negativa desde origen no autorizado** donde exista ruta, contrastar con reglas efectivas y escáner de secretos; no confundir timeout con firewall probado | Bajo–medio. Comprobaciones de lectura/conexión sin alterar reglas |
+| Persistencia y coherencia | +3 | Corroborar funcionamiento de carrito WooCommerce en los dos backends sin pagos/pedidos ni usuarios reales; precisar qué comparte NFS, DB y qué no se comparte (sesión/configuración), sin tocar base productiva | Medio. No ejecutar compras ni operaciones con efectos |
+| Aplicación multicontenedor reproducible | +3 | Revisar preflight por rol en las VMs y referencias/hashes Compose; documentar diferencias entre repo y runtime. **La reconstrucción integral de cinco VMs no está demostrada** | Bajo para preflight; alto/riesgoso reconstruir desde cero |
+| Dos backends funcionales (si profesor exige más) | hasta +3 desde 80 | Evidencia HTTP de portada/tienda/imágenes en ambos, versión/huellas equivalentes y dependencias; ya está bien respaldado | Bajo con pruebas de solo lectura |
+| HAProxy/TLS/health checks (si exige más) | hasta +4 desde 80 | Presentar sintaxis, redirección, SAN/autofirmado, roundrobin, logs DOWN/UP ya observados | Mayormente evidencias existentes, no repetir falla |
+| Falla/recuperación (si exige más) | hasta +3 desde 80 | Defender 8/8 con Web2 parado y 4/4 tras volver, junto con procedimiento y límite de salud; no inventar RTO/RPO | Mayormente evidencias existentes, no repetir falla |
+
+**Resultado proyectado condicional:** si el profesor aceptara 100 para los cuatro criterios ya fuertemente evidenciados, serían 91 puntos; un criterio adicional de 15 puntos pasando de 80 a 100 aportaría 3 puntos (94), dos aportarían 6 (97) y tres, 9 (100). **Esto no implica que baste con renombrar una casilla a 100** ni exige desplegar NFS/BD/TLS desde cero si la pauta literal no lo requiere. Hay que contrastar cada nivel con el descriptor real del docente.
+
+**Revisión local comunicada por operador:** [árbol Git limpio, `git diff --check` sin errores, sintaxis Bash OK y heurístico con 0 candidatos](../evidencias/e3/revision-git-seguridad-local-20261021.txt). Esa ejecución se hizo **después de `git fetch`, sin `git merge`**, por lo que la sintaxis y archivos examinados correspondían a una copia de trabajo anterior al último HEAD remoto. Revalidar después del fast-forward; no interpretar cero candidatos como prueba de ausencia de secretos.
+
 ## Orden razonado de cierre
 
 **Prioridad 1 — Reproducibilidad y coherencia con Git:** el [plan de ensayo aislado](ENSAYO-REPRODUCIBILIDAD-E3.md) distingue lo que ya acredita el Compose instalado de una reconstrucción real sin afectar producción. La [guía de reconstrucción](DESPLIEGUE-REPRODUCIBLE-E3.md), el [preflight por rol](../scripts/preflight-e3.sh) y la [huella semántica de Compose](../scripts/compose-fingerprint-e3.sh) documentan requisitos y permiten verificar sin escrituras. **Pendiente validar estos scripts en los hosts reales** si ya están disponibles y su uso no requiere cambiar producción; el [estado Git de ambos backends](../evidencias/e3/git-backends-cambios-locales-20261021.txt) está auditado y sus cambios locales se preservan deliberadamente. Revisar PR #2 sin fusionarlo automáticamente. Esto NO sustituye una restauración integral desde cero.
