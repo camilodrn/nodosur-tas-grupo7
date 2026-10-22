@@ -17,6 +17,10 @@
 
 La duración es aproximada; si el docente concede menos tiempo, priorizar **TLS + reparto + evidencia de falla/recuperación + persistencia**. La caída en vivo no es requisito para recrear una falla que ya quedó documentada: será una opción únicamente si es solicitada y autorizada.
 
+## Evidencia alternativa de reproducibilidad (sin arriesgar producción)
+
+Si preguntan cómo sabemos que los Compose pueden levantar la capa Docker, mostrar el [ensayo aislado ejecutado en Fedora](ENSAYO-REPRODUCIBILIDAD-E3.md) y su [evidencia de persistencia y reincorporación](../evidencias/e3/persistencia-reinicio-ensayo-fedora-20261021.txt): cuatro contenedores, MariaDB healthy, WordPress inicializado en ambos backends, SQL, uploads con SHA-256, conservación tras reinicio, Web1 `DOWN`/`UP` y balanceo posterior 4/4. **No repetir el reinicio ni la caída durante la defensa** salvo solicitud y autorización. El experimento simula servicios en un Docker Engine local: no equivale a reconstruir VLAN, BIND, NFS ni TLS de iLab. Recordar explicar por qué hubo respuestas inicialmente solo de Web2: Web1 todavía no había sido reincorporado por el health check y el script esperaba demasiado poco.
+
 ## Comandos de lectura para la demostración
 
 ### Desde Fedora o VM308, DNS y publicación
