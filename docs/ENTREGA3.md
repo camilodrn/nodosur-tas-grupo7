@@ -84,6 +84,10 @@ Se levantó en Fedora el proyecto aislado `nodosur-e3-ensayo` a partir de `compo
 
 [Último control funcional](../evidencias/e3/validacion-integral-fedora-20261021.txt): los registros A de DNS resolvieron correctamente por UDP y TCP (8/8), HTTP devolvió 301 a HTTPS, el proxy respondió 6/6 HTTP/2 200 repartidos 3/3 entre los dos backends y WooCommerce `/tienda/` devolvió HTTP 200. Estas consultas no generaron pedidos, no recrearon servicios ni validaron todas las funciones de la tienda.
 
+## Opciones WordPress y WooCommerce consistentes en ejecución (21/10/2026)
+
+Se consultaron las [opciones reales de ambos WordPress por PHP CLI dentro de VM263/VM310](../evidencias/e3/wordpress-opciones-productivas-web1-web2-20261021.txt), sin modificaciones: **núcleo 7.1.3**, `siteurl` y `home` idénticos (`https://nodosur07.tas`), WooCommerce **activo** en ambos y `DB_HOST` con prefijo `10.33.199.60` y `DB_NAME=nodo_sur_final` en ambos. Es evidencia adicional de configuración coherente, junto a NFS y carrito compartido ya documentados. **No demuestra** igualdad de claves de sesión, prefijo SQL o todos los flujos concurrentes.
+
 ## Qué no está demostrado todavía
 
 - Sí hay registros `DOWN/UP` conservados en la nueva prueba controlada de falla y recuperación; no se ha medido formalmente un **RTO/RPO** ni la posible pérdida de solicitudes durante el umbral de detección.
