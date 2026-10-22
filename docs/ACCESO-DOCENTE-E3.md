@@ -53,6 +53,26 @@ al profesor, verificar usuario WordPress administrativo, comprobar si
 existen llaves SSH E2 aún autorizadas ni validar sesión docente desde
 su red. No borrar HOME E2 ni cambiar usuarios operativos del equipo.
 
+## Caducidad cuenta E2 en VM268 — verificación inicial (22/10/2026)
+
+Se ejecutó por SSH desde Fedora con la identidad nueva `tas_revision_e3`:
+- `sudo chage -l tas_revision` previo mostró `Account expires: never`.
+- `sudo usermod --expiredate 1970-01-02 tas_revision` terminó sin error.
+- `sudo chage -l tas_revision` posterior mostró
+  `Account expires: Jan 02, 1970`.
+- `sudo systemctl is-active named` devolvió `active`.
+- No se ejecutó `userdel`, no se borró HOME ni se modificaron
+  archivos de configuración o contenedores.
+
+**Resultado acotado:** la cuenta Linux E2 quedó caducada en VM268;
+el proceso DNS estaba activo. **Aún no consta** una prueba negativa
+de SSH por contraseña/llave contra `tas_revision` ni consulta DNS
+de red y prueba NFS posteriores. No extrapolar caducidad a otras VMs.
+
+**Reversión de caducidad, solo si procede:** desde E3 ya validada,
+`sudo usermod --expiredate -1 tas_revision`, confirmando luego
+`sudo chage -l tas_revision`. No restablecer E2 sin motivo autorizado.
+
 ## Comprobaciones posteriores a rotación y conservación de HOME E2 (22/10/2026)
 
 - Las **cinco cuentas `tas_revision_e3`** iniciaron sesión por SSH y
