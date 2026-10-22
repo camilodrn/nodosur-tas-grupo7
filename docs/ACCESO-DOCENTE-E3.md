@@ -53,6 +53,29 @@ al profesor, verificar usuario WordPress administrativo, comprobar si
 existen llaves SSH E2 aún autorizadas ni validar sesión docente desde
 su red. No borrar HOME E2 ni cambiar usuarios operativos del equipo.
 
+## Acceso WordPress E2 todavía administrador — verificación del 22/10/2026
+
+En la **VM263 Web1**, mediante consulta PHP a WordPress realizada con
+`docker exec -u www-data`, el equipo obtuvo:
+`WP E2: existe; roles=administrator` para login `tas_revision`.
+La consulta fue de solo lectura. **La caducidad del usuario Linux no
+afecta a la cuenta administradora WordPress** y no se ha revocado
+todavía su acceso al panel.
+
+Acciones pendientes, sin modificar producción hasta validar:
+1. Comprobar en WordPress si `tas_revision_e3` ya existe y si
+   `tas_revision` conserva entradas/páginas/productos de su autoría.
+2. Crear administrador separado `tas_revision_e3` con contraseña
+   **diferente a cualquiera usada para Linux** y entregada por canal
+   privado. Crear **solo una vez**: las webs comparten MariaDB.
+3. Probar inicio de sesión y funciones administrativas con el nuevo
+   usuario desde la ruta HTTPS por HAProxy, sin mostrar contraseñas.
+4. Revocar rol administrativo E2 y sesiones antiguas, o eliminar E2
+   reasignando contenidos conforme a decisión del equipo.
+   Comprobar que permanecen los administradores legítimos del grupo.
+5. No cambiar credenciales SQL, `wp-config.php`, secretos ni
+   volúmenes para este objetivo.
+
 ## Confirmación PAM/SSH y caducidad de cuentas E2 (22/10/2026)
 
 El operador consultó por SSH con `tas_revision_e3` los tres hosts donde
