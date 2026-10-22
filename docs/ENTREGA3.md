@@ -10,6 +10,31 @@ Escalar WordPress/WooCommerce de la instalación tradicional a dos backends en D
 
 [Arquitectura](../ARQUITECTURA.md) · [Inventario](../INVENTARIO.md) · [Matriz de accesos](MATRIZ-FLUJOS-E3.md) · [Rúbrica](RUBRICA-E3.md) · [Reconstrucción por host](DESPLIEGUE-REPRODUCIBLE-E3.md) · [Demo de 12–15 minutos](PLAN-DEMOSTRACION-E3.md)
 
+## Verificación reproducible adicional — 22/10/2026
+
+El equipo ejecutó un segundo **arranque limpio y aislado de la
+capa Docker en Fedora** con proyecto `nodosur-e3-init-limpio`,
+volúmenes nuevos y dependencias declaradas en
+`compose/e3-lab/compose.yaml`:
+`uploads-init` se ejecutó **automáticamente** (`Exited (0)`,
+`UPLOADS_INIT_OK`), MariaDB alcanzó `healthy` y ambas
+webs iniciaron `running`. Desde ambos backends, `uploads`
+presentó UID/GID 33:33 y permitió escritura con `www-data`.
+Posteriormente, Web1 escribió un marcador temporal que Web2 pudo
+leer con SHA-256 **idéntico** al calculado en Fedora; el archivo
+fue eliminado con `LIMPIEZA: OK`.
+
+[Arranque limpio](../evidencias/e3/arranque-limpio-uploads-init-fedora-20261022.txt) ·
+[Escritura y SHA-256 cruzado](../evidencias/e3/lectura-cruzada-arranque-limpio-fedora-20261022.txt) ·
+[Informe del ensayo](ENSAYO-REPRODUCIBILIDAD-E3.md).
+
+**Alcance:** se eliminó la brecha de inicialización manual de
+`uploads` en un segundo proyecto Docker nuevo sin afectar
+FurgoPlus ni iLab. No se reconstruyeron de cero las cinco VMs
+ni BIND/NFS/TLS productivos, y el proxy no se arrancó en este
+segundo proyecto para evitar conflicto de puertos; su balanceo,
+TLS y failover cuentan con evidencias independientes.
+
 ## Resultado de las pruebas disponibles
 
 | Comportamiento a defender | Evidencia que tenemos | Interpretación correcta |
