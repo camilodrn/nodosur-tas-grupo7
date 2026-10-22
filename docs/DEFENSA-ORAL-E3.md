@@ -1,4 +1,6 @@
-# Ensayo oral — Entrega 3 Nodo Sur (Grupo 7)
+# Referencia de explicación oral por criterios — Entrega 3 Nodo Sur (Grupo 7)
+
+**Modalidad confirmada posteriormente:** el docente evalúa en los puestos de trabajo y puede interrogar **a cualquier integrante** y pedir **comandos al azar**. No es una exposición formal de 12–15 minutos. Esta distribución por tiempos queda como guía opcional de repaso; para estudiar usar [guía individual](GUIA-ESTUDIO-INDIVIDUAL-E3.md) y [tarjeta de comandos](TARJETA-COMANDOS-E3.md).
 
 **Propósito:** preparar una explicación natural de 12–15 minutos, con
 evidencia real y sin cambios de producción. Basado en la rúbrica
