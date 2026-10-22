@@ -87,6 +87,10 @@ Para capturar comprobaciones con alcance más preciso: [evidencia de Apache en p
 
 **Preflight DB y proxy verificado el 21/10/2026:** se ejecutaron `docker compose ... config --quiet` correctamente en VM279 y VM308, y se comprobaron contenedores en ejecución, imagen, DB `healthy`, volumen histórico y existencia de archivos privados ([evidencia](../evidencias/e3/preflight-db-proxy-compose-20261021.txt)). Los repos locales aparecieron limpios, pero no se comprobó igualdad de commit/branch con `e3/cierre-tecnico`. Estas validaciones no sustituyen reconstrucción limpia de la infraestructura.
 
+## Evidencia operativa distinta de reconstrucción limpia
+
+La [validación final desde Fedora](../evidencias/e3/validacion-integral-fedora-20261021.txt) confirmó consultas DNS UDP/TCP, redirección HTTP/HTTPS, balanceo y tienda desde la instalación existente, y las huellas Compose de ambos web coinciden con Fedora. **Esto es evidencia de funcionamiento y coherencia de definición, no de un `docker compose up` exitoso en un host limpio.** Para demostrar reconstrucción real, usar un entorno de ensayo separado con datos ficticios y puertos/volúmenes aislados. No ejecutar una prueba de reconstrucción en las VMs productivas ni aplicar Compose con los nombres y volúmenes de DB históricos en Fedora sin aislamiento explícito.
+
 ## Persistencia y recuperación
 
 La BD está en un **volumen Docker productivo** en VM279. El WordPress local está en bind mounts separados por backend. `uploads` está compartido por NFS y depende de VM268. Por eso un respaldo íntegro necesita **consistencia coordinada de base de datos, WordPress local y NFS**, además de secretos y configuraciones: copiar solo `uploads` no restaura la tienda completa.
