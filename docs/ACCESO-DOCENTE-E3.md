@@ -53,6 +53,28 @@ al profesor, verificar usuario WordPress administrativo, comprobar si
 existen llaves SSH E2 aún autorizadas ni validar sesión docente desde
 su red. No borrar HOME E2 ni cambiar usuarios operativos del equipo.
 
+## Confirmación PAM/SSH y caducidad de cuentas E2 (22/10/2026)
+
+El operador consultó por SSH con `tas_revision_e3` los tres hosts donde
+se había caducado `tas_revision`:
+- VM268 `10.33.195.205`: `Account expires: Jan 02, 1970`;
+  `sshd -T`: `usepam yes`, `pubkeyauthentication yes`,
+  `passwordauthentication yes`.
+- VM263 `10.33.195.202`: mismos resultados.
+- VM279 `10.33.195.226`: mismos resultados.
+
+Con PAM habilitado, la autenticación por contraseña o clave
+pública debe someterse a la política de caducidad de cuenta.
+**No se ha ejecutado prueba negativa de un login SSH nuevo E2**:
+se documenta la configuración observada, no un rechazo
+de inicio de sesión medido. No reiniciar `sshd` ni borrar cuentas
+o `/home/tas_revision`. Se conservan `WorkingDirectory`
+necesarios para unidades systemd.
+
+La cuenta docente WordPress E2 es independiente y sigue pendiente
+de auditoría/revocación. Las credenciales nuevas E3 requieren
+entrega segura y revocación cuando concluya la evaluación.
+
 ## Caducidad completada E2 en VM263 y VM279 (22/10/2026)
 
 **Evidencia de ejecución del operador por SSH como `tas_revision_e3`:**
