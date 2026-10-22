@@ -64,6 +64,10 @@ La [evidencia de firewall MariaDB y DNS](../evidencias/e3/auditoria-firewall-db-
 
 BIND9 contestó SOA autoritativo por UDP/TCP (`aa`, `NOERROR`). Inicialmente AXFR desde Fedora por VPN permitió transferir nueve registros (`XFR size: 9 records`). Se verificó BIND 9.18.39, zona primaria sin `allow-transfer` explícito y un solo NS publicado. Tras preparar y validar una copia con respaldo privado, **se aplicó `allow-transfer { none; };` únicamente a `nodosur07.tas`**, se validó con `named-checkconf -z` y se ejecutó `rndc reconfig` sin reinicio. **Verificación posterior desde Fedora: SOA UDP/TCP autoritativo `NOERROR`, `www` hacia `10.33.195.194` y AXFR `REFUSED`** ([evidencia](../evidencias/e3/auditoria-firewall-db-dns-20261021.txt)). El resultado no certifica pruebas desde todas las redes ni redundancia DNS; se preserva respaldo para reversión.
 
+## Persistencia después de reinicio (ensayo Fedora, 21/10/2026)
+
+[Registro de la prueba](../evidencias/e3/persistencia-reinicio-ensayo-fedora-20261021.txt): tras reiniciar contenedores **solo** del proyecto de ensayo, MariaDB recuperó `healthy`, WordPress conservó instalación y administrador en Web1/Web2, y un archivo ficticio mantuvo su SHA-256 en ambos; después fue eliminado. HAProxy contestó HTTP 200, pero **las seis respuestas finales vinieron solamente de Web2**, así que el validador terminó en error y falta comprobar recuperación de ambos miembros del balanceo. Esta limitación no modifica la evidencia de balanceo y failover de las VMs iLab productivas.
+
 ## WordPress inicializado en el ensayo (21/10/2026)
 
 La [instalación ficticia con `wp_install()`](../evidencias/e3/wordpress-instalado-ensayo-fedora-20261021.txt) tuvo éxito (`WORDPRESS_LAB_INSTALL_OK`), y HAProxy respondió HTTP 200 en 6/6 solicitudes, repartidas 3/3 entre Web1 y Web2. La ausencia de `sendmail` no impidió terminar; el ensayo no incluye correo de producción. El siguiente control pendiente es la persistencia del WordPress ficticio después de reiniciar exclusivamente los contenedores de laboratorio.
