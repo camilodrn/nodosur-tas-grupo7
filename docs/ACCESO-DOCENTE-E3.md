@@ -53,6 +53,36 @@ al profesor, verificar usuario WordPress administrativo, comprobar si
 existen llaves SSH E2 aún autorizadas ni validar sesión docente desde
 su red. No borrar HOME E2 ni cambiar usuarios operativos del equipo.
 
+## Revocación de privilegios WordPress E2 ejecutada (22/10/2026)
+
+**Ejecutado por el equipo en VM263 Web1 como `www-data` mediante
+`docker exec`:** tras comprobar previamente que
+`tas_revision_e3` existe y tiene rol `administrator`, se aplicó
+a la cuenta WordPress `tas_revision` (E2):
+- `set_role("subscriber")`: retirada de privilegios de administrador.
+- `wp_set_password(wp_generate_password(48, true, true), $e2->ID)`:
+  contraseña sustituida por una clave aleatoria no mostrada.
+- `WP_Session_Tokens::get_instance($e2->ID)->destroy_all()`:
+  sesiones de la cuenta E2 invalidadas.
+
+La ejecución concluyó con:
+```text
+E2: rol administrativo retirado, contraseña rotada y sesiones invalidadas.
+E3: administrator
+```
+
+**Alcance:** cambio en la base de datos compartida de WordPress; no
+se borraron usuarios, publicaciones, pedidos, volúmenes ni
+credenciales Linux. La cuenta E2 sigue existente como suscriptor;
+un eventual restablecimiento de contraseña mediante correo electrónico
+no le devolvería automáticamente permisos administrativos.
+
+**Pendiente de verificación independiente:** inicio de sesión real por
+`https://nodosur07.tas/wp-admin/` con E3 y prueba de
+funciones administrativas, inspección de ambos backends,
+y comprobación del rol E2 después de la mutación. No afirmar
+que el login web E3 ya se probó.
+
 ## Confirmación del administrador WordPress E3 (22/10/2026)
 
 Nueva comprobación de solo lectura ejecutada por el equipo en VM263 Web1
