@@ -84,8 +84,18 @@ revisión explícita de nombres y etiquetas antes de limpiar.
 2. Revisar `free -h`, estado y contexto Docker, puerto TCP 19090 y que no
    exista proyecto etiquetado `nodosur-e3-ensayo`.
 3. Crear **solo una vez** dos contraseñas ficticias con `umask 077` en
-   `~/.local/share/nodosur-e3-ensayo`, permisos privados, sin mostrar valores.
-4. Exportar `NODOSUR_E3_LAB_SECRETS` con esa ruta, ejecutar
+   `~/.local/share/nodosur-e3-ensayo`, directorio **0700**, sin mostrar valores.
+   **Detalle de Compose con secretos desde `file`:** el contenedor WordPress
+   ejecuta PHP como `www-data`, que necesita leer `db_password`. Docker Compose
+   monta el archivo de origen y no remapea UID/GID o `mode` para secretos
+   `file`. Después de crear las contraseñas, dar modo **0444 únicamente al
+   archivo ficticio `db_password`**, dejando el directorio host 0700 y el
+   archivo privado `db_root_password` en 0600. La carpeta 0700 impide a
+   usuarios locales no autorizados atravesar el directorio, aunque `db_password`
+   sea legible dentro de los contenedores con el secreto montado. No aplicar
+   esta práctica a secretos productivos sin un diseño de permisos propio.
+4. Verificar con `stat` solo permisos y rutas, sin imprimir las contraseñas.
+   Luego exportar `NODOSUR_E3_LAB_SECRETS` con esa ruta y ejecutar
    `docker compose -p nodosur-e3-ensayo -f compose/e3-lab/compose.yaml config --quiet`.
 5. Confirmar que `docker compose config` valida; aún **no** descargar imágenes
    ni ejecutar `up` hasta evaluar el resultado de la inspección.
