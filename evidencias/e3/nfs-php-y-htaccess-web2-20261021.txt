@@ -1,0 +1,28 @@
+# Entrega 3 — Barrido de extensiones ejecutables en NFS y reglas heredadas web2
+# Salidas proporcionadas por el equipo. Solo lectura, sin creación de archivos,
+# prueba de ejecución ni alteraciones de producción.
+
+# VM268 (nodosur-g7, servidor del export de uploads):
+$ sudo find /srv/nodosur/uploads -type f \
+    \( -iname '*.php*' -o -iname '*.phtml' -o -iname '*.phar' \) -printf '1\n' | wc -l
+Archivos encontrados: 0
+BUSQUEDA COMPLETADA
+
+# Observación: bash set -o pipefail estaba activo; no se reportaron errores
+# de find en la búsqueda realizada directamente en el servidor del NFS.
+
+# VM310 (web2):
+$ sudo docker exec nodosur-web2 sh -c '[grep booleano de reglas en .htaccess principal]'
+NO SE DETECTARON DIRECTIVAS DE BLOQUEO PHP
+
+# Interpretación
+# - Al momento de la prueba no se hallaron archivos con extensiones .php*,
+#   .phtml o .phar en el NFS compartido (según los patrones empleados).
+# - Web1 y web2 tienen mod_php y handler PHP global; ningún .htaccess
+#   específico en uploads fue observado.
+# - El grep sobre .htaccess de web2 se limitó a directivas
+#   <Files, Require all denied, Deny from all, RemoveHandler y php_flag engine;
+#   no demuestra exhaustivamente ausencia de otros controles Apache.
+# - No se ha demostrado ejecución de PHP desde uploads ni un incidente.
+# - Recomendación: preparar hardening Apache preventivo, comprobar sintaxis
+#   en contenedor aislado y plan de reversión antes de cualquier despliegue.

@@ -1,0 +1,39 @@
+# E3 — Huellas de directorios WordPress web1/web2 (21/10/2026)
+# Consultas de solo lectura en contenedores productivos, salidas del equipo.
+# NO se consultó ni imprimió wp-config.php ni el directorio NFS uploads.
+# Fórmula por componente: find directorio -type f -print0 | LC_ALL=C sort -z |
+# xargs -0 -r sha256sum | sha256sum. Las rutas son relativas e iguales.
+#
+# WEB1 VM263
+# WordPress wp-includes/version.php -> 7.1.3 (ver evidencia previa)
+wp-admin archivos=593 SHA256=9840e4f358a49d84be76487a88e02d2fe049de7b029098a0e9ced9561d0568c5
+wp-includes archivos=2729 SHA256=0b1ac00b1e04409045a5ed04e51a62c9c945bec77feedac3cc5fd59c2e5f0a35
+wp-content/plugins archivos=5911 SHA256=18422824b698330724d1fcc5b3182c8649e341305231cf82d629e4e09e3dc256
+wp-content/themes archivos=584 SHA256=d947bbd940d63b45d9785246cb3cf5087ce00493727016ac0272b798eb2be0a9
+COMPARACION WEB1 COMPLETADA
+
+# WEB2 VM310
+# WordPress wp-includes/version.php -> 7.1.2 (ver evidencia previa)
+wp-admin archivos=593 SHA256=4f88d6c3ea492d3c1c0c914297a4b9c579220dfe39f8534634438cab298604d4
+wp-includes archivos=2729 SHA256=b86df6c5d5af3e32f93cfe6d9bb41f20581b779701b3eafcef3c11656935e9fb
+wp-content/plugins archivos=5911 SHA256=18422824b698330724d1fcc5b3182c8649e341305231cf82d629e4e09e3dc256
+wp-content/themes archivos=584 SHA256=d947bbd940d63b45d9785246cb3cf5087ce00493727016ac0272b798eb2be0a9
+COMPARACION WEB2 COMPLETADA
+
+# Hallazgos
+# - Cantidad de archivos idéntica por cada directorio.
+# - Hash del conjunto de plugins IDÉNTICO y hash del conjunto de temas IDÉNTICO:
+#   se preservaron tanto nombres/rutas como checksums de cada archivo regular.
+# - Hash del conjunto wp-admin DISTINTO y del conjunto wp-includes DISTINTO.
+# - Junto con wp-includes/version.php, confirma divergencia del core
+#   instalado, a pesar de la misma imagen Docker declarada en ambos.
+# - Los datos internos de /var/www/html son bind mounts distintos por VM,
+#   y solo wp-content/uploads se comparte vía NFS.
+#
+# Advertencia: la línea de consulta de wp_db_version con grep en regex
+# devolvió vacío en ambos hosts, sin dar valor interpretable. No concluir
+# que falte la variable: revisar con PHP de forma segura, sin cargar wp-config.
+# La comparación no incluyó todos los archivos de la raíz WordPress,
+# plugins instalados sí pero no su activación en BD, enlaces simbólicos
+# adicionales, ni contenido de wp-config.php / secrets.
+# No actualizar WordPress ni cambiar datos sin backup y plan de reversión.

@@ -1,0 +1,38 @@
+# Nodo Sur E3 — Preflight HAProxy antes de mantenimiento WordPress web2
+# Reportado por el operador el 21/10/2026 desde VM308.
+# Consultas de solo lectura, sin modificaciones al proxy.
+
+=== CONTENEDOR HAPROXY ===
+Estado=running
+
+=== CONFIGURACION VALIDA ===
+# sudo docker exec nodosur-haproxy haproxy -c -f /usr/local/etc/haproxy/haproxy.cfg
+# La orden no imprimió salida; NO hay código de retorno capturado en el texto.
+
+=== HEALTH CHECKS Y SOCKET ADMINISTRATIVO ===
+32:    option httpchk
+33:    http-check send meth HEAD uri / ver HTTP/1.1 hdr Host nodosur07.tas hdr X-Forwarded-Proto https
+34:    http-check expect status 200
+36:    server web1 10.33.199.58:18081 check inter 3s fall 3 rise 2
+37:    server web2 10.33.199.62:18080 check inter 3s fall 3 rise 2
+# No línea 'stats socket' detectada en grep del archivo dentro del contenedor.
+
+=== BALANCEO ACTUAL ===
+HTTP/2 200
+x-nodosur-backend: web1
+HTTP/2 200
+x-nodosur-backend: web2
+HTTP/2 200
+x-nodosur-backend: web1
+HTTP/2 200
+x-nodosur-backend: web2
+HTTP/2 200
+x-nodosur-backend: web1
+HTTP/2 200
+x-nodosur-backend: web2
+
+# Resultado: proxy responde, ambos backends operativos y balanceo 3/3.
+# Con esta configuración no se ha habilitado drenaje administrativo vía
+# socket. En un mantenimiento con Docker stop en web2, puede haber
+# solicitudes fallidas durante fall 3 / inter 3s, antes de marcarlo DOWN.
+# NO afirmar cero interrupciones. Aún NO se detuvo web2 ni se actualizó WordPress.

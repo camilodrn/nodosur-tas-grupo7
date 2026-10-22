@@ -1,0 +1,36 @@
+# Nodo Sur — E3 — Verificación de VM279 y VM308
+# Fecha: 21/10/2026. Salidas suministradas por el operador.
+# Comandos de consulta y validación, sin cambios en servicios.
+
+=== VM279 — MariaDB ===
+Ruta de trabajo: ~/nodosur-tas-grupo7
+git status --short: sin salida (árbol limpio)
+sudo docker compose -f compose/db-stage/compose.prod.yaml config --quiet:
+COMPOSE DB: OK
+sudo docker inspect nodosur-db-staging:
+Estado=running Salud=healthy Imagen=mariadb:10.11
+Montaje de /var/lib/mysql:
+Volumen=nodosur-db-staging_db_stage_data
+sudo test -s /etc/nodosur/secrets/db-stage-root.password:
+SECRETO DB: PRESENTE (no se mostró el contenido)
+
+=== VM308 — HAProxy ===
+Ruta de trabajo: ~/nodosur-tas-grupo7
+git status --short: sin salida (árbol limpio)
+sudo docker compose -f compose/proxy/compose.prod.yaml config --quiet:
+COMPOSE PROXY: OK
+sudo docker inspect nodosur-haproxy:
+Estado=running Imagen=haproxy:3.2.23-alpine
+sudo docker exec nodosur-haproxy haproxy -c -f /usr/local/etc/haproxy/haproxy.cfg:
+HAPROXY: OK
+sudo test -s /etc/nodosur/tls/haproxy-www.pem:
+ARCHIVO TLS: PRESENTE (no se mostró certificado/clave)
+Nota: hubo un intento sudo fallido por contraseña en VM308; el segundo fue aceptado, sin impedir la ejecución de las comprobaciones.
+
+=== Interpretación y alcance ===
+Se confirmó Compose sintácticamente válido en las dos VMs, árbol de trabajo Git limpio,
+contenedores activos y recursos locales privados presentes. MariaDB healthy y volumen
+histórico correcto; HAProxy -c válido.
+NO demuestra: igualdad de HEAD Git con rama e3/cierre-tecnico, restauración limpia,
+permisos mínimos de archivos, aislamiento efectivo de puertos, ni corrección de
+todo el conjunto de secretos/certificado. No hubo reinicios ni cambios.

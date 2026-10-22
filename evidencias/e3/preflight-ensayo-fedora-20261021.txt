@@ -1,0 +1,44 @@
+# Nodo Sur E3 — Preflight de laboratorio aislado en Fedora
+# Fecha: 21/10/2026. Salidas aportadas por operador.
+# Fase: validacion y descarga de imagenes; NO despliegue de servicios.
+# No se mostraron contenidos de secretos ni se modificaron VMs iLab.
+
+=== VERSIONES / MOTOR ===
+docker context show: default (verificado mediante test)
+Docker Compose version v5.5.1
+Docker Engine version 29.9.1; CPUs=8; RAM total 16485978112 bytes
+Memoria disponible observada al preflight: 8.2 GiB
+Espacio disponible previo en /home: 398G
+
+=== CONTROL DE AISLAMIENTO ===
+Puerto local TCP 19090: LIBRE al preflight
+Contenedores existentes del proyecto nodosur-e3-ensayo: ninguno
+Seis contenedores de FurgoPlus observados, todos Up (healthy)
+Motores separados: se uso Docker Engine default, NO contexto desktop-linux
+
+=== SECRETOS FICTICIOS (CONTENIDO NO MOSTRADO) ===
+Directorio: ~/.local/share/nodosur-e3-ensayo
+Permisos de directorio: 700
+Permisos db_password ficticio: 444
+Permisos db_root_password ficticio: 600
+Se ubicaron fuera del repositorio.
+
+=== COMPOSE E3-LAB ===
+Repositorio: e3/cierre-tecnico, actualizado por fast-forward hasta 6da9652
+Archivo: compose/e3-lab/compose.yaml
+Validacion: docker compose -p nodosur-e3-ensayo -f compose/e3-lab/compose.yaml config --quiet
+Resultado: sin errores
+Servicios listados: database, web1, web2, proxy
+
+=== IMAGENES DESCARGADAS ===
+wordpress:7.1.3-php8.3-apache — Pulled
+haproxy:3.2.23-alpine — Pulled
+mariadb:10.11 — Pulled
+
+=== ESTADO FINAL ===
+docker ps -a filtrado por etiqueta com.docker.compose.project=nodosur-e3-ensayo:
+  sin contenedores
+FurgoPlus: seis contenedores observados healthy
+RESULTADO: PREPARACION COMPLETADA; NO SE HA EJECUTADO UP.
+ALCANCE: no prueba arranque de MariaDB/WordPress/HAProxy,
+HTTP de laboratorio ni persistencia. No sustituye NFS/TLS/BD reales.

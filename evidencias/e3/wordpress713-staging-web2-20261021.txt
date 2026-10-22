@@ -1,0 +1,32 @@
+# Nodo Sur E3 — Staging WordPress 7.1.3 en VM310, SIN actualizar CMS
+# Salida proporcionada por operador, 21/10/2026.
+#
+# Paquete local:
+# /tmp/wordpress-7.1.3.tar.gz
+# Directorio de staging privado (root):
+# /var/tmp/nodosur-e3-wp713-staging/wordpress
+# Se comprobó que NO existía el staging antes de crearlo.
+#
+=== VERIFICAR PAQUETE ===
+wordpress-7.1.3.tar.gz: OK
+=== EXTRAER FUERA DE WORDPRESS ===
+# sudo install -d -o root -g root -m 0700 "$staging"
+# sudo tar -xzf "$paquete" -C "$staging" --no-same-owner
+=== VALIDAR CONTENIDO ===
+# wp-admin y wp-includes directorios existentes,
+# wp-login.php fichero existente
+$wp_version = '7.1.3';
+=== HERRAMIENTAS DEL HOST ===
+rsync: disponible
+=== WORDPRESS ACTUAL ===
+Version activa: 7.1.2
+STAGING WEB2 PREPARADO
+#
+# Alcance: paquete extraído en directorio separado; no hay ningún cambio
+# a /srv/nodosur/web2/html, Compose, base compartida ni uploads NFS.
+# Paquete previamente verificado SHA1 oficial/gzip y SHA256 en VM310
+# d2a09acb6a15e3b9c471d72557753c266d6f41a79ed19bfe04cbfe49e283b2a5
+# Respaldo previo HTML verificado por checksum, respaldo SQL reciente
+# verificado por checksum. Pendiente detener/drenar web2 controladamente
+# ANTES de copiar core. Sin socket HAProxy, falla inicial de solicitudes
+# durante fall3 es posible y debe registrarse con honestidad.

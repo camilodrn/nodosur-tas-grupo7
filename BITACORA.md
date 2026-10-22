@@ -1,5 +1,10 @@
 # Bitácora técnica de incidentes
 
+**Contexto:** los incidentes enumerados a continuación pertenecen principalmente a la fase de plataforma base (E2). Algunas correcciones (como el DNS que apuntaba directamente a VM263 o el LVM local) no describen E3. Consultar [ARQUITECTURA.md](ARQUITECTURA.md) y [estado E3](docs/ENTREGA3.md).
+
+---
+
+
 ## 1. Importación SQL y redirección con sudo
 - **Síntoma:** permiso denegado al importar un dump mediante redirección `<`.
 - **Causa:** la redirección la ejecuta el shell antes de aplicar `sudo` al comando.

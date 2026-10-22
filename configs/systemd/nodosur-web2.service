@@ -1,0 +1,18 @@
+[Unit]
+Description=Nodo Sur - WordPress Backend 2
+Wants=network-online.target
+After=network-online.target docker.service
+Requires=docker.service
+RequiresMountsFor=/srv/nodosur/nfs/uploads
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/nodosur-g7-web2/nodosur-tas-grupo7
+ExecStartPre=/usr/bin/mountpoint -q /srv/nodosur/nfs/uploads
+ExecStart=/usr/bin/docker compose -f compose/web2/compose.yaml up -d
+ExecStop=/usr/bin/docker compose -f compose/web2/compose.yaml stop
+TimeoutStartSec=120
+
+[Install]
+WantedBy=multi-user.target

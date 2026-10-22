@@ -1,5 +1,7 @@
 # Checklist Entrega 2
 
+> **Documento histórico de E2.** Conserva el estado de la segunda entrega y no describe los cinco servidores Docker/NFS/HAProxy de E3. Las rutas citadas se refieren a archivos en la raíz del repositorio o a sus versiones históricas.
+
 Estado técnico consolidado del repositorio. No reemplaza la rúbrica oficial.
 
 | Área | Estado | Evidencia principal |

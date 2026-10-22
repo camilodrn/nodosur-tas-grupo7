@@ -1,0 +1,38 @@
+# Nodo Sur E3 — Huellas semanticas Compose, Fedora vs hosts web
+# Salidas proporcionadas por operador, 21/10/2026.
+# Comandos de solo lectura docker compose config --format json;
+# json.dumps(sort_keys=True,separators=(',', ':'),ensure_ascii=False)
+# y SHA-256 sobre el JSON resultante. No se imprimieron secretos.
+
+=== FEDORA (clon e3/cierre-tecnico, tras pull --ff-only) ===
+web1:
+HUELLA_COMPOSE_E3=df504c323b546fc6d38909ec0a1e5f9d5a4a33adbf8abd665ba688eb531b4ec6
+web2:
+HUELLA_COMPOSE_E3=6f2060327b5fbf1e46785e67c77180c583aa20a2fc172f215ca7df32c3d7b496
+
+=== VM310 web2 — Compose instalado ===
+HUELLA_COMPOSE_E3=6f2060327b5fbf1e46785e67c77180c583aa20a2fc172f215ca7df32c3d7b496
+git status --short:
+ M compose/web2/compose.yaml
+git diff --stat -- compose/web2/compose.yaml:
+ compose/web2/compose.yaml | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+=== VM263 web1 — Compose instalado ===
+HUELLA_COMPOSE_E3=df504c323b546fc6d38909ec0a1e5f9d5a4a33adbf8abd665ba688eb531b4ec6
+git status --short:
+ M compose/web1/compose.yaml
+git diff --stat -- compose/web1/compose.yaml:
+ compose/web1/compose.yaml | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+=== RESULTADO Y ALCANCE ===
+# Coincidencia exacta de huellas web1/web2 entre GitHub (clon Fedora)
+# y los Compose disponibles en los hosts web.
+# Mismas definiciones semanticas normalizadas, aun si difiere formato,
+# espacios o comentarios. NO prueba por si solo que Docker haya creado
+# el contenedor a partir de ese Compose ni que WordPress/plugins/salts
+# en el bind HTML sean identicos.
+# Checkouts de web1 y web2 todavia tienen cambios locales de Compose;
+# no efectuar git pull/reset indiscriminado antes de reconciliar.
+# Las pruebas de Apache y HTTP reales se documentan por separado.

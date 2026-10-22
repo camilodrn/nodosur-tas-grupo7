@@ -1,5 +1,10 @@
 # Evidencias de la entrega
 
+**Nota:** la lista histórica de abajo documenta evidencias de la implementación E2 (Apache/PHP-FPM nativo y LVM). Para E3, con Docker, HAProxy y NFS en cinco VMs, consultar [las pruebas reales de Entrega 3](../docs/ENTREGA3.md) y la carpeta [evidencias/e3](e3/). No utilizar como evidencia E3 los antiguos puertos web directos, logs Apache nativos ni el LV de uploads de E2.
+
+---
+
+
 Esta carpeta documenta **qué evidencia debe conservarse**, pero no almacena secretos ni capturas con credenciales visibles.
 
 ## Evidencias recomendadas

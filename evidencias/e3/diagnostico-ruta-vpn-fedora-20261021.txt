@@ -1,0 +1,62 @@
+# Nodo Sur E3 — Diagnóstico de rutas Fedora hacia iLab
+# 21/10/2026, observación aportada por operador.
+# No se cambió VPN, router, rutas, reglas ni servicios.
+
+NetworkManager conexiones activas (parcial):
+  vpn:wlp0s20f3
+  802-11-wireless:wlp0s20f3
+  tun:tailscale0
+  (bridges de Docker, loopback)
+
+Interfaz de túnel observada:
+  tun0 DOWN <POINTOPOINT,MULTICAST,NOARP>
+
+ip -4 route get 10.33.195.194:
+  10.33.195.194 via 192.168.1.1 dev wlp0s20f3 src 192.168.1.103
+ip -4 route get 10.33.195.205:
+  10.33.195.205 via 192.168.1.1 dev wlp0s20f3 src 192.168.1.103
+
+Comprobación TCP/22 desde Fedora:
+  10.33.195.194 TCP 22: SIN CONEXION
+  10.33.195.205 TCP 22: SIN CONEXION
+
+INTERPRETACIÓN:
+  Ninguno de los dos destinos SSH usa una ruta sobre el túnel
+  institucional; ambos se enrutan a la puerta de enlace doméstica.
+  La interfaz tun0 aparece DOWN. La entrada vpn de NetworkManager
+  no acredita por sí sola túnel/rutas activas. Un problema de
+  conexión/ruteo de VPN es la explicación prioritaria del timeout.
+  No se confirmó la causa raíz del estado de la VPN.
+
+IMPLICANCIA RÚBRICA:
+  El intento de validación positiva/negativa desde VM308/VM268 a
+  Web1/Web2 NO se ejecutó, porque SSH no llegó a ninguna VM.
+  No constituye evidencia nueva de las reglas DOCKER-USER.
+  Conservar evidencias previas y reintentar solo tras recuperar
+  acceso VPN legítimo. No alterar firewall productivo para resolverlo.
+
+SIGUIENTE:
+  Reconectar la VPN institucional usando su perfil existente;
+  luego comprobar tun0, ip -4 route get y TCP/22 antes de SSH.
+
+=== RECUPERACION POSTERIOR DE VPN (21/10/2026) ===
+El operador ejecutó:
+  nmcli connection down id "VPN USM"
+  nmcli --ask connection up id "VPN USM"
+Ambos comandos informaron éxito. Las credenciales, si fueron
+solicitadas, se introdujeron localmente y NO se compartieron.
+
+Verificaciones posteriores:
+  Perfil VPN USM aparece activo en NetworkManager.
+  tun0 aparece operativo ("UNKNOWN" en ip -br addr, con IPv4 /24).
+  ip -4 route get 10.33.195.194: dev tun0.
+  ip -4 route get 10.33.195.205: dev tun0.
+  TCP/22 a 10.33.195.194: ACCESIBLE.
+  TCP/22 a 10.33.195.205: ACCESIBLE.
+
+INTERPRETACION:
+  Se recuperó ruta vía túnel y accesibilidad TCP al puerto 22
+  en ambas VMs. La comprobación TCP no equivale a autenticación
+  SSH ni a validación de accesos HTTP entre VMs. Próxima etapa:
+  realizar pruebas desde cada VM a los dos backends y correlacionar
+  con reglas DOCKER-USER sin alterar la infraestructura.

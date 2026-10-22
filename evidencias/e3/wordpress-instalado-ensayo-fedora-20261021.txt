@@ -1,0 +1,38 @@
+# Nodo Sur E3 — WordPress ficticio instalado y publicado en Fedora
+# Fecha: 21/10/2026. Resultados proporcionados por el operador.
+# ALCANCE: proyecto Docker de ensayo nodosur-e3-ensayo, NO VMs USM.
+
+=== CONTROL PREVIO ===
+git fetch origin && git merge --ff-only origin/e3/cierre-tecnico:
+  Fast-forward 3634a97..6201aa8
+bash -n scripts/install-e3-lab-wordpress.sh:
+  sin errores.
+
+=== INSTALACION WORDPRESS DEL ENSAYO ===
+bash scripts/install-e3-lab-wordpress.sh --permitir-instalacion
+  PREPARAR CLAVE DE ADMINISTRACION FICTICIA (NO MOSTRADA)
+  INSTALAR WORDPRESS SOLO EN WEB1 DEL ENSAYO
+  sh: 1: /usr/sbin/sendmail: not found
+  WORDPRESS_LAB_INSTALL_OK
+  RESULTADO: WORDPRESS INSTALADO EN BASE DE DATOS FICTICIA
+Usuario de ensayo: nodosur_lab_admin
+Clave privada generada y almacenada solo en Fedora, fuera del repositorio;
+NO se registra su contenido en esta evidencia.
+La ausencia de sendmail indica que no hay binario local para el correo
+de instalación, y no impidió que wp_install() finalizara con éxito.
+
+=== HAProxy / HTTP POSTINSTALACION ===
+Seis solicitudes GET a http://127.0.0.1:19090/:
+  HTTP/1.1 200 OK — x-nodosur-lab-backend: web2
+  HTTP/1.1 200 OK — x-nodosur-lab-backend: web1
+  HTTP/1.1 200 OK — x-nodosur-lab-backend: web2
+  HTTP/1.1 200 OK — x-nodosur-lab-backend: web1
+  HTTP/1.1 200 OK — x-nodosur-lab-backend: web2
+  HTTP/1.1 200 OK — x-nodosur-lab-backend: web1
+Resultado: seis respuestas HTTP 200 y balanceo 3/3 en la instalación nueva.
+
+=== LIMITACIONES ===
+WordPress ficticio sin WooCommerce. No se evaluó login autenticado,
+transacciones, email/SMTP, carga concurrente ni persistencia tras reinicio.
+El ensayo usa volumen Docker local compartido (no NFS), HTTP en loopback
+(sin TLS) y cuatro contenedores en un solo host, no cinco VMs iLab.

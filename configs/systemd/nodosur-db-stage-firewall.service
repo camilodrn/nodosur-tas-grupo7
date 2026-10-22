@@ -1,0 +1,13 @@
+[Unit]
+Description=Nodo Sur - Proteccion MariaDB Docker staging
+Requires=docker.service
+After=docker.service
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/nodosur-db-stage-firewall.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,17 @@
+[Unit]
+Description=Nodo Sur - MariaDB Docker staging
+Requires=docker.service nodosur-db-stage-firewall.service
+After=docker.service nodosur-db-stage-firewall.service
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/tas_revision/nodosur-tas-grupo7
+ExecStart=/usr/bin/docker compose -f compose/db-stage/compose.yaml up -d --wait --wait-timeout 120
+ExecStop=/usr/bin/docker compose -f compose/db-stage/compose.yaml stop -t 30
+TimeoutStartSec=180
+TimeoutStopSec=90
+
+[Install]
+WantedBy=multi-user.target

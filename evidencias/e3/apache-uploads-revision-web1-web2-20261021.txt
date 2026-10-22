@@ -1,0 +1,30 @@
+# E3 — Revisión de PHP/Apache/htaccess en ambos WordPress
+# Equipo: resultados de consultas de solo lectura, 21/10/2026.
+# No se añadieron archivos a uploads, no se reinició contenedor, no se revelaron secretos.
+
+# VM310 web2 — nodosur-web2
+$ sudo docker exec nodosur-web2 sh -c '[apache2ctl -M; prueba handler; presencia htaccess]'
+ php_module (shared)
+HANDLER PHP GLOBAL: PRESENTE
+PRESENTE: /var/www/html/.htaccess
+AUSENTE: /var/www/html/wp-content/.htaccess
+AUSENTE: /var/www/html/wp-content/uploads/.htaccess
+
+# VM263 web1 — nodosur-web1
+$ sudo docker exec nodosur-web1 sh -c '[grep booleano htaccess raiz; find extensiones PHP]'
+NO SE DETECTARON DIRECTIVAS DE BLOQUEO PHP
+=== ARCHIVOS PHP/PHTML/PHAR EN UPLOADS ===
+0
+find: '/var/www/html/wp-content/uploads/lost+found': Permission denied
+
+# Interpretación cautelosa
+# - Web2: php_module activo y SetHandler global presente, al igual que web1.
+# - Web1: el grep sobre htaccess raíz buscó un conjunto de patrones
+#   (<Files, Require all denied, Deny from all, RemoveHandler, php_flag engine).
+#   No prueba ausencia de cualquier otra restricción Apache o mecanismo.
+# - 0 cuenta solo archivos con extensiones buscadas en subárboles accesibles;
+#   por el Permission denied en lost+found, no es inventario íntegro.
+# - En NFS root_squash puede restringir acceso al root del contenedor.
+# - No se ha ejecutado archivo PHP bajo uploads ni demostrado explotación.
+# - Falta revisar htaccess de web2 con los mismos patrones y contar PHP desde
+#   el NFS servidor VM268, preferiblemente sin listar nombres/código.

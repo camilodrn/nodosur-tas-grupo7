@@ -1,0 +1,12 @@
+2026-10-21 — VM310 WordPress 7.1.3 offline syntax check.
+The operator ran a temporary Docker container using the existing web2 image, without network and with WordPress source bind-mounted read-only; production nodosur-web2 was still exited.
+All PHP lint commands returned "No syntax errors detected":
+- /check/wp-includes/version.php
+- /check/wp-includes/load.php
+- /check/wp-settings.php
+- /check/wp-login.php
+- /check/wp-admin/admin.php
+- /check/wp-content/plugins/woocommerce/woocommerce.php
+- /check/wp-config.php
+Final version.php declares 7.1.3; script ended PRECHECK PHP COMPLETADO.
+Limitations: syntax lint is not a runtime health check. The backend has not yet restarted or rejoined HAProxy; functional tests remain pending.

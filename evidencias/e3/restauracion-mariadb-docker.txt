@@ -1,0 +1,17 @@
+=== RECUPERACION MARIADB DOCKER ===
+Fecha: 2026-10-20
+
+=== AISLAMIENTO ===
+Red=none Puertos={}
+
+=== DATOS RECUPERADOS ===
+Tablas: 52
+Posts: 51
+Opciones: 512
+Usuarios: 4
+
+=== PRODUCCION ===
+active
+
+=== STAGING ===
+Salud=healthy

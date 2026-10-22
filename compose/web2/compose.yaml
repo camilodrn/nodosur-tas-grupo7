@@ -1,0 +1,46 @@
+name: nodosur-web2
+
+services:
+  wordpress:
+    image: wordpress:7.1.2-php8.3-apache
+    container_name: nodosur-web2
+    restart: "no"
+
+    ports:
+      # Acceso local hasta integrar NFS y HAProxy
+      - "10.33.199.62:18080:80"
+
+    environment:
+      WORDPRESS_DB_HOST: "10.33.199.60:3306"
+      WORDPRESS_DB_NAME: "nodo_sur_final"
+      WORDPRESS_DB_USER: "cms_web62"
+
+    secrets:
+      - db_password
+
+    volumes:
+      - /srv/nodosur/web2/html:/var/www/html
+      - type: bind
+        source: /srv/nodosur/nfs/uploads
+        target: /var/www/html/wp-content/uploads
+        bind:
+          create_host_path: false
+
+      # E3: bloquear ejecucion de PHP dentro de los uploads compartidos.
+      # El archivo root-owned debe existir en cada host ANTES de recrear WordPress.
+      - type: bind
+        source: /etc/nodosur/apache/nodosur-uploads.conf
+        target: /etc/apache2/conf-enabled/nodosur-uploads.conf
+        read_only: true
+        bind:
+          create_host_path: false
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+secrets:
+  db_password:
+    file: /etc/nodosur/secrets/cms_web62.password

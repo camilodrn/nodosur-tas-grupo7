@@ -1,0 +1,26 @@
+# Nodo Sur E3 — Artefacto oficial WordPress 7.1.3 en Fedora
+# Salida del operador durante preparacion de actualizacion controlada.
+# NO se instalo ni copio aun el paquete a web1/web2.
+#
+# Comandos principales:
+# mkdir -p ~/Proyectos/nodosur-wp-staging/7.1.3
+# curl -fL --show-error -o wordpress-7.1.3.tar.gz https://wordpress.org/wordpress-7.1.3.tar.gz
+# curl -fL --show-error -o wordpress-7.1.3.tar.gz.sha1 https://wordpress.org/wordpress-7.1.3.tar.gz.sha1
+# Compara el digest del archivo descargado con el SHA-1 publicado por WordPress.org
+# gzip -t y lectura tar -xOzf del version.php sin extraer al host productivo
+#
+=== DESCARGAR WORDPRESS 7.1.3 ===
+# Descarga de 33.72M reportada completa por curl.
+=== DESCARGAR CHECKSUM OFICIAL ===
+# Se descargó un archivo SHA-1 oficial de 40 bytes.
+=== VERIFICAR ARCHIVO ===
+wordpress-7.1.3.tar.gz: OK
+=== VERSION ===
+$wp_version = '7.1.3';
+PAQUETE VERIFICADO
+#
+# Alcance: paquete local en Fedora pasa comparacion SHA-1 publicada por
+# fuente oficial HTTPS y prueba gzip, y contiene version.php 7.1.3.
+# No se ha calculado/documentado aun SHA-256 local ni un ensayo
+# de actualización, ni se ha intervenido el backend web2.
+# SHA-1 por sí solo no sustituye un proceso completo de procedencia.

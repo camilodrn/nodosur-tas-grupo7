@@ -1,0 +1,48 @@
+# Nodo Sur E3 — Balanceo y conectividad SQL, ensayo Fedora
+# Fecha: 21/10/2026. Salidas aportadas por el operador.
+# No se modificó producción ni se ejecutaron pruebas de escritura.
+# IMPORTANTE: el script termino antes del paso 4, causa no determinada.
+
+=== VERSION FEDORA ===
+git fetch && git merge --ff-only origin/e3/cierre-tecnico:
+  Fast-forward 3ea267d..8d82b0b, sin conflictos.
+
+=== ESTADO DOCKER ENSAYO ===
+nodosur-e3-ensayo-database-1  mariadb:10.11                  Up (healthy)
+nodosur-e3-ensayo-web1-1      wordpress:7.1.3-php8.3-apache Up
+nodosur-e3-ensayo-web2-1      wordpress:7.1.3-php8.3-apache Up
+nodosur-e3-ensayo-proxy-1     haproxy:3.2.23-alpine         Up
+Publicacion proxy: 127.0.0.1:19090->8080/tcp.
+Las dos webs y la BD no publican puerto en el host Fedora.
+
+=== HTTP / HAPROXY DE LABORATORIO ===
+6 solicitudes GET a http://127.0.0.1:19090/:
+  HTTP/1.1 302; Location: http://127.0.0.1:19090/wp-admin/install.php
+  X-NodoSur-Lab-Backend: web2
+  HTTP/1.1 302; ... backend web1
+  HTTP/1.1 302; ... backend web2
+  HTTP/1.1 302; ... backend web1
+  HTTP/1.1 302; ... backend web2
+  HTTP/1.1 302; ... backend web1
+Resultado: reparto 3/3, redireccion al instalador inicial de WordPress.
+No hay evidencia de instalacion WordPress completada.
+
+=== SQL DESDE CADA WORDPRESS ===
+Se ejecuto PHP CLI dentro de web1 y web2 como usuario www-data;
+leyo /run/secrets/db_password de ensayo sin mostrar su contenido,
+conecto mediante mysqli a database/nodosur_lab y ejecuto SELECT 1.
+web1: CONEXION SQL: OK
+web2: CONEXION SQL: OK
+
+=== FIN OBSERVADO DEL SCRIPT ===
+La transcripcion termina tras "CONEXION SQL: OK" de web2.
+No aparecio encabezado "=== 4. PROBAR VOLUMEN COMPARTIDO ===".
+No es posible distinguir con la salida si una orden regreso codigo
+no-cero despues de imprimir o si hubo otro motivo de terminacion.
+NO se documenta aun prueba de archivo compartido, hashes, limpieza
+de archivo ficticio ni estado posterior de los contenedores FurgoPlus.
+
+SIGUIENTE CONTROL:
+Comprobar mounts de shared_uploads en ambos WordPress y, con archivo
+ficticio temporal, hash identico y eliminacion acotada. Luego observar
+FurgoPlus y la continuidad del proyecto sin mutar servicios ajenos.

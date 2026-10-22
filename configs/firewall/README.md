@@ -1,5 +1,10 @@
 # Estado de firewall UFW
 
+**Aviso E3 (21/10/2026): el inventario de UFW de abajo corresponde principalmente a E2 y a reglas históricas. En Entrega 3 se comprobaron controles Docker en `DOCKER-USER`, específicos de web1 y web2, y flujos adicionales. Ver [matriz de flujos E3](../../docs/MATRIZ-FLUJOS-E3.md) y [reglas actuales](../../evidencias/e3/firewall-docker-user-web1-web2-20261021.txt). Esta página no certifica las políticas actuales de las cinco VMs.**
+
+---
+
+
 Las siguientes reglas resumen el **estado validado** por rol. No contienen secretos.
 
 ## VM .58 — WEB/CMS
