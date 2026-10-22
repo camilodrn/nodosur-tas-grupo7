@@ -88,6 +88,10 @@ Se levantó en Fedora el proyecto aislado `nodosur-e3-ensayo` a partir de `compo
 
 Se consultaron las [opciones reales de ambos WordPress por PHP CLI dentro de VM263/VM310](../evidencias/e3/wordpress-opciones-productivas-web1-web2-20261021.txt), sin modificaciones: **núcleo 7.1.3**, `siteurl` y `home` idénticos (`https://nodosur07.tas`), WooCommerce **activo** en ambos y `DB_HOST` con prefijo `10.33.199.60` y `DB_NAME=nodo_sur_final` en ambos. Es evidencia adicional de configuración coherente, junto a NFS y carrito compartido ya documentados. **No demuestra** igualdad de claves de sesión, prefijo SQL o todos los flujos concurrentes.
 
+## Compatibilidad del esquema WordPress / WooCommerce (21/10/2026)
+
+Se consultaron [ambas aplicaciones ejecutándose en VM263 y VM310](../evidencias/e3/coherencia-esquema-wp-woocommerce-20261021.txt), solo lectura: prefijo SQL `wp_`, `WC_VERSION=11.1.0`, `woocommerce_db_version=11.1.0-1` y `db_version=61833` **coinciden en ambos servidores**. Junto a los hashes del código, opciones `home/siteurl`, MariaDB compartida, NFS y una prueba previa de carrito, estos controles fortalecen la coherencia del estado en E3. No certifican sesiones privadas, pedidos concurrentes ni recuperación integral desde backup.
+
 ## Qué no está demostrado todavía
 
 - Sí hay registros `DOWN/UP` conservados en la nueva prueba controlada de falla y recuperación; no se ha medido formalmente un **RTO/RPO** ni la posible pérdida de solicitudes durante el umbral de detección.
