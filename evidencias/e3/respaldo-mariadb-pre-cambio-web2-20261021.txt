@@ -1,0 +1,23 @@
+# E3 — Respaldo SQL manual reciente antes de eventual actualizacion del core en web2
+# 21/10/2026, VM279 MariaDB, salida proporcionada por el operador.
+# NO se modifico WordPress ni se restauro BD.
+$ sudo systemctl start nodosur-db-backup.service
+$ sudo systemctl show nodosur-db-backup.service -p Result -p ExecMainStatus
+Result=success
+ExecMainStatus=0
+
+# Archivo más reciente por mtime dentro de /var/backups/nodosur/daily:
+nodo_sur_final-20261021-182217.sql.gz | 2026-10-21 18:22:17.816399585 +0000 | 202097 bytes
+# 18:22 UTC corresponde a 15:22 horario Chile continental UTC-03.
+$ sudo sha256sum -c nodo_sur_final-20261021-182217.sql.gz.sha256
+nodo_sur_final-20261021-182217.sql.gz: OK
+$ sudo gzip -t nodo_sur_final-20261021-182217.sql.gz
+# Sin error
+RESPALDO PRE-ACTUALIZACION VERIFICADO
+
+# Se había comprobado previamente el contenedor nodosur-db-staging
+# running/healthy, volumen nodosur-db-staging_db_stage_data, y timer activo.
+# Esta verificación NO es un ensayo de restauración ni demuestra consistencia
+# de la copia en presencia de transacciones simultaneas.
+# La base es COMPARTIDA por web1/web2: su restauración causaría pérdida
+# de cambios posteriores; NO restaurarla para revertir un único backend.

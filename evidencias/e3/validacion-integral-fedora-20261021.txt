@@ -1,0 +1,48 @@
+# Nodo Sur E3 — Validación funcional final desde Fedora
+# Fecha: 21/10/2026. Resultados observados por el operador.
+# Validaciones read-only contra el laboratorio; sin detener contenedores,
+# crear pedidos ni escribir en la base de datos.
+
+=== CONTROL DE VERSION EN FEDORA ===
+git fetch origin && git merge --ff-only origin/e3/cierre-tecnico
+Resultado: Fast-forward a d9d8db6 (al momento de la prueba).
+No se reportaron conflictos.
+
+=== DNS BIND9 / UDP ===
+nodosur07.tas       10.33.195.194
+www.nodosur07.tas   10.33.195.194
+db.nodosur07.tas    10.33.199.60
+ns1.nodosur07.tas   10.33.195.205
+
+=== DNS BIND9 / TCP ===
+nodosur07.tas       10.33.195.194
+www.nodosur07.tas   10.33.195.194
+db.nodosur07.tas    10.33.199.60
+ns1.nodosur07.tas   10.33.195.205
+Resultado: 8/8 consultas A con valores esperados.
+
+=== HTTP -> HTTPS (HAProxy VM308) ===
+HTTP/1.1 301 Moved Permanently
+location: https://nodosur07.tas/
+
+=== HTTPS / ROUNDROBIN ===
+# Consulta HEAD seis veces con --resolve al proxy,
+# certificado autofirmado comprobado funcionalmente con -k.
+HTTP/2 200 — x-nodosur-backend: web1
+HTTP/2 200 — x-nodosur-backend: web2
+HTTP/2 200 — x-nodosur-backend: web1
+HTTP/2 200 — x-nodosur-backend: web2
+HTTP/2 200 — x-nodosur-backend: web1
+HTTP/2 200 — x-nodosur-backend: web2
+Resultado: 6/6 HTTP 200; 3 web1 / 3 web2.
+
+=== WOOCOMMERCE ===
+GET https://nodosur07.tas/tienda/
+Tienda: HTTP 200
+
+=== ALCANCE ===
+Esta prueba demuestra resolución de registros, redirección, respuesta
+HTTPS y reparto observado, y respuesta del listado de tienda.
+No comprueba checkout real, ausencia de errores de aplicación bajo
+concurrencia, confianza pública del certificado ni recuperación completa.
+No acredita reconstrucción limpia de las cinco VMs mediante Compose.

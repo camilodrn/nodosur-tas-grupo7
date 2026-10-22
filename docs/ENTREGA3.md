@@ -1,151 +1,138 @@
-# Entrega 3 — Nodo Sur
+# Entrega 3 — Publicación resiliente, contenedores y seguridad
 
-## Objetivo
+**Grupo 7 · Taller de Administración de Sistemas · Octubre de 2026.**
 
-Implementar y validar una arquitectura distribuida para
-WordPress y WooCommerce, utilizando contenedores Docker,
-balanceo de carga, almacenamiento compartido, base de
-datos separada y mecanismos de recuperación.
+Esta página ordena lo que podemos **mostrar y defender técnicamente** de Nodo Sur. La pauta escrita del proyecto incluye un informe de avance; según la indicación posterior comunicada por el equipo, la evaluación de esta entrega se enfocará en la **demostración y defensa técnica**, sin un informe separado. Mantener la documentación de GitHub como respaldo, no como sustituto de la demostración.
 
-## Arquitectura implementada
+## Objetivo técnico
 
-| Rol | VM | IP administrativa | IP interna |
-|---|---|---|---|
-| DNS, NFS y respaldos | 268 | 10.33.195.205 | 10.33.199.59 |
-| WordPress 1 | 263 | 10.33.195.202 | 10.33.199.58 |
-| WordPress 2 | 310 | 10.33.195.208 | 10.33.199.62 |
-| MariaDB Docker | 279 | 10.33.195.226 | 10.33.199.60 |
-| HAProxy | 308 | 10.33.195.194 | 10.33.199.61 |
+Escalar WordPress/WooCommerce de la instalación tradicional a dos backends en Docker, con HAProxy como entrada HTTPS, MariaDB única, uploads NFS compartidos y controles de red. La condición principal de E3 es **mantener la atención del sitio cuando uno de los dos backends web deja de funcionar**; no se exige afirmar redundancia de toda la infraestructura.
 
-## Funcionamiento
+[Arquitectura](../ARQUITECTURA.md) · [Inventario](../INVENTARIO.md) · [Matriz de accesos](MATRIZ-FLUJOS-E3.md) · [Rúbrica](RUBRICA-E3.md) · [Reconstrucción por host](DESPLIEGUE-REPRODUCIBLE-E3.md) · [Demo de 12–15 minutos](PLAN-DEMOSTRACION-E3.md)
 
-BIND9 administra la zona nodosur07.tas y resuelve
-el dominio principal y www a 10.33.195.194.
+## Verificación reproducible adicional — 22/10/2026
 
-HAProxy recibe HTTP y HTTPS, redirige HTTP a HTTPS
-y distribuye las solicitudes mediante roundrobin:
+El equipo ejecutó un segundo **arranque limpio y aislado de la
+capa Docker en Fedora** con proyecto `nodosur-e3-init-limpio`,
+volúmenes nuevos y dependencias declaradas en
+`compose/e3-lab/compose.yaml`:
+`uploads-init` se ejecutó **automáticamente** (`Exited (0)`,
+`UPLOADS_INIT_OK`), MariaDB alcanzó `healthy` y ambas
+webs iniciaron `running`. Desde ambos backends, `uploads`
+presentó UID/GID 33:33 y permitió escritura con `www-data`.
+Posteriormente, Web1 escribió un marcador temporal que Web2 pudo
+leer con SHA-256 **idéntico** al calculado en Fedora; el archivo
+fue eliminado con `LIMPIEZA: OK`.
 
-- web1: 10.33.199.58:18081
-- web2: 10.33.199.62:18080
+[Arranque limpio](../evidencias/e3/arranque-limpio-uploads-init-fedora-20261022.txt) ·
+[Escritura y SHA-256 cruzado](../evidencias/e3/lectura-cruzada-arranque-limpio-fedora-20261022.txt) ·
+[Informe del ensayo](ENSAYO-REPRODUCIBILIDAD-E3.md).
 
-Los health checks HTTP retiran temporalmente un
-backend cuando deja de responder y lo reincorporan
-cuando vuelve a estar disponible.
+**Alcance:** se eliminó la brecha de inicialización manual de
+`uploads` en un segundo proyecto Docker nuevo sin afectar
+FurgoPlus ni iLab. No se reconstruyeron de cero las cinco VMs
+ni BIND/NFS/TLS productivos, y el proxy no se arrancó en este
+segundo proyecto para evitar conflicto de puertos; su balanceo,
+TLS y failover cuentan con evidencias independientes.
 
-Ambos WordPress utilizan MariaDB Docker en
-10.33.199.60:3306 y almacenamiento NFS compartido
-para los archivos subidos.
+## Resultado de las pruebas disponibles
 
-El tráfico HTTPS utiliza un certificado autofirmado
-con SAN para nodosur07.tas y www.nodosur07.tas.
+| Comportamiento a defender | Evidencia que tenemos | Interpretación correcta |
+|---|---|---|
+| HAProxy distribuye peticiones | [8 respuestas en alternancia, 4/4](../evidencias/e3/balanceo-roundrobin.txt) | Roundrobin observado con ambos web disponibles |
+| Un backend deja de atender | [Detención controlada, log `DOWN` y 8/8 HTTP 200 vía web1](../evidencias/e3/prueba-falla-web2-haproxy-web1-20261021.txt) | Continuidad demostrada después de la detección de caída; no prueba ausencia de errores en el intervalo de detección |
+| Web2 vuelve | [Actualización WordPress 7.1.3, log `UP` de HAProxy, 8/8 HTTP 200 repartidos 4/4](../evidencias/e3/wordpress713-recuperacion-web2-haproxy-20261021.txt) | Reincorporación automática por health check Layer7 HTTP 200 verificada; no hay RTO formal medido |
+| Configuración y publicación HTTPS | [`haproxy -c` correcto y redirección HTTP 301](../evidencias/e3/http-redirect-y-validacion-proxy-20261021.txt), [6 HTTPS exitosos 3/3](../evidencias/e3/https-haproxy.txt) | Proxy operativo; sin demostrar confianza pública del certificado |
+| Certificado TLS | [SAN, fechas y huella pública](../evidencias/e3/certificado-publico-y-repo-local-20261021.txt) | Autofirmado, válido por fechas y nombres, **no** reconocido automáticamente por navegadores |
+| Contenido compartido por NFS | [Mismo archivo, tres SHA-256 idénticos](../evidencias/e3/nfs-mismo-archivo-web1-web2-20261021.txt) | Ambos web entregan bytes idénticos al origen; no prueba escritura cruzada de archivos nuevos |
+| Coherencia de aplicación | [Carrito del producto 43 compartido](../evidencias/e3/carrito-coherencia-postmigracion.txt) | Un flujo de carrito entre web1 y web2; no todas las sesiones ni operaciones concurrentes |
+| Reglas de red | [`DOCKER-USER` web1/web2](../evidencias/e3/firewall-docker-user-web1-web2-20261021.txt), [conectividad observada](../evidencias/e3/acceso-proxy-backends-20261020.txt) | Restricción de orígenes a puertos web; las pruebas negativas TCP no localizan por sí solas toda la causa |
+| Despliegue por host | [Compose web1/web2 y mounts](../evidencias/e3/compose-productivo-web1-web2-y-php-20261021.txt), [DB/proxy](../evidencias/e3/compose-productivo-db-proxy-20261021.txt) | Definiciones Compose correctas en cuatro hosts; contenedores running |
+| Pruebas de los cambios auditados | [25 pruebas locales OK y barrido heurístico](../evidencias/e3/validacion-local-fedora-20261021.txt) | Resultado de la rama local de Codex con dobles de Docker/iptables; **no acredita adopción en producción** |
 
-## Validaciones realizadas
+## Funcionamiento de la plataforma
 
-### Balanceo
+1. BIND resuelve `nodosur07.tas` hacia el proxy `10.33.195.194`.
+2. HAProxy atiende HTTP 80/HTTPS 443, redirige HTTP, termina TLS y consulta la salud de web1/web2 con `HEAD /`, respuesta esperada 200.
+3. Los backends están en `10.33.199.58:18081` (VM263) y `10.33.199.62:18080` (VM310).
+4. Los dos WordPress consultan MariaDB `10.33.199.60:3306` (VM279), con volumen de datos persistente histórico `nodosur-db-staging_db_stage_data`.
+5. El directorio `wp-content/uploads` está montado en ambos web desde NFS de VM268 (`10.33.199.59`).
+6. Las reglas `DOCKER-USER` de ambos web limitan sus puertos internos a conexiones desde el proxy `10.33.199.61`. Los secretos no deben versionarse.
 
-Se realizaron diez solicitudes HTTPS consecutivas:
+## Endurecimiento de uploads instalado (21/10/2026)
 
-- 10 respuestas HTTP 200.
-- 5 respuestas desde web1.
-- 5 respuestas desde web2.
+Se incorporó la configuración [`configs/apache/nodosur-uploads.conf`](../configs/apache/nodosur-uploads.conf) para denegar PHP/PHTML/PHAR y ejecución CGI dentro de `wp-content/uploads`. Antes de su instalación se verificó `apache2ctl -t` y comportamiento HTTP de un contenedor Apache efímero aislado: archivo de texto `200` y archivo PHP existente `403`, ambos inocuos.
 
-### Falla y recuperación
+La configuración quedó montada **en web2 (VM310) y después en web1 (VM263)**, desde `/etc/nodosur/apache/nodosur-uploads.conf` con bind de solo lectura y sin creación automática de ruta. Ambos WordPress siguieron `running`. La verificación final desde VM308 mostró:
 
-Se detuvo de forma controlada web2.
+- **Web1**: portada `200`, `/tienda/` `200`, imagen real de uploads en NFS `200`, URL PHP inexistente bajo uploads `403`.
+- **Web2**: las mismas respuestas `200 / 200 / 200 / 403`.
+- **HAProxy**: seis respuestas HTTPS `200` repartidas **3 web1 / 3 web2**.
 
-HAProxy detectó el backend como DOWN.
-Durante la falla, ocho solicitudes consecutivas
-respondieron HTTP 200 desde web1.
+Evidencia: [resultado final de los dos backends](../evidencias/e3/apache-uploads-web1-web2-final-20261021.txt). El `403` de producción se observó consultando una ruta inexistente: se presenta como comprobación de la regla HTTP, no como ensayo de ejecución de un PHP subido. Los respaldos previos de Compose permanecen fuera de Git en los hosts web.
 
-Al iniciar nuevamente web2, HAProxy detectó
-su recuperación mediante un health check HTTP 200.
+**Nota operativa:** se comprobaron [huellas semánticas idénticas de Compose entre Fedora y VM263/VM310](../evidencias/e3/huellas-compose-web1-web2-verificadas-20261021.txt). La [auditoría Git posterior](../evidencias/e3/git-backends-cambios-locales-20261021.txt) muestra que VM263 sigue en `e3/backend1` (`8b067ef`) y VM310 en `e3/backend2` (`667d7d9`); en cada una el único cambio local reportado es la adición del bind de hardening Apache en su Compose, y `git diff --check` no reportó problemas. **Se conservarán esas ediciones locales sin `pull`/`reset`, commits productivos ni recreación de contenedores por motivos puramente Git.** La rama de cierre representa el trabajo versionado, no una revisión instalada idéntica en cada VM. **En la auditoría productiva del 21/10**, el PR #2 seguía sin fusionar con `e3/integracion`. Su integración Git posterior no implica desplegar esos commits en las VMs.
 
-Se realizaron otras diez solicitudes exitosas,
-distribuidas cinco por cada backend.
+## Alineación de WordPress y recuperación posterior (21/10/2026)
 
-### Coherencia del carrito
+Tras respaldar archivos privados de web2 y generar/verificar un respaldo reciente de MariaDB, el operador preparó el paquete oficial WordPress 7.1.3 y actualizó **solo el core de web2** con el contenedor detenido. Se conservaron `wp-config.php`, `wp-content` y NFS; pasaron siete pruebas PHP lint aisladas. Web2 volvió a `running`, Apache reportó `Syntax OK` (aviso no fatal ServerName), core declaró **7.1.3** y esquema 61833. Desde VM308, portada, tienda e imagen NFS devolvieron 200, PHP bajo uploads 403. HAProxy registró `web2 is UP` por `Layer7 check passed, code: 200` y 8 solicitudes al frontend obtuvieron HTTP 200, repartidas **4/4**.
 
-Se creó un carrito WooCommerce en web1, se agregó
-el producto de prueba ID 43 y se verificó su presencia
-desde web2.
+La secuencia completa incluye [evento DOWN y continuidad atendida por web1](../evidencias/e3/prueba-falla-web2-haproxy-web1-20261021.txt) y [evento UP y regreso del balanceo](../evidencias/e3/wordpress713-recuperacion-web2-haproxy-20261021.txt), respaldada por el [plan de alineación](PLAN-ALINEACION-WORDPRESS-E3.md). No se cuantificaron errores durante el intervalo previo al DOWN ni se ensayó restauración funcional integrada. Se auditaron las cuatro huellas de directorios postactualización: los 9817 archivos de `wp-admin`, `wp-includes`, plugins y temas presentan cantidades y hashes idénticos en web1/web2 ([evidencia](../evidencias/e3/comparacion-post-upgrade-web1-web2-20261021.txt)). Los archivos principales seleccionados de la raíz de WordPress también tienen [SHA-256 idéntico](../evidencias/e3/wordpress-raiz-sha256-igual-web1-web2-20261021.txt), excluyendo `wp-config.php`; continúa pendiente evaluar configuración efectiva y estado dinámico.
 
-El producto fue retirado correctamente y la prueba
-finalizó con código de salida 0.
+## Comprobación adicional de MariaDB y HAProxy (21/10/2026)
 
-Evidencia:
-evidencias/e3/carrito-coherencia-postmigracion.txt
+Desde sus VMs, el operador comprobó `git status --short` sin cambios locales y `docker compose config --quiet` correcto en ambos roles. MariaDB `running/healthy` con imagen `mariadb:10.11`, volumen histórico exacto y secreto root externo presente. HAProxy `running` con imagen `haproxy:3.2.23-alpine`, validación `haproxy -c` correcta y archivo TLS presente. [Evidencia](../evidencias/e3/preflight-db-proxy-compose-20261021.txt). Se verificó únicamente presencia/no vacío de archivos privados; no sus permisos o contenido. Un estado Git limpio no asegura igualdad de ramas o commits con el PR. En una [auditoría posterior](../evidencias/e3/permisos-publicacion-git-db-proxy-20261021.txt) se comprobaron además permisos DB 700/600 root, 3306 enlazado únicamente a 10.33.199.60, TLS de proxy 750/640 root:UNKNOWN, y puertos 80/443 enlazados a 10.33.195.194. Las ramas locales son e3/database (488cb27) y e3/proxy (fdaba39); son despliegues por rol, no el commit del PR. La [auditoría complementaria del certificado](../evidencias/e3/haproxy-certificado-gid99-20261021.txt) confirmó que el GID 99 sin nombre resuelto en el anfitrión corresponde al grupo `haproxy` dentro del contenedor (UID/GID 99). La lectura efectiva mediante `test -r` fue positiva y el montaje del PEM tiene `RW=false`. No fue necesario modificar permisos; esto no equivale a auditar exhaustivamente ACL ni otras identidades del host.
 
-### Seguridad de red
+## Auditoría adicional de segmentación y DNS (21/10/2026)
 
-Se verificó que:
+La [evidencia de firewall MariaDB y DNS](../evidencias/e3/auditoria-firewall-db-dns-20261021.txt) muestra reglas `DOCKER-USER` efectivas para 3306: excepciones de origen `10.33.199.59` (VM268), `.62` (web2) y `.58` (web1), seguidas de `DROP` para otros orígenes sobre el puerto original; también hay reglas para el puerto `13307` cuya necesidad histórica no se ha aclarado, pero **no se observó escucha TCP ni publicación/NAT Docker** en la comprobación posterior. UFW permanece activo, con política `deny incoming` y permisos limitados de SSH/DB. Estas observaciones no prueban por sí solas aceptación final de cada flujo ni que la configuración cubra toda la red.
 
-- Los backends autorizados acceden a MariaDB.
-- El proxy no puede conectarse directamente a MariaDB.
-- La VM de MariaDB no puede conectarse al HTTPS del proxy
-  por la interfaz administrativa.
-- Las reglas DOCKER-USER muestran paquetes descartados.
-- El acceso HTTPS desde la VPN institucional funciona.
+BIND9 contestó SOA autoritativo por UDP/TCP (`aa`, `NOERROR`). Inicialmente AXFR desde Fedora por VPN permitió transferir nueve registros (`XFR size: 9 records`). Se verificó BIND 9.18.39, zona primaria sin `allow-transfer` explícito y un solo NS publicado. Tras preparar y validar una copia con respaldo privado, **se aplicó `allow-transfer { none; };` únicamente a `nodosur07.tas`**, se validó con `named-checkconf -z` y se ejecutó `rndc reconfig` sin reinicio. **Verificación posterior desde Fedora: SOA UDP/TCP autoritativo `NOERROR`, `www` hacia `10.33.195.194` y AXFR `REFUSED`** ([evidencia](../evidencias/e3/auditoria-firewall-db-dns-20261021.txt)). El resultado no certifica pruebas desde todas las redes ni redundancia DNS; se preserva respaldo para reversión.
 
-### Respaldos
+## Persistencia después de reinicio (ensayo Fedora, 21/10/2026)
 
-La VM de MariaDB genera respaldos comprimidos y
-sus archivos SHA-256.
+[Registro de la prueba y verificación posterior](../evidencias/e3/persistencia-reinicio-ensayo-fedora-20261021.txt): tras reiniciar **solo** los contenedores del ensayo, MariaDB recuperó `healthy`, WordPress conservó instalación/administrador en ambos servidores, y un archivo ficticio mantuvo el mismo SHA-256 desde ambas webs; después fue eliminado. Las primeras seis peticiones HTTP 200 del proxy pasaron solo por Web2 (el validador original salió con error). **Sin nuevos reinicios**, los logs de HAProxy mostraron Web1 `DOWN` por conexión rechazada y posteriormente `UP` tras health check Layer7 HTTP 200. En la comprobación posterior ambos WordPress devolvieron HTTP 200 y **ocho solicitudes se distribuyeron 4/4**. FurgoPlus permaneció saludable. El script se ajustó para esperar ambos nodos en futuras ejecuciones; no se midió RTO y este ensayo no sustituye la prueba de las cinco VMs del iLab.
 
-Se verificó la réplica externa del respaldo
-nodo_sur_final-20261020-190237.sql.gz.
+## WordPress inicializado en el ensayo (21/10/2026)
 
-Resultados:
-- Copia disponible en VM268, directorio archive.
-- SHA-256 correcto.
-- Compresión GZIP válida.
-- 52 tablas identificadas en el respaldo.
+La [instalación ficticia con `wp_install()`](../evidencias/e3/wordpress-instalado-ensayo-fedora-20261021.txt) tuvo éxito (`WORDPRESS_LAB_INSTALL_OK`), y HAProxy respondió HTTP 200 en 6/6 solicitudes, repartidas 3/3 entre Web1 y Web2. La ausencia de `sendmail` no impidió terminar; el ensayo no incluye correo de producción. El estado persistente del WordPress ficticio quedó comprobado posteriormente en el reinicio controlado del propio laboratorio.
 
-El servicio nodosur-remote-backup-maintenance realiza
-validaciones periódicas de los respaldos recibidos.
+## Validación de uploads compartidos del ensayo (21/10/2026)
 
-## Servicios persistentes
+La [prueba de escritura/lectura cruzada](../evidencias/e3/volumen-compartido-ensayo-fedora-20261021.txt) pasó: misma identidad y montaje `shared_uploads`, Web1 creó archivo temporal como `www-data`, Web2 leyó SHA-256 igual y el archivo se eliminó. MariaDB de ensayo permaneció `healthy` y los seis contenedores FurgoPlus continuaron `healthy`. La prueba usa **volumen local Docker**, no NFS productivo.
 
-Los servicios productivos utilizan systemd para
-gestionar los contenedores y las tareas de respaldo.
+## Ensayo local de arranque multicontenedor (21/10/2026)
 
-La configuración versionada se encuentra en:
+Se levantó en Fedora el proyecto aislado `nodosur-e3-ensayo` a partir de `compose/e3-lab/compose.yaml`: MariaDB 10.11 healthy, WordPress web1/web2 y HAProxy 3.2.23 running; redes y volúmenes exclusivos, solo 127.0.0.1:19090 publicado, HTTP 302 y los seis contenedores FurgoPlus aún saludables ([evidencia](../evidencias/e3/primer-arranque-ensayo-fedora-20261021.txt)). Este era el resultado **inicial**; las pruebas posteriores sí demostraron ambos backends, SQL, instalación del CMS y volumen compartido local, **pero no NFS/TLS reales ni una reconstrucción productiva desde cero**.
 
-- compose/proxy/compose.prod.yaml
-- compose/proxy/haproxy.prod.cfg
-- compose/db-stage/compose.prod.yaml
-- configs/systemd/
-- configs/firewall/
-- scripts/e3/
+## Verificación integral de lectura desde Fedora (21/10/2026)
 
-Los certificados, las credenciales y los secretos
-se mantienen fuera del repositorio.
+[Último control funcional](../evidencias/e3/validacion-integral-fedora-20261021.txt): los registros A de DNS resolvieron correctamente por UDP y TCP (8/8), HTTP devolvió 301 a HTTPS, el proxy respondió 6/6 HTTP/2 200 repartidos 3/3 entre los dos backends y WooCommerce `/tienda/` devolvió HTTP 200. Estas consultas no generaron pedidos, no recrearon servicios ni validaron todas las funciones de la tienda.
 
-## Limitaciones
+## Opciones WordPress y WooCommerce consistentes en ejecución (21/10/2026)
 
-La implementación tolera la caída de un backend web,
-pero no ofrece alta disponibilidad de todos los servicios.
+Se consultaron las [opciones reales de ambos WordPress por PHP CLI dentro de VM263/VM310](../evidencias/e3/wordpress-opciones-productivas-web1-web2-20261021.txt), sin modificaciones: **núcleo 7.1.3**, `siteurl` y `home` idénticos (`https://nodosur07.tas`), WooCommerce **activo** en ambos y `DB_HOST` con prefijo `10.33.199.60` y `DB_NAME=nodo_sur_final` en ambos. Es evidencia adicional de configuración coherente, junto a NFS y carrito compartido ya documentados. **No demuestra** igualdad de claves de sesión, prefijo SQL o todos los flujos concurrentes.
 
-Persisten puntos únicos de fallo:
+## Compatibilidad del esquema WordPress / WooCommerce (21/10/2026)
 
-- HAProxy.
-- MariaDB.
-- DNS autoritativo.
-- Servidor NFS y repositorio de respaldos.
+Se consultaron [ambas aplicaciones ejecutándose en VM263 y VM310](../evidencias/e3/coherencia-esquema-wp-woocommerce-20261021.txt), solo lectura: prefijo SQL `wp_`, `WC_VERSION=11.1.0`, `woocommerce_db_version=11.1.0-1` y `db_version=61833` **coinciden en ambos servidores**. Junto a los hashes del código, opciones `home/siteurl`, MariaDB compartida, NFS y una prueba previa de carrito, estos controles fortalecen la coherencia del estado en E3. No certifican sesiones privadas, pedidos concurrentes ni recuperación integral desde backup.
 
-El certificado TLS es autofirmado y requiere confianza
-explícita del cliente.
+## Comprobación final de los cuatro hosts Docker (21/10/2026)
 
-La reproducción completa depende de las redes,
-volúmenes, certificados y secretos configurados en
-las VMs de laboratorio. El repositorio no constituye
-un aprovisionamiento automático completo.
+La [validación directa de VM279/VM308/VM263/VM310](../evidencias/e3/validacion-cuatro-vms-config-runtime-20261021.txt) confirmó definición Compose válida en cada host, contenedores `running`, DB `healthy` sobre el volumen histórico, sintaxis de HAProxy `exit 0`, Apache `Syntax OK` `exit 0` en ambas webs y NFSv4 montado desde VM268. Web1/Web2 siguen teniendo modificaciones locales intencionales de Compose; `git diff --check` no produjo errores. La advertencia de `ServerName` no impide su funcionamiento. La etiqueta Docker WordPress es 7.1.2, mientras que el núcleo PHP dentro de ambos HTML persistentes fue comprobado como 7.1.3. **No se reconstruyó el iLab desde cero**.
 
-## Conclusión
+## Qué no está demostrado todavía
 
-La arquitectura de cinco VMs permite distribuir
-las solicitudes, conservar el estado compartido
-de WooCommerce y mantener la atención del sitio
-ante la caída de uno de los servidores web.
+- Sí hay registros `DOWN/UP` conservados en la nueva prueba controlada de falla y recuperación; no se ha medido formalmente un **RTO/RPO** ni la posible pérdida de solicitudes durante el umbral de detección.
+- El montaje NFS y las lecturas idénticas no certifican por sí solos que todos los plugins, salts, sesiones o pedidos concurrentes sean coherentes. **El desfase de WordPress 7.1.3 frente a 7.1.2 fue corregido:** ahora ambos nodos declaran 7.1.3; la comparación de directorios por SHA-256 ya dio cuatro coincidencias (núcleo y plugins/temas), y también coinciden los archivos principales seleccionados de raíz, excluyendo `wp-config.php`; resta revisar diferencias de configuración. WooCommerce 11.1.0 y los árboles completos de plugins/temas coincidían según [evidencia previa](../evidencias/e3/wordpress-arboles-core-plugins-temas-20261021.txt). Se verificaron [respaldo privado HTML](../evidencias/e3/respaldo-html-web2-pre-upgrade-20261021.txt) y [SQL reciente](../evidencias/e3/respaldo-mariadb-pre-cambio-web2-20261021.txt); **no hay ensayo de restauración real**.
+- Los cuatro Compose funcionan donde están instalados, pero un checkout nuevo no reconstruye automáticamente la VPN, las VMs, los secretos, el TLS, los datos y el almacenamiento.
+- HAProxy, MariaDB, DNS y NFS son **SPOF**. No se ha demostrado continuidad ante caída de cualquiera de esas dependencias compartidas.
+- La protección Apache de `uploads` **sí está instalada** en ambos WordPress, con evidencia aislada y productiva. Otras propuestas de Codex para firewall, systemd, HAProxy y backups **no se han aplicado a las VMs** y requieren validación separada.
 
-Las pruebas se realizaron sobre los servicios
-productivos de la Entrega 3.
+## Antes de la defensa
+
+La falla controlada con logs DOWN/UP ya fue ensayada y documentada. Para la defensa corresponde revalidar estado de servicios, balanceo y endpoints, y preparar la demostración sin repetir la falla si no hay una ventana autorizada. Explicar el uso de NFS, MariaDB compartida, Docker Compose, `DOCKER-USER`, el umbral de health checks y los puntos únicos de fallo.
+
+## Nota sobre E4
+
+El ensayo de restauración de MariaDB (52 tablas) y la extracción de WordPress (10.313 archivos coincidentes por SHA-256) se hicieron por separado en laboratorio aislado. Son avances valiosos para la continuidad operacional de **Entrega 4**, pero no equivalen a restauración funcional integrada de WordPress + MariaDB, ni sustituyen los criterios técnicos de E3.

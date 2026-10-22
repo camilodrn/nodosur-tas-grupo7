@@ -1,0 +1,41 @@
+# Nodo Sur E3 — comprobaciones de solo lectura de Git/Compose/runtime
+# 21/10/2026, salida proporcionada por el operador.
+# Se ejecutó por SSH en VM279 y VM308. No hubo cambios de servicios.
+
+=== VM279 / MariaDB ===
+SSH: tas_revision@10.33.195.226, autenticación finalmente exitosa.
+cd ~/nodosur-tas-grupo7:
+  git branch --show-current -> e3/database
+  git rev-parse --short HEAD -> 488cb27
+  git status --short -> salida vacía
+sudo docker compose -f compose/db-stage/compose.prod.yaml config --quiet:
+  COMPOSE: OK
+sudo docker inspect nodosur-db-staging:
+  Estado=running Salud=healthy
+  Mount /var/lib/mysql: nodosur-db-staging_db_stage_data
+
+=== VM308 / HAProxy ===
+SSH: nodosur-g7-proxy@10.33.195.194, se logró ingresar tras
+dos intentos de autenticación rechazados. No se registraron claves.
+cd ~/nodosur-tas-grupo7:
+  git branch --show-current -> e3/proxy
+  git rev-parse --short HEAD -> fdaba39
+  git status --short -> salida vacía
+sudo docker compose -f compose/proxy/compose.prod.yaml config --quiet:
+  COMPOSE: OK
+sudo docker exec nodosur-haproxy haproxy -c -f /usr/local/etc/haproxy/haproxy.cfg:
+  sin salida visible en transcripción; su exit code no se capturó.
+  NO concluir a partir de este intento que haproxy -c devolvió 0.
+sudo docker inspect nodosur-haproxy:
+  Estado=running Imagen=haproxy:3.2.23-alpine
+
+=== INTERPRETACIÓN ===
+Los archivos Compose actuales son sintácticamente válidos en las
+dos VMs y ambos contenedores existen/en ejecución. La MariaDB
+conserva salud y volumen histórico exacto. La versión local de
+Git corresponde a ramas por rol, no necesariamente a la rama de
+cierre e3/cierre-tecnico ni a un despliegue desde cero.
+
+Pendiente capturar explicitamente exit code de haproxy -c y
+revisar solo lectura de Web1/VM263 y Web2/VM310. No se ejecutó
+docker compose up/down, reinicio, alteración de Git o firewall.

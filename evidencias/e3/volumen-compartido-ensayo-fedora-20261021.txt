@@ -1,0 +1,45 @@
+# Nodo Sur E3 — Volumen de uploads compartido validado en Fedora
+# Fecha: 21/10/2026. Evidencia suministrada por el operador.
+# ENSAYO AISLADO: nodosur-e3-ensayo; sin modificación de VMs productivas.
+
+=== PRECONDICIONES ===
+Git Fedora: fast-forward 99cd2d5..3634a97, sin conflictos.
+bash -n scripts/validate-e3-lab-uploads.sh: sin errores.
+script: bash scripts/validate-e3-lab-uploads.sh
+Cada exec Docker Compose recibe stdin desde /dev/null.
+
+=== VOLUMEN Y PROPIEDADES ===
+web1: montaje correcto
+UPLOADS: UID=33 GID=33 MODO=755
+ESCRITURA: PERMITIDA
+web2: montaje correcto
+UPLOADS: UID=33 GID=33 MODO=755
+ESCRITURA: PERMITIDA
+
+=== PRUEBA REAL DE ESCRITURA Y LECTURA CRUZADA ===
+Script creó un archivo de contenido fijo y nombre temporal bajo
+/var/www/html/wp-content/uploads desde web1 como www-data.
+SHA256 web1: cb957d8d4c8447c361e434aa6f1f6a5635e7eb53dd50e6d4663091ac6bbbd1fb
+SHA256 web2: cb957d8d4c8447c361e434aa6f1f6a5635e7eb53dd50e6d4663091ac6bbbd1fb
+Validación del script: ambos hashes iguales al esperado
+ALMACENAMIENTO COMPARTIDO: OK
+RESULTADO: VALIDACION DEL VOLUMEN COMPLETADA
+LIMPIEZA: ARCHIVO FICTICIO ELIMINADO
+
+=== ESTADO FINAL DEL ENSAYO ===
+database: mariadb:10.11 Up 22 min (healthy), solo 3306/tcp interno
+proxy: haproxy:3.2.23-alpine Up 22 min, 127.0.0.1:19090->8080/tcp
+web1: wordpress:7.1.3-php8.3-apache Up 22 min, 80/tcp interno
+web2: wordpress:7.1.3-php8.3-apache Up 22 min, 80/tcp interno
+
+=== FURGOPLUS ===
+Seis contenedores furgoplus-demo y demo-restore: Up (healthy).
+La prueba de Nodo Sur no detuvo ni modificó explícitamente estos servicios.
+
+=== ALCANCE / LIMITACIONES ===
+Reprodujo servicios Docker en un solo host Fedora.
+Comprobó permiso www-data, escritura desde web1, lectura desde web2,
+consistencia de contenido y limpieza del archivo ficticio.
+No certifica NFS real (usa volumen Docker local), login compartido,
+WordPress inicializado, reinicio persistente, red VLAN/TLS USM o la
+reconstrucción completa de las cinco VMs de producción.

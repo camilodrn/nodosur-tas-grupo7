@@ -1,10 +1,15 @@
 # Contribuciones del equipo
 
+**Alcance de esta tabla:** trabajo y evidencia documentados de la fase E2; **no** es una atribución individual comprobada de todas las tareas y commits de E3. Antes de usarla en la defensa E3, contrastar con el grupo las actividades reales de cada integrante sin inventar autorías.
+
+---
+
+
 Este registro reconstruye el trabajo **realmente realizado** por el equipo durante la implementación de Nodo Sur. No se asignan tareas ficticias ni commits retroactivos. Como el repositorio se consolidó al final del hito, no todas las contribuciones quedaron asociadas a commits individuales; por eso se indican también otras evidencias disponibles.
 
 | Integrante | Trabajo realizado | Evidencia disponible |
 |---|---|---|
-| **Camilo Durán** | Coordinación e integración técnica del cierre de la entrega; trabajo directo sobre la arquitectura distribuida y validaciones finales de DNS, web, base de datos, seguridad, almacenamiento, logs y privilegios; consolidación del informe y del repositorio técnico. | Estado final de las tres VMs, configuraciones y pruebas reproducibles almacenadas en `configs/` y `pruebas/`, además de `ARQUITECTURA.md`, `BITACORA.md` y `CHECKLIST_ENTREGA2.md`. |
+| **Camilo Durán** | Coordinación e integración técnica del cierre de la entrega; trabajo directo sobre la arquitectura distribuida y validaciones finales de DNS, web, base de datos, seguridad, almacenamiento, logs y privilegios; consolidación del informe y del repositorio técnico. | Estado final de las tres VMs, configuraciones y pruebas reproducibles almacenadas en `configs/` y `pruebas/`, además de `ARQUITECTURA.md`, `BITACORA.md` y [`CHECKLIST_ENTREGA2.md`](docs/historia/CHECKLIST_ENTREGA2.md). |
 | **Nicolás Matamala** | Participación práctica en las VMs durante la implementación; realización de pruebas, cambios y validaciones de servicios; apoyo en WordPress y WooCommerce y en la comprobación del flujo funcional. También fue registrando técnicamente configuraciones, pruebas e incidencias mientras el equipo trabajaba, material que sirvió como apoyo para el cierre del informe. | Cambios y pruebas realizadas directamente en las VMs; participación en validaciones del CMS/WooCommerce; registro técnico de trabajo y pruebas compartido con el equipo. |
 | **Joaquín Sáez** | Participación práctica en las VMs durante la implementación; instalación y configuración de WordPress; incorporación y configuración de WooCommerce; trabajo en el diseño de la página; ejecución de pruebas y cambios sobre el CMS y la tienda durante el desarrollo. | Resultado funcional visible en WordPress/WooCommerce, cambios realizados en las VMs y declaración directa del integrante al equipo. No generó documentación propia de sus cambios. |
 | **Jean Díaz** | Elaboración de un mockup exploratorio de interfaz durante una etapa temprana del proyecto. | Aporte de diseño exploratorio declarado por el equipo. El mockup no fue incorporado a la versión final de la plataforma, por lo que no se presenta como cambio técnico implementado. |

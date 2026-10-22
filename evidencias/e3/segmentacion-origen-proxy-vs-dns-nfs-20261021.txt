@@ -1,0 +1,55 @@
+# Nodo Sur E3 — Prueba diferencial de acceso por origen a backends web
+# Fecha: 21/10/2026. Evidencia aportada por operador.
+# Ejecución desde Fedora conectado a la VPN USM.
+# Solo solicitudes HTTP GET: no se alteraron VMs ni firewall.
+
+=== ORIGEN AUTORIZADO: VM308 PROXY ===
+SSH hacia 10.33.195.194, usuario autorizado nodosur-g7-proxy: acceso correcto.
+hostname remoto: nodosur-g7-proxy
+GET http://10.33.199.58:18081/
+  Host: nodosur07.tas; X-Forwarded-Proto: https
+  HTTP=200
+  CURL_EXIT=0
+GET http://10.33.199.62:18080/
+  Host: nodosur07.tas; X-Forwarded-Proto: https
+  HTTP=200
+  CURL_EXIT=0
+
+=== ORIGEN RESTRINGIDO: VM268 DNS/NFS ===
+SSH hacia 10.33.195.205, usuario autorizado tas_revision: acceso correcto.
+hostname remoto: nodosur-g7
+GET http://10.33.199.58:18081/
+  Host: nodosur07.tas; X-Forwarded-Proto: https
+  HTTP=000
+  CURL_EXIT=28
+  Error curl: Failed to connect ... after ~3002 ms: Timeout was reached
+GET http://10.33.199.62:18080/
+  Host: nodosur07.tas; X-Forwarded-Proto: https
+  HTTP=000
+  CURL_EXIT=28
+  Error curl: Failed to connect ... after ~3002 ms: Timeout was reached
+Nota: la transcripción de stderr/stdout se intercaló en las dos líneas
+de timeout, pero los pares HTTP=000 / EXIT=28 son visibles.
+
+=== CONCLUSIONES OBSERVADAS ===
+La conectividad HTTP desde VM308 hacia web1 y web2 funciona.
+El mismo intento de conexión desde VM268 no completa TCP a
+web1 ni web2 dentro de la ventana (curl 28). HTTP=000 no es
+un código de respuesta enviado por el servidor.
+Se verifica una diferencia efectiva de conectividad según origen.
+Esto NO atribuye de forma concluyente la causa del timeout a
+DOCKER-USER sin inspeccionar las reglas activas y, si se busca
+correlación más fuerte, sus contadores antes/después de una
+prueba controlada. Las reglas previamente registradas en ambas
+webs coinciden con esa política, pero eran de una captura anterior.
+
+=== ACCIONES PENDIENTES DE SOLO LECTURA ===
+Revisar nodosur-docker-firewall.service y
+iptables -S/-nvL DOCKER-USER en web1 y web2.
+Si es útil, comprobar rutas de VM268 a ambos destinos.
+No modificar reglas, no reiniciar Docker ni el firewall.
+
+=== RELEVANCIA ===
+Refuerza el criterio E3 Segmentación/firewall/secretos y la
+matriz de flujos; NO constituye una auditoría integral de todas
+las VLAN, servicios, ACL o direcciones de origen.

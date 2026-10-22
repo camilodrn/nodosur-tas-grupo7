@@ -1,0 +1,43 @@
+# Nodo Sur E3 — Opciones WordPress/WooCommerce en ejecución por backend
+# Fecha observada: 21/10/2026. Salidas del operador de consola Fedora.
+# Lectura de la aplicación desde sus propios contenedores productivos.
+# No se escribieron datos ni se visualizaron secretos.
+
+=== VM263 WEB1 ===
+ssh tas_revision@10.33.195.202
+sudo docker exec -u www-data nodosur-web1 php -r '...wp-load.php...get_option...'
+WP=7.1.3
+SITEURL=https://nodosur07.tas
+HOME=https://nodosur07.tas
+WC_ACTIVO=SI
+DB_COMUN=SI
+Conexión SSH finalizada normalmente.
+
+=== VM310 WEB2 ===
+ssh nodosur-g7-web2@10.33.195.208
+sudo docker exec -u www-data nodosur-web2 php -r '...wp-load.php...get_option...'
+WP=7.1.3
+SITEURL=https://nodosur07.tas
+HOME=https://nodosur07.tas
+WC_ACTIVO=SI
+DB_COMUN=SI
+Conexión SSH finalizada normalmente.
+
+=== QUE COMPROBABA DB_COMUN ===
+El script impreso por el operador calculaba SI cuando:
+  defined(DB_HOST) && str_starts_with(DB_HOST, "10.33.199.60")
+  && defined(DB_NAME) && DB_NAME === "nodo_sur_final"
+Por tanto, se verifica igualdad de las condiciones de configuración
+del servidor y nombre de BD; el booleano solo NO comprueba
+que DB_HOST sea exactamente el mismo string, ni que los prefijos
+SQL, tablas, sesiones privadas o datos de checkout sean idénticos.
+
+=== ALCANCE Y LIMITES ===
+PASS: en ambos contenedores: WordPress 7.1.3, misma URL publica
+en siteurl/home, WooCommerce listado entre plugins activos,
+y configuracion de host/BD que satisface las mismas condiciones.
+Esta prueba es complementaria a las evidencias anteriores
+de SQL, NFS, hash de archivos y coherencia de un carrito.
+NO valida sesiones autenticadas entre servidores, configuraciones
+privadas, concurrente checkout ni restauracion integral.
+Sin cambios a contenedores, MariaDB, firewalls ni DNS.

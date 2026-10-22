@@ -22,6 +22,15 @@ services:
         bind:
           create_host_path: false
 
+      # E3: bloquear ejecución de PHP en uploads compartidos.
+      # Instalar el archivo root-owned en el host antes de recrear WordPress.
+      - type: bind
+        source: /etc/nodosur/apache/nodosur-uploads.conf
+        target: /etc/apache2/conf-enabled/nodosur-uploads.conf
+        read_only: true
+        bind:
+          create_host_path: false
+
     logging:
       driver: json-file
       options:

@@ -1,0 +1,33 @@
+# Nodo Sur E3 — Prueba funcional Apache uploads en contenedor temporal
+# Salida reportada por el equipo desde VM263, 21/10/2026.
+# No se alteró ni recreó nodosur-web1, ni la VM310, ni el NFS/WordPress.
+#
+# Precondiciones observadas:
+# - Imagen local wordpress:7.1.2-php8.3-apache
+# - Config Apache candidata /tmp/nodosur-uploads-e3-test.conf en host
+# - docker run: --rm --pull=never --network none, sin -p/--publish
+# - Bind de SOLO LECTURA de conf candidata hacia
+#   /etc/apache2/conf-enabled/nodosur-uploads.conf
+# - Límites --memory 256m --cpus 1
+# - entrypoint apache2-foreground en contenedor aislado nodosur-e3-apache-aislado
+# - Archivos inocuos .txt y .php creados solamente en el filesystem temporal del contenedor
+#
+=== INICIAR APACHE AISLADO ===
+=== CREAR ARCHIVOS SOLO EN EL CONTENEDOR TEMPORAL ===
+=== COMPROBAR RESPUESTAS HTTP ===
+/wp-content/uploads/nodosur-e3-prueba.txt -> HTTP/1.1 200 OK
+/wp-content/uploads/nodosur-e3-prueba.php -> HTTP/1.1 403 Forbidden
+PRUEBA AISLADA: OK
+#
+# La rutina envolvente usó set -e y trap EXIT 'docker rm -f', con
+# --rm para eliminar el contenedor al detenerlo.
+#
+# Interpretación:
+# - Archivo estático accesible 200 y PHP denegado 403 usando Apache
+#   con la configuración candidata en un contenedor temporal y sin red.
+# - Esto valida ese escenario acotado. No prueba que todas las imágenes,
+#   plugins, sesiones y URLs de WooCommerce funcionen tras integrar
+#   el hardening en los backends productivos.
+# - Config Apache no instalada en nodosur-web1 ni nodosur-web2.
+# - El archivo de configuración temporal transferido al host VM263
+#   permanece por separado en /tmp, salvo que se borre explícitamente.

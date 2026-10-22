@@ -1,0 +1,91 @@
+# E3 — Validación final del bloqueo Apache de PHP en uploads, ambos backends
+# Reportado por el equipo el 21/10/2026 desde VM263 y VM308.
+# Se desplegó una configuración preventiva en cada backend web, de uno en uno.
+# No se modificaron MariaDB ni NFS, ni se subió código PHP a uploads.
+
+## Preflight y preparación de web1, VM263 (10.33.199.58:18081)
+
+# Tras la intervención de web2, HAProxy devolvió 6 respuestas HTTP/2 200:
+# alternancia web1, web2, web1, web2, web1, web2 (3/3).
+# Archivo de protección copiado al host web1 y SHA-256 verificado:
+# ceac4ca76941235039e5b8c321a923050360b101b19866fd2b55246e0fa05e14
+# Archivo instalado: /etc/nodosur/apache/nodosur-uploads.conf (root-owned).
+# Respaldo de Compose original confirmado:
+# /var/backups/nodosur-e3/web1-compose-pre-uploads-20261021-043923.yaml
+
+$ sudo docker compose -f compose/web1/compose.yaml config --quiet
+PRECHECK: OK
+
+# Modificación local del Compose: montaje de configuración Apache a
+# /etc/apache2/conf-enabled/nodosur-uploads.conf, sólo lectura
+# y create_host_path=false. Tres mounts verificados:
+# /var/www/html, /var/www/html/wp-content/uploads y conf Apache.
+TRES MONTAJES: VALIDOS
+WEB1 PREPARADO PARA RECREACION
+
+## Recreación web1 (único backend intervenido en este paso)
+
+$ sudo docker compose -f compose/web1/compose.yaml up -d --no-deps --force-recreate --pull never wordpress
+[+] up 1/1
+ ✔ Container nodosur-web1 Started 1.8s
+
+$ sudo docker inspect nodosur-web1 --format 'Estado={{.State.Status}} Imagen={{.Config.Image}}'
+Estado=running Imagen=wordpress:7.1.2-php8.3-apache
+
+# Inspección acotada de montaje (NO docker inspect completo):
+Origen=/etc/nodosur/apache/nodosur-uploads.conf Escritura=false
+
+$ sudo docker exec nodosur-web1 apache2ctl -t
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.18.0.2. Set the 'ServerName' directive globally to suppress this message
+Syntax OK
+
+## Validación HTTP desde VM308 después de actualizar web1
+
+# Host: nodosur07.tas; X-Forwarded-Proto: https
+BACKEND: 10.33.199.58:18081
+/ -> HTTP 200
+/tienda/ -> HTTP 200
+/wp-content/uploads/woocommerce-placeholder-768x768.webp -> HTTP 200
+PHP BLOQUEADO:
+HTTP 403
+
+BACKEND: 10.33.199.62:18080
+/ -> HTTP 200
+/tienda/ -> HTTP 200
+/wp-content/uploads/woocommerce-placeholder-768x768.webp -> HTTP 200
+PHP BLOQUEADO:
+HTTP 403
+
+# URL PHP era /wp-content/uploads/nodosur-e3-inexistente.php.
+# Se consultó una ruta inexistente, NO se ejecutó código PHP real.
+
+## Balanceo final HTTPS desde VM308
+
+# Curl con --resolve nodosur07.tas:443:10.33.195.194 y -k:
+# el -k se utilizó para diagnóstico con certificado autofirmado,
+# no como prueba de confianza CA pública.
+HTTP/2 200
+x-nodosur-backend: web1
+HTTP/2 200
+x-nodosur-backend: web2
+HTTP/2 200
+x-nodosur-backend: web1
+HTTP/2 200
+x-nodosur-backend: web2
+HTTP/2 200
+x-nodosur-backend: web1
+HTTP/2 200
+x-nodosur-backend: web2
+
+## Conclusión y límites
+
+# Instalación efectivamente verificada en VM263 y VM310.
+# Ambos WordPress sirven portada/tienda/upload de imagen (HTTP 200).
+# La ruta PHP inexistente respondió 403 desde ambos backends.
+# La prueba HTTP aislada previa sí demostró que un .php existente
+# de contenido inocuo en uploads recibía 403 y un .txt 200.
+# No se probó reencendido de las VMs, checkout concurrente,
+# todas las rutas de WooCommerce ni tiempo formal de failover.
+# web1 y web2 mantienen modificaciones locales de Compose hasta
+# reconciliar los checkouts instalados con la rama e3/cierre-tecnico.
+# Evitar git pull --ff-only/reset en estas VMs sin revisar cambios locales.

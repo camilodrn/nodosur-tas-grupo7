@@ -1,0 +1,64 @@
+# Nodo Sur E3 — Primer arranque de Compose en Fedora (ensayo aislado)
+# Fecha de evidencia: 21/10/2026. Transcripción resumida proporcionada por operador.
+# No se copiaron datos, credenciales o certificados de producción.
+# No demuestra todavía instalación final de WordPress o consistencia aplicativa.
+
+=== CONTROL DE VERSION ===
+git fetch origin && git merge --ff-only origin/e3/cierre-tecnico
+Fast-forward 6da9652..3ea267d, sin conflictos.
+
+=== CONDICIONES PREVIAS ===
+Docker context: default
+Secretos ficticios presentes, proyecto de prueba sin contenedores previos.
+Puerto TCP 19090 libre; docker compose config --quiet sin errores.
+
+=== ARRANQUE MARIADB ===
+docker compose -p nodosur-e3-ensayo -f compose/e3-lab/compose.yaml \
+  up -d --wait --wait-timeout 180 database
+Recursos creados:
+  Network nodosur-e3-ensayo_database_net
+  Volume nodosur-e3-ensayo_database_data
+  Container nodosur-e3-ensayo-database-1
+Resultado: MariaDB 10.11 Healthy en ~5.8 segundos (reporte Compose).
+
+=== ARRANQUE WORDPRESS Y HAPROXY ===
+docker compose -p nodosur-e3-ensayo -f compose/e3-lab/compose.yaml \
+  up -d web1 web2 proxy
+Recursos creados:
+  Network nodosur-e3-ensayo_frontend_net
+  Volume nodosur-e3-ensayo_web1_html
+  Volume nodosur-e3-ensayo_web2_html
+  Volume nodosur-e3-ensayo_shared_uploads
+Contenedores:
+  nodosur-e3-ensayo-database-1  mariadb:10.11                  Up (healthy)
+  nodosur-e3-ensayo-web1-1      wordpress:7.1.3-php8.3-apache Up
+  nodosur-e3-ensayo-web2-1      wordpress:7.1.3-php8.3-apache Up
+  nodosur-e3-ensayo-proxy-1     haproxy:3.2.23-alpine         Up
+Publicación observada en proxy:
+  127.0.0.1:19090->8080/tcp
+No se publicaron puertos host de DB ni de los WordPress.
+
+=== HTTP DESDE FEDORA ===
+curl http://127.0.0.1:19090/
+Resultado: HTTP 302.
+Interpretación: hay respuesta HTTP por el proxy local.
+No se ha capturado Location ni la identificación del backend.
+No afirmar aplicación inicializada, BD conectada o balanceo confirmado
+hasta sus pruebas por separado.
+
+=== PROYECTO FURGOPLUS (MISMO MOTOR, SIN CAMBIOS) ===
+Seis contenedores furgoplus-demo y demo-restore, Up (healthy).
+No se pararon ni modificaron explícitamente.
+
+=== PROXIMAS COMPROBACIONES ===
+1. Respuesta HTTP y cabecera X-NodoSur-Lab-Backend para ambos backends.
+2. Acceso SQL SELECT 1 desde cada WordPress con usuario www-data,
+   secreto ficticio solo leído dentro del contenedor.
+3. Verificación de mounts: mismo volumen de uploads.
+4. Prueba controlada y reversible de archivo ficticio compartido.
+5. Confirmar alcance y, si procede, instalación WordPress ficticia.
+
+ALCANCE: reproducibilidad efectiva de ARRANQUE DE CUATRO CONTENEDORES
+en proyecto local aislado, sin despliegue de NFS/TLS/VLAN/VMs USM ni
+prueba de WooCommerce en este ensayo. No confundir con reconstrucción
+completa de Nodo Sur productivo.

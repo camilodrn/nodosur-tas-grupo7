@@ -1,0 +1,22 @@
+# E3 — Apache uploads: sintaxis validada en contenedor efimero aislado
+# Salida comunicada por el equipo, VM263 (host web1).
+# Prueba local de parseo, SIN despliegue ni cambio del contenedor nodosur-web1.
+#
+# Desde Fedora: git pull --ff-only en el clon e3/cierre-tecnico;
+# scp de configs/apache/nodosur-uploads.conf hacia
+# /tmp/nodosur-uploads-e3-test.conf en VM263 (solo copia del archivo candidato).
+#
+# En VM263:
+$ sudo docker run --rm --pull=never --network none --memory 256m --cpus 1 \
+    --mount type=bind,source=/tmp/nodosur-uploads-e3-test.conf,target=/etc/apache2/conf-enabled/nodosur-uploads.conf,readonly \
+    --entrypoint apache2ctl wordpress:7.1.2-php8.3-apache -t
+AH00557: apache2: apr_sockaddr_info_get() failed for b8231b9d8f0a
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.0.1. Set the 'ServerName' directive globally to suppress this message
+Syntax OK
+#
+# Alcance: sintaxis del archivo candidato aceptada por Apache de la imagen.
+# --rm elimina el contenedor de prueba; --network none sin puertos publicados.
+# Los avisos AH00557/58 no fueron fatales.
+# La sintaxis no prueba que una peticion php bajo uploads reciba HTTP 403,
+# ni que imagenes/archivos estaticos sigan respondiendo 200.
+# Ningun contenedor o Compose productivo fue modificado.

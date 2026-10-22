@@ -1,0 +1,35 @@
+# E3 — Comprobación del respaldo de MariaDB en VM279
+# Salida proporcionada por el operador, 21/10/2026.
+# Consultas de solo lectura; no se restauró ni se alteró MariaDB.
+#
+# Salud del contenedor:
+Estado=running Salud=healthy
+# Volumen montado en /var/lib/mysql:
+Volumen=nodosur-db-staging_db_stage_data
+#
+# Cinco respaldos comprimidos más recientes en /var/backups/nodosur/daily:
+2026-10-21 04:05 nodo_sur_final-20261021-040534.sql.gz (202093 bytes)
+2026-10-20 19:02 nodo_sur_final-20261020-190237.sql.gz (202050 bytes)
+2026-10-20 18:23 nodo_sur_final-20261020-182306.sql.gz (202053 bytes)
+2026-10-20 18:11 nodo_sur_final-20261020-181117.sql.gz (202051 bytes)
+2026-10-20 04:05 nodo_sur_final-20261020-040534.sql.gz (201754 bytes)
+#
+# Timer:
+sudo systemctl is-active nodosur-db-backup.timer
+active
+# Próxima ejecución anunciada:
+Thu 2026-10-22 04:05:31 UTC
+# Última ejecución anunciada:
+Wed 2026-10-21 04:05:33 UTC
+#
+# Prueba de respaldo más reciente:
+sudo sha256sum -c nodo_sur_final-20261021-040534.sql.gz.sha256
+nodo_sur_final-20261021-040534.sql.gz: OK
+sudo gzip -t nodo_sur_final-20261021-040534.sql.gz
+# gzip -t sin salida ni error
+RESPALDO VERIFICADO: nodo_sur_final-20261021-040534.sql.gz
+#
+# LÍMITES: no se restauró SQL en una instancia aislada, ni se comprobó
+# integridad relacional/consistencia del dump con transacciones concurrentes.
+# El respaldo es anterior a una eventual actualización futura de WordPress;
+# verificar respaldos cercanos al momento del cambio antes de actualizar.

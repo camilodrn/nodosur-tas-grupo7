@@ -1,0 +1,15 @@
+E3 — revisión de salud y registros WordPress tras alineación a 7.1.3 (21/10/2026).
+
+VM310 web2:
+Estado=running Reinicios=0
+Coincidencias en errores recientes según filtro = 0
+
+VM263 web1:
+Estado=running Reinicios=0
+Coincidencias en errores recientes según filtro = 0
+
+Comprobación usada en cada backend:
+sudo docker inspect CONTAINER --format 'Estado={{.State.Status}} Reinicios={{.RestartCount}}'
+sudo docker logs --since 3h --tail 3000 CONTAINER 2>&1 | grep -Eic 'PHP Fatal error|PHP Parse error|PHP Warning|\[error\]|SQLSTATE|" (500|502|503|504) ' || true
+
+Alcance: solo entradas dentro de los últimos 3 h y hasta 3000 líneas más recientes de cada contenedor, y solo errores que coincidan con patrones buscados. Un cero no asegura ausencia global de errores ni integridad de flujos concurrentes. No se modificaron los servicios.

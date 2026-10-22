@@ -1,0 +1,47 @@
+# Nodo Sur E3 — Prueba controlada de caída de web2 con continuidad de web1
+# 21/10/2026, salidas proporcionadas por operador (VM310 y VM308).
+# Al registrar esta evidencia web2 estaba DETENIDO (exited).
+# No se puede afirmar aún recuperación/reincorporación.
+
+=== PRECHECK DESDE VM308 (hacia web1) ===
+/ -> HTTP 200
+/tienda/ -> HTTP 200
+/wp-content/uploads/woocommerce-placeholder-768x768.webp -> HTTP 200
+HAProxy Estado=running
+
+=== INYECCION CONTROLADA DE FALLA EN VM310 ===
+$ sudo docker stop --time 10 nodosur-web2
+Flag --time has been deprecated, use --timeout instead
+nodosur-web2
+$ sudo docker inspect nodosur-web2 --format 'Estado={{.State.Status}}'
+Estado=exited
+
+=== CONTINUIDAD A TRAVES DE HAPROXY (VM308) ===
+# 8 consultas HTTPS a https://nodosur07.tas/ con --resolve a proxy admin IP:
+HTTP/2 200
+x-nodosur-backend: web1
+HTTP/2 200
+x-nodosur-backend: web1
+HTTP/2 200
+x-nodosur-backend: web1
+HTTP/2 200
+x-nodosur-backend: web1
+HTTP/2 200
+x-nodosur-backend: web1
+HTTP/2 200
+x-nodosur-backend: web1
+HTTP/2 200
+x-nodosur-backend: web1
+HTTP/2 200
+x-nodosur-backend: web1
+
+=== EVENTO DE SALUD REGISTRADO EN HAPROXY ===
+[WARNING] (8) : Server backend_wordpress/web2 is DOWN, reason: Layer4 connection problem, info: "Connection refused", check duration: 1ms. 1 active and 0 backup servers left. 0 sessions active, 0 requeued, 0 remaining in queue.
+Server backend_wordpress/web2 is DOWN, reason: Layer4 connection problem, info: "Connection refused", check duration: 1ms. 1 active and 0 backup servers left. 0 sessions active, 0 requeued, 0 remaining in queue.
+
+# Interpretacion: web2 fuera de servicio, HAProxy detectó DOWN y
+# consultas posteriores exitosas servidas por web1. La evidencia no
+# mide las solicitudes perdidas durante la detección ni prueba
+# disponibilidad sin interrupciones. PENDIENTE: actualizar WordPress
+# web2 7.1.2 -> 7.1.3 de manera controlada, arrancar/revalidar,
+# verificar evento UP y balanceo recuperado, preservar NFS/DB.

@@ -1,0 +1,34 @@
+# Entrega 3 — Revisión Apache PHP y protecciones de uploads, VM263 web1
+# Salidas comunicadas por el equipo, comandos de solo lectura (21/10/2026).
+# No se publicaron contenidos de wp-config.php, salts o claves.
+#
+# VM263: tas_revision@nodosurtas07; contenedor nodosur-web1.
+$ sudo docker exec nodosur-web1 sh -c '[apache2ctl -M, grep de directivas Apache, chequeo booleano de htaccess]'
+=== MODULOS PHP/CGI ===
+ php_module (shared)
+=== DIRECTIVAS RELACIONADAS CON EJECUCION ===
+/etc/apache2/conf-enabled/serve-cgi-bin.conf:14:            Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+/etc/apache2/conf-enabled/localized-error-pages.conf:34:#          SetHandler directive in a <Location /> context somewhere. Adding
+/etc/apache2/conf-enabled/localized-error-pages.conf:38:#              SetHandler none
+/etc/apache2/conf-enabled/docker-php.conf:1:<FilesMatch \.php$>
+/etc/apache2/conf-enabled/docker-php.conf:2:    SetHandler application/x-httpd-php
+/etc/apache2/conf-enabled/docker-php.conf:3:</FilesMatch>
+/etc/apache2/mods-enabled/status.conf:6:    SetHandler server-status
+/etc/apache2/mods-enabled/mime.conf:216:# (You will also need to add "ExecCGI" to the "Options" directive.)
+=== HTACCESS HEREDADOS ===
+PRESENTE: /var/www/html/.htaccess
+  Contiene directivas que requieren revision
+AUSENTE: /var/www/html/wp-content/.htaccess
+AUSENTE: /var/www/html/wp-content/uploads/.htaccess
+
+# Lectura tecnica y limites:
+# - mod_php cargado y conf-enabled/docker-php.conf tiene FilesMatch de .php
+#   con handler application/x-httpd-php.
+# - No se encontro configuracion explicita de bloqueo de PHP en uploads en
+#   los archivos revisados; falta inspeccionar reglas heredadas en el .htaccess
+#   raiz y cualquier otra configuracion/ruta de acceso efectiva.
+# - La regla Options -ExecCGI por si sola no invalida mod_php/SetHandler.
+# - No se escribieron archivos ni se hizo una prueba real de ejecucion PHP
+#   desde uploads; no afirmar explotabilidad comprobada.
+# - Antes de implementar hardening, evaluar configuracion candidata, acceso
+#   HTTP a imagenes existentes, y reversion; cambiar un web por vez.

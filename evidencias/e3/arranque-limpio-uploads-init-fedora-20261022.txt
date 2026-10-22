@@ -1,0 +1,62 @@
+# Arranque limpio de uploads-init, capa Docker aislada — 22/10/2026
+# Evidencia: salida de terminal Fedora aportada por el operador durante E3
+# No es una captura directa del iLab ni implica reconstrucción de las cinco VMs.
+# No contiene credenciales.
+
+Entorno previo verificado:
+- Clon en rama e3/cierre-tecnico; git status --short sin modificaciones.
+- Docker context: default. Docker Compose v5.5.1.
+- Proyecto nodosur-e3-init-limpio inicialmente sin contenedores ni volúmenes.
+- Secretos ficticios de otro ensayo local ya disponibles fuera de Git.
+- Docker Compose config --quiet: COMPOSE OK.
+- Memoria disponible: 9.2 GiB.
+
+Comando ejecutado:
+docker compose -p nodosur-e3-init-limpio -f compose/e3-lab/compose.yaml up -d --no-build web1 web2
+
+Resultado de creación:
+- Volume nodosur-e3-init-limpio_shared_uploads: Created
+- Volume nodosur-e3-init-limpio_database_data: Created
+- Volume nodosur-e3-init-limpio_web1_html: Created
+- Volume nodosur-e3-init-limpio_web2_html: Created
+- Network nodosur-e3-init-limpio_frontend_net: Created
+- Network nodosur-e3-init-limpio_database_net: Created
+- Container nodosur-e3-init-limpio-uploads-init-1: Exited
+- Container nodosur-e3-init-limpio-database-1: Healthy
+- Container nodosur-e3-init-limpio-web1-1: Started
+- Container nodosur-e3-init-limpio-web2-1: Started
+
+Postarranque de docker compose ps -a:
+- database    mariadb:10.11                  Up (healthy) 3306/tcp
+- uploads-init wordpress:7.1.3-php8.3-apache  Exited (0)
+- web1        wordpress:7.1.3-php8.3-apache  Up 80/tcp
+- web2        wordpress:7.1.3-php8.3-apache  Up 80/tcp
+
+docker compose logs uploads-init:
+uploads-init-1 | UPLOADS_INIT_OK
+
+Desde web1 (docker compose exec -T -u www-data):
+UID=33 GID=33 MODO=755
+UPLOADS_WRITE_OK
+
+Desde web2 (docker compose exec -T -u www-data):
+UID=33 GID=33 MODO=755
+UPLOADS_WRITE_OK
+
+Observación externa tras el ensayo:
+- Seis contenedores furgoplus-demo* permanecían Up/healthy.
+
+Interpretación:
+- Se verificó por primera vez el disparo AUTOMÁTICO de uploads-init
+  desde volúmenes NUEVOS por depends_on service_completed_successfully.
+- No se tuvo que ejecutar chown/chmod manualmente.
+- El comando desplegó SOLO webs, BD e inicializador de ensayo; NO el proxy,
+  cuyo puerto 127.0.0.1:19090 entra en conflicto con el ensayo anterior.
+- El usuario www-data tiene permiso de escritura sobre el directorio
+  compartido, pero AUN NO SE PROBÓ ESCRITURA REAL ni hash cruzado en
+  ESTE proyecto de inicio limpio.
+- No se verificaron instalación WP, HTTPS, DNS/NFS iLab ni reconstrucción
+  de VMs desde cero en este ensayo nuevo; constan otros ensayos anteriores
+  para WordPress/persistencia/balanceo.
+- Esta evidencia fue transcrita de la salida compartida por el operador.
+- No eliminar volúmenes de ensayo ni de producción para esta prueba.

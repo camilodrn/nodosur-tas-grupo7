@@ -1,0 +1,7 @@
+Dry run on VM310, 2026-10-21. Web2 exited. No actual application files modified at time of check.
+Precheck: wp-includes/version.php 33:33 644, wp-admin 33:33 755, wp-config.php 0:33 640.
+rsync -anic proposed: wp-admin 611 entries, wp-includes 3122 entries, root files 17 entries.
+No *deleting lines. Examples: .f..t...... reflects timestamp-only changes, not necessarily content changes.
+Script ended SIMULACION COMPLETADA.
+Current web1 serves the site through HAProxy; controlled web2 DOWN event was logged previously.
+Pending: apply core copy, verify files, restart web2 and verify recovery.
