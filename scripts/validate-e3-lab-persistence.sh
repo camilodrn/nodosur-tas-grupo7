@@ -124,25 +124,44 @@ printf 'SHA256 web1 después: %s\nSHA256 web2 después: %s\n' "$post1" "$post2"
 [[ $pre == "$post1" && $pre == "$post2" ]] || fail 'pérdida o alteración de uploads'
 echo 'PERSISTENCIA DE DATOS Y UPLOADS: OK'
 
-echo '=== DISTRIBUCION FINAL ==='
-uno=0
-dos=0
-for i in 1 2 3 4 5 6; do
-  cab=$(curl --noproxy '*' --silent --show-error \
-    --connect-timeout 3 --max-time 15 -D - -o /dev/null \
-    http://127.0.0.1:19090/) || fail "GET proxy #$i falló"
-  http=$(printf '%s\n' "$cab" | tr -d '\r' | awk 'NR==1 {print $2}')
-  backend=$(printf '%s\n' "$cab" | tr -d '\r' | awk 'tolower($1)=="x-nodosur-lab-backend:" {print $2}')
-  [[ $http == 200 ]] || fail "HTTP inesperado $http"
-  case $backend in
-    web1) uno=$((uno+1));;
-    web2) dos=$((dos+1));;
-    *) fail "Backend desconocido: $backend";;
-  esac
-  printf 'HTTP %s -> %s\n' "$http" "$backend"
+echo '=== ESPERAR A QUE AMBOS BACKENDS VUELVAN AL BALANCEO ==='
+# La primera respuesta HTTP 200 solo prueba que AL MENOS UN backend funciona.
+# Tras reiniciar puede haber eventos Layer4 DOWN y recuperacion Layer7 UP.
+# Por eso esperamos un ciclo completo 200 que incluya ambos backends,
+# sin reiniciar de nuevo ni asumir tiempos RTO/RPO.
+listos=0
+for intento in $(seq 1 45); do
+  uno=0
+  dos=0
+  fallos=0
+  for i in 1 2 3 4 5 6; do
+    cab=$(curl --noproxy '*' --silent --show-error \
+      --connect-timeout 3 --max-time 15 -D - -o /dev/null \
+      http://127.0.0.1:19090/) || {
+      fallos=$((fallos+1))
+      continue
+    }
+    http=$(printf '%s\n' "$cab" | tr -d '\r' | awk 'NR==1 {print $2}')
+    backend=$(printf '%s\n' "$cab" | tr -d '\r' | awk 'tolower($1)=="x-nodosur-lab-backend:" {print $2}')
+    if [[ $http != 200 ]]; then
+      fallos=$((fallos+1))
+      continue
+    fi
+    case $backend in
+      web1) uno=$((uno+1));;
+      web2) dos=$((dos+1));;
+      *) fallos=$((fallos+1));;
+    esac
+  done
+  if (( fallos == 0 && uno > 0 && dos > 0 )); then
+    listos=1
+    break
+  fi
+  echo "Esperando salud de ambos: intento=$intento web1=$uno web2=$dos errores=$fallos"
+  sleep 2
 done
-(( uno > 0 && dos > 0 )) || fail "no participan los dos backends"
-echo "BALANCEO DESPUES: web1=$uno web2=$dos"
+(( listos == 1 )) || fail 'ambos backends no volvieron al balanceo dentro de la ventana'
+echo "BALANCEO DESPUES DE RECUPERACION: web1=$uno web2=$dos (6 solicitudes HTTP 200)"
 
 echo '=== FURGOPLUS (OBSERVACION SOLAMENTE) ==='
 docker ps -a --filter name=furgoplus --format '{{.Names}} {{.Status}}'
