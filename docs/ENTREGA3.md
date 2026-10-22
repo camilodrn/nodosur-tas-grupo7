@@ -64,6 +64,10 @@ La [evidencia de firewall MariaDB y DNS](../evidencias/e3/auditoria-firewall-db-
 
 BIND9 contestó SOA autoritativo por UDP/TCP (`aa`, `NOERROR`). Inicialmente AXFR desde Fedora por VPN permitió transferir nueve registros (`XFR size: 9 records`). Se verificó BIND 9.18.39, zona primaria sin `allow-transfer` explícito y un solo NS publicado. Tras preparar y validar una copia con respaldo privado, **se aplicó `allow-transfer { none; };` únicamente a `nodosur07.tas`**, se validó con `named-checkconf -z` y se ejecutó `rndc reconfig` sin reinicio. **Verificación posterior desde Fedora: SOA UDP/TCP autoritativo `NOERROR`, `www` hacia `10.33.195.194` y AXFR `REFUSED`** ([evidencia](../evidencias/e3/auditoria-firewall-db-dns-20261021.txt)). El resultado no certifica pruebas desde todas las redes ni redundancia DNS; se preserva respaldo para reversión.
 
+## WordPress inicializado en el ensayo (21/10/2026)
+
+La [instalación ficticia con `wp_install()`](../evidencias/e3/wordpress-instalado-ensayo-fedora-20261021.txt) tuvo éxito (`WORDPRESS_LAB_INSTALL_OK`), y HAProxy respondió HTTP 200 en 6/6 solicitudes, repartidas 3/3 entre Web1 y Web2. La ausencia de `sendmail` no impidió terminar; el ensayo no incluye correo de producción. El siguiente control pendiente es la persistencia del WordPress ficticio después de reiniciar exclusivamente los contenedores de laboratorio.
+
 ## Validación de uploads compartidos del ensayo (21/10/2026)
 
 La [prueba de escritura/lectura cruzada](../evidencias/e3/volumen-compartido-ensayo-fedora-20261021.txt) pasó: misma identidad y montaje `shared_uploads`, Web1 creó archivo temporal como `www-data`, Web2 leyó SHA-256 igual y el archivo se eliminó. MariaDB de ensayo permaneció `healthy` y los seis contenedores FurgoPlus continuaron `healthy`. La prueba usa **volumen local Docker**, no NFS productivo.
