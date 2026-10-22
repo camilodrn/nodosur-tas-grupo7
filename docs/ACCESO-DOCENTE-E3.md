@@ -1,7 +1,8 @@
 # Plan controlado de accesos de revisión docente — E3
 
-**Estado: propuesto / pendiente de ejecución y validación.** No afirmar
-que existan aún cuentas nuevas ni que se hayan revocado cuentas anteriores.
+**Estado: cuentas E3 creadas y validadas por SSH/sudo en las cinco VMs.**
+Pendiente: rotación de contraseñas, entrega segura y revocación E2 tras
+revisión de dependencias. No se han revocado cuentas anteriores.
 No incluir contraseñas, hashes, tokens, claves privadas ni credenciales en Git.
 
 ## Antecedente de Entrega 2
@@ -16,6 +17,41 @@ En octubre se verificaron accesos SSH operativos `tas_revision` a
 estas tres VMs; no se ha confirmado su estado en VM308/VM310.
 No dar por hecho que los usuarios operativos `nodosur-g7-proxy`
 o `nodosur-g7-web2` sean cuentas exclusivas del docente.
+
+## Cuentas E3 creadas y acceso SSH/sudo comprobado (22/10/2026)
+
+**Realizado por el equipo en las VMs vía VPN; transcripción aportada al chat.**
+Se creó `tas_revision_e3` con HOME y shell Bash en cada máquina. Se
+añadió al grupo `sudo` y a `ssh-nodosur` únicamente donde este
+grupo existe y es necesario para `AllowGroups`.
+
+| VM | Resultado de creación | Resultado de conexión y autorización |
+|---|---|---|
+| VM268 DNS/NFS | `tas_revision_e3` creado, `sudo,ssh-nodosur` | SSH correcto, `sudo -n id -u` = 0 |
+| VM263 Web1 | `tas_revision_e3` creado, `sudo,ssh-nodosur` | SSH correcto, `sudo -n id -u` = 0 |
+| VM310 Web2 | `tas_revision_e3` creado, `sudo` | SSH correcto, `sudo -n id -u` = 0 |
+| VM279 MariaDB | `tas_revision_e3` creado, `sudo,ssh-nodosur` | SSH correcto, `sudo -n id -u` = 0 |
+| VM308 HAProxy | `tas_revision_e3` creado, `sudo` | SSH correcto, `sudo -n id -u` = 0 |
+
+**Verificación: 5/5 accesos SSH y sudo funcionales.** El código `0`
+es UID efectivo root, no una garantía de que todos los servicios
+funcionan ni de mínimo privilegio.
+
+**Seguridad pendiente antes de entrega:** las cuentas recibieron
+contraseña durante `passwd` interactivo, sin revelar la clave en
+salidas. Una contraseña temporal débil y compartida entre hosts fue
+propuesta explícitamente por el operador en chat: debe considerarse
+expuesta; **rotar con contraseñas largas únicas por VM, fuera de la
+conversación y repo, y entregarlas por canal seguro**. Si la política
+institucional exige identidades/privilegios acotados, coordinar
+con el docente antes de compartir cuentas con sudo completo.
+
+**No realizado todavía:** revocar `tas_revision` E2, inspeccionar la
+dependencia exacta de `nodosur-web1.service` y `nodosur-db-stage.service`
+/ `nodosur-db-prod.service` en `/home/tas_revision`, entregar credenciales
+al profesor, verificar usuario WordPress administrativo, comprobar si
+existen llaves SSH E2 aún autorizadas ni validar sesión docente desde
+su red. No borrar HOME E2 ni cambiar usuarios operativos del equipo.
 
 ## Auditoría de cuentas efectiva (22/10/2026)
 
