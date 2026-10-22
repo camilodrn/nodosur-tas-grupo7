@@ -108,6 +108,10 @@ No modificar políticas de firewall, NAT o rutas durante la defensa.
 
 **No detener web1, proxy, DNS, NFS o MariaDB para esta prueba.** El criterio evalúa continuidad ante fallo de **un backend**, no destrucción de infraestructura compartida.
 
+## Coherencia de WordPress demostrable en un minuto
+
+Además de NFS, [esta evidencia de lectura de la configuración efectiva](../evidencias/e3/wordpress-opciones-productivas-web1-web2-20261021.txt) muestra desde ambos WordPress 7.1.3, la misma URL pública en `home`/`siteurl`, WooCommerce activo y el mismo destino configurado de MariaDB. Aclara que **una misma BD y un mismo almacenamiento de imágenes** evitan divergencia de productos y uploads, pero no prueban sesiones privadas ni checkout concurrente. Para la defensa, basta mostrar la evidencia versionada: no repetir cambios ni pruebas que generen pedidos.
+
 ## Preguntas que conviene responder brevemente
 
 - **¿Qué diferencia hay entre balanceo y HA?** Roundrobin reparte tráfico entre backends. La tolerancia probada se limita a falla de uno de ellos; HA integral requeriría eliminar los SPOF de HAProxy, DB, DNS y NFS.
