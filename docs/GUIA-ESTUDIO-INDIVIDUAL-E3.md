@@ -19,6 +19,8 @@
 
 ---
 
+**Para aprender la terminal desde cero:** [comandos explicados paso a paso](COMANDOS-EXPLICADOS-E3.md), con desglose de opciones, símbolos, ejemplos sencillos y advertencias de seguridad. No es necesario memorizar la sintaxis completa de los comandos largos.
+
 ## Archivo de referencia: ¿qué archivo modificamos y dónde está la regla?
 
 **Antes de memorizar rutas, estudiar el [mapa de archivos y configuraciones de E3](MAPA-CONFIGURACIONES-E3.md)**. Reúne por cada VM: carpeta de datos, archivo de configuración, archivo versionado en Git, regla activa y comando de solo lectura para mostrarla. Es especialmente importante para NFS: se comprobó el export /srv/nodosur/uploads y los montajes de las webs, pero **no está acreditado cuál archivo de exports modificó el equipo**. El mapa indica cómo verificar /etc/exports o /etc/exports.d en VM268 y /etc/fstab o una unidad .mount en cada cliente, sin adivinar ni modificar.

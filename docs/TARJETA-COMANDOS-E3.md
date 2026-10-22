@@ -2,6 +2,8 @@
 **Para la revisión individual en el puesto · No ejecutar comandos destructivos.**
 [Guía explicada y 40 preguntas](GUIA-ESTUDIO-INDIVIDUAL-E3.md) · **[Mapa de archivos y reglas](MAPA-CONFIGURACIONES-E3.md)** · [Arquitectura](../ARQUITECTURA.md) · [Inventario](../INVENTARIO.md)
 
+**¿No entiendes un parámetro como -f, -I, -k, --resolve, -M, -p o una tubería?** Consulta primero [Comandos explicados paso a paso](COMANDOS-EXPLICADOS-E3.md). Las órdenes de esta tarjeta son una referencia rápida, no sustituyen entender qué hacen.
+
 ## Antes de tocar la terminal
 
 **Primero:** hostname, whoami, pwd, VPN, cuenta autorizada y rol de la VM. No leer credenciales ni wp-config.php ni PEM privado. **Segundo:** confirmar que el comando es de consulta. **Tercero:** explicar qué salida demuestra y qué no demuestra.

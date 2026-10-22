@@ -4,6 +4,8 @@
 
 [Guía de estudio](GUIA-ESTUDIO-INDIVIDUAL-E3.md) · [Tarjeta de comandos](TARJETA-COMANDOS-E3.md) · [Inventario de VMs](../INVENTARIO.md)
 
+**Cómo interpretar las órdenes para localizar los archivos:** [Comandos explicados paso a paso](COMANDOS-EXPLICADOS-E3.md). Explica sudo, grep, findmnt, docker inspect, iptables y systemctl sin confundir consultar con modificar.
+
 ## Antes de responder «¿qué archivo modificaron?»
 
 Hay que distinguir tres conceptos:
