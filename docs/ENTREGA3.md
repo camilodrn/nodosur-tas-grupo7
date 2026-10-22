@@ -92,6 +92,10 @@ Se consultaron las [opciones reales de ambos WordPress por PHP CLI dentro de VM2
 
 Se consultaron [ambas aplicaciones ejecutándose en VM263 y VM310](../evidencias/e3/coherencia-esquema-wp-woocommerce-20261021.txt), solo lectura: prefijo SQL `wp_`, `WC_VERSION=11.1.0`, `woocommerce_db_version=11.1.0-1` y `db_version=61833` **coinciden en ambos servidores**. Junto a los hashes del código, opciones `home/siteurl`, MariaDB compartida, NFS y una prueba previa de carrito, estos controles fortalecen la coherencia del estado en E3. No certifican sesiones privadas, pedidos concurrentes ni recuperación integral desde backup.
 
+## Comprobación final de los cuatro hosts Docker (21/10/2026)
+
+La [validación directa de VM279/VM308/VM263/VM310](../evidencias/e3/validacion-cuatro-vms-config-runtime-20261021.txt) confirmó definición Compose válida en cada host, contenedores `running`, DB `healthy` sobre el volumen histórico, sintaxis de HAProxy `exit 0`, Apache `Syntax OK` `exit 0` en ambas webs y NFSv4 montado desde VM268. Web1/Web2 siguen teniendo modificaciones locales intencionales de Compose; `git diff --check` no produjo errores. La advertencia de `ServerName` no impide su funcionamiento. La etiqueta Docker WordPress es 7.1.2, mientras que el núcleo PHP dentro de ambos HTML persistentes fue comprobado como 7.1.3. **No se reconstruyó el iLab desde cero**.
+
 ## Qué no está demostrado todavía
 
 - Sí hay registros `DOWN/UP` conservados en la nueva prueba controlada de falla y recuperación; no se ha medido formalmente un **RTO/RPO** ni la posible pérdida de solicitudes durante el umbral de detección.
