@@ -1,0 +1,33 @@
+# Nodo Sur E3 — comprobaciones de Git, sintaxis y barrido heurístico
+# Fecha de reporte del operador: 21/10/2026.
+# Comandos ejecutados SOLO en clon Fedora; no se intervino iLab.
+# Esta evidencia NO sustituye una revisión manual o escáner completo.
+
+=== REFERENCIAS REMOTAS ===
+git fetch origin: exitoso
+origin/e3/cierre-tecnico actualizado dc8f3d9..3f479dd.
+git status --short: sin líneas (árbol local limpio)
+git branch --show-current: e3/cierre-tecnico
+
+IMPORTANTE: el usuario ejecutó git fetch y NO git merge. La copia
+de trabajo NO avanzó automáticamente a origin/e3/cierre-tecnico;
+por tanto el barrido de archivos y la sintaxis Bash se aplicaron
+a la versión local anterior a 3f479dd. El escáner de blobs sí recorre
+git rev-list --objects --all sobre refs locales, incluyendo los remotos
+recientemente fetched si son alcanzables.
+
+=== VALIDACIONES ===
+git diff --check origin/e3/integracion...origin/e3/cierre-tecnico:
+  sin salida de error
+for archivo in scripts/*.sh; do bash -n "$archivo"; done:
+  SINTAXIS BASH: OK
+python3 scripts/audit-secrets.py:
+  Archivos árbol=140; blobs alcanzables --all=338; candidatos=0
+  Heurístico: no demuestra ausencia absoluta; excluye .git físico,
+  objetos inalcanzables y contenido remoto.
+
+=== LIMITES ===
+Sin verificación de sintaxis de la rama de trabajo ya fast-forward
+al último origen, sin auditoría manual integral de contenidos, ni
+prueba directa de los scripts de preflight en cada VM. Aún no hay
+resultado oficial de la Entrega 3. No se modificaron contenedores.
