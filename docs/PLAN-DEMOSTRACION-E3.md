@@ -19,6 +19,8 @@ La duración es aproximada; si el docente concede menos tiempo, priorizar **TLS 
 
 ## Evidencia alternativa de reproducibilidad (sin arriesgar producción)
 
+**Actualización 22/10:** además del ensayo anterior de persistencia/HAProxy, se inició desde cero un segundo proyecto Docker aislado con cuatro volúmenes nuevos. `uploads-init` terminó automáticamente con `UPLOADS_INIT_OK` y permitió escritura real desde Web1, lectura desde Web2 y triple SHA-256 coincidente; se eliminó el marcador temporal. [Arranque](../evidencias/e3/arranque-limpio-uploads-init-fedora-20261022.txt) · [lectura cruzada](../evidencias/e3/lectura-cruzada-arranque-limpio-fedora-20261022.txt). Esto demuestra **capa Docker local reproducible**, no aprovisionamiento automático de cinco VMs, NFS/TLS ni restauración de datos reales.
+
 Si preguntan cómo sabemos que los Compose pueden levantar la capa Docker, mostrar el [ensayo aislado ejecutado en Fedora](ENSAYO-REPRODUCIBILIDAD-E3.md) y su [evidencia de persistencia y reincorporación](../evidencias/e3/persistencia-reinicio-ensayo-fedora-20261021.txt): cuatro contenedores, MariaDB healthy, WordPress inicializado en ambos backends, SQL, uploads con SHA-256, conservación tras reinicio, Web1 `DOWN`/`UP` y balanceo posterior 4/4. **No repetir el reinicio ni la caída durante la defensa** salvo solicitud y autorización. El experimento simula servicios en un Docker Engine local: no equivale a reconstruir VLAN, BIND, NFS ni TLS de iLab. Recordar explicar por qué hubo respuestas inicialmente solo de Web2: Web1 todavía no había sido reincorporado por el health check y el script esperaba demasiado poco.
 
 ## Comandos de lectura para la demostración
@@ -122,3 +124,5 @@ Además de NFS, [esta evidencia de lectura de la configuración efectiva](../evi
 - **¿Qué demuestra el health check?** `HEAD /` con 200 muestra respuesta HTTP del WordPress; no garantiza compras, NFS o DB ante cualquier degradación.
 - **¿Por qué el certificado da aviso?** Es autofirmado y el cliente no lo confía automáticamente; TLS cifra el tramo cliente–HAProxy, pero `curl -k` no valida identidad.
 - **¿Por qué un Compose por VM?** Docker Compose maneja servicios del motor local, no coordina cinco VMs entre sí. La reproducción completa necesita provisión de red/almacenamiento/secretos.
+- **¿Puede el profesor acceder a todo?** Se verificó SSH/sudo en cinco VMs con `tas_revision_e3`; la cuenta WordPress E3 administra por HTTPS. Las cuentas E2 fueron caducadas/rebajadas sin eliminar HOME; entregar contraseñas por canal privado antes de la evaluación.
+- **¿Reprodujimos desde cero las cinco VMs?** No. Sí un proyecto Docker ficticio con dependencias automáticas, archivos compartidos y validación del hash; la configuración de máquinas, BIND, NFS, firewall y secretos reales requiere una provisión separada.
