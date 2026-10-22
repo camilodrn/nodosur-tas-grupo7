@@ -1,7 +1,9 @@
-# Plan controlado de accesos de revisión docente — E3
+# Accesos de revisión docente — Entrega 3
 
-**Estado actualizado:** cinco accesos Linux E3 verificados por SSH/sudo y rotados; E2 Linux caducado reversiblemente en VM268/263/279, preservando HOME. WordPress E2 rebajado a suscriptor, contraseña aleatoria y sesiones invalidadas; WordPress E3 administrador creado, pendiente probar inicio de sesión por HTTPS. Pendiente entregar nuevas credenciales por canal privado y revocar E3 tras evaluación. Nunca subir secretos a Git.
+**Estado final comprobado (22/10/2026):** cinco cuentas Linux `tas_revision_e3` creadas, contraseñas rotadas interactivamente y SSH/sudo probados; las cuentas Linux E2 quedaron **caducadas sin borrar HOME** en VM268/263/279 y con PAM habilitado (no se hizo prueba negativa de login E2). WordPress E2 quedó como `subscriber`, con contraseña aleatoria y sesiones invalidadas; WordPress E3 es `administrator`, probó acceso real por HTTPS a `/wp-admin/users.php` y su rol se comprobó directamente desde Web2. El administrador original `nodo_sur` permanece. **Pendiente:** entrega privada de las credenciales E3, confirmar que las contraseñas de cada VM son distintas, y revocar accesos E3 al terminar la evaluación. No subir secretos a Git.
 
+
+**Nota de lectura:** las secciones siguientes conservan una **bitácora cronológica**; expresiones históricas como «pendiente» o «aún no creado» describen el estado en el momento de esa comprobación. Para el estado vigente, prevalecen el resumen anterior y la sección «Verificación final en navegador y backend 2».
 
 ## Antecedente de Entrega 2
 
