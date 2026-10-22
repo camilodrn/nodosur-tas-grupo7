@@ -18,6 +18,10 @@ Esta matriz no reemplaza la demostración en vivo. La implementación usa cinco 
 
 **Evidencia de coherencia de archivos del ensayo ya completada:** [mismo volumen Docker RW, permisos www-data corregidos, escritura Web1, SHA-256 idéntico desde Web2 y limpieza del archivo ficticio](../evidencias/e3/volumen-compartido-ensayo-fedora-20261021.txt). Los seis contenedores FurgoPlus seguían saludables. Esto respalda reproducibilidad de la capa Docker, pero no sustituye NFS de producción, WordPress instalado ni reinicio/persistencia del CMS.
 
+## Persistencia tras reinicio en laboratorio (21/10/2026)
+
+La [prueba controlada en Fedora](../evidencias/e3/persistencia-reinicio-ensayo-fedora-20261021.txt) confirmó **persistencia de WordPress y su administrador en ambos backends, MariaDB healthy y SHA-256 idénticos del mismo archivo compartido antes/después** de reiniciar solamente el proyecto de ensayo. La prueba **NO terminó aprobada como conjunto**: en el chequeo final seis HTTP 200 vinieron exclusivamente de Web2 y el script salió por ausencia de Web1 en el balanceo. Queda pendiente un diagnóstico de salud/routing de HAProxy en el ensayo; no atribuir HA demostrada tras reinicio. No aplicar estos resultados al iLab productivo sin separar ambientes.
+
 ## Instalación WordPress ficticia y HTTP 200 (21/10/2026)
 
 Se ejecutó [instalación controlada](../evidencias/e3/wordpress-instalado-ensayo-fedora-20261021.txt) usando `wp_install()` con usuario y clave ficticios: `WORDPRESS_LAB_INSTALL_OK`. Aunque faltó `sendmail`, no impidió completar la instalación. HAProxy del ensayo respondió **6/6 HTTP 200** repartidos **3/3** entre las webs, en lugar del 302 de WordPress no inicializado. Queda pendiente verificar persistencia después de reiniciar solamente los contenedores del ensayo; esto sigue sin demostrar NFS o TLS/VMs USM desde cero.
