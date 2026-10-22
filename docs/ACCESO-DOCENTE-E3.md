@@ -81,6 +81,45 @@ funciones administrativas, inspección de ambos backends,
 y comprobación del rol E2 después de la mutación. No afirmar
 que el login web E3 ya se probó.
 
+## Verificación final en navegador y backend 2 (22/10/2026)
+
+**Evidencia visual entregada por el operador:**
+- Navegador abierto en `https://nodosur07.tas/wp-admin/users.php`
+  con sesión `tas_revision_e3`; panel WordPress de usuarios,
+  menú de WooCommerce, administración de usuarios visible.
+- La lista de usuarios de WordPress muestra **dos administradores**
+  (`nodo_sur` y `tas_revision_e3`), un suscriptor
+  (`tas_revision`) y dos clientes. En particular, no se perdió
+  el administrador original de la aplicación.
+- Navegador muestra **Not secure**: existe certificado TLS
+  autofirmado y no se afirma confianza pública. La captura incluye
+  aviso de Action Scheduler sobre **13 acciones vencidas**;
+  requiere diagnóstico separado y no acredita por sí sola fallos
+  de WordPress ni un incumplimiento de E3.
+- Consulta adicional de solo lectura dentro del contenedor
+  `nodosur-web2` realizada por SSH desde Fedora confirmó:
+  ```text
+  tas_revision: subscriber
+  tas_revision_e3: administrator
+  ```
+  La coherencia entre nodos es compatible con su MariaDB compartida.
+- El operador canceló con `Ctrl+C` el indicador de continuación
+  `>` de su terminal Fedora después de salir de SSH; no implica
+  fallo de contenedor ni de la consulta PHP.
+
+**Conclusión acotada:** la identidad WordPress E3 se autenticó
+con éxito por la ruta HTTPS pública del laboratorio y pudo
+visualizar la pantalla administrativa de usuarios. Los roles
+observados coinciden en Web2. E2 dejó de ser administrador, pero
+**sigue existiendo como suscriptor**. No se ha certificado una
+prueba explícita de cada función de WooCommerce.
+
+**Pendiente de gestión:** entregar al docente por canal privado
+las credenciales actualizadas y VPN; asegurar contraseñas
+únicas entre hosts (sin divulgar valores); definir retirada
+E3 al finalizar corrección; conservar directorios HOME E2
+que usan las unidades systemd.
+
 ## Revocación WordPress E2 aplicada (22/10/2026)
 
 Operador ejecutó **dos veces** por SSH, en VM263 y en el contenedor
