@@ -38,6 +38,8 @@ Se completó un **primer arranque reproducible de la capa Docker** desde un clon
 
 La [comprobación final sin escrituras](../evidencias/e3/validacion-integral-fedora-20261021.txt) verificó ocho respuestas DNS A correctas (UDP/TCP), HTTP 301 hacia HTTPS, seis respuestas HTTP/2 200 distribuidas 3/3 entre web1/web2 y `/tienda/` HTTP 200. La conectividad no representa por sí sola un despliegue nuevo desde cero ni un checkout real. No se repitieron fallas ni se modificó producción.
 
+**Intento de prueba de segmentación desde VMs (21/10, pendiente):** al conectar desde Fedora a VM308 y VM268 por SSH, ambos destinos agotaron el tiempo de conexión al puerto 22. Los `curl` remotos **no llegaron a ejecutarse**, por lo que **no hay evidencia nueva de aceptación o bloqueo en DOCKER-USER**; ver [registro del bloqueo por SSH](../evidencias/e3/verificacion-segmentacion-bloqueada-ssh-20261021.txt). Revisar ruta/VPN/acceso institucional antes de repetir pruebas HTTP. **No subir el criterio por este intento.**
+
 ## Ruta para aspirar a la nota máxima (sin cambios improvisados)
 
 **No confundir autoevaluación con nota docente.** Con los niveles 80–100 de la matriz, la combinación más favorable de las evidencias productivas existentes, tomando provisionalmente 100 para **dos backends, HAProxy/TLS/health checks, falla/recuperación y documentación**, y 80 para los otros tres criterios, sumaría **91/100**. Esta proyección de 91 **no es un resultado otorgado ni garantiza que el profesor reconozca 100 en los primeros criterios**. El extremo conservador continúa siendo 81/100.
