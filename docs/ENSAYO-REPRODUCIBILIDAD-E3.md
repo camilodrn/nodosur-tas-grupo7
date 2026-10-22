@@ -1,8 +1,46 @@
 # Plan de ensayo aislado de reproducibilidad — Nodo Sur E3
 
-**Estado:** ensayo multicontenedor ejecutado el 21/10/2026. Se comprobaron arranque de cuatro contenedores, MariaDB healthy, SQL desde ambos WordPress, instalación ficticia, volumen compartido con SHA-256, persistencia tras reiniciar los cuatro servicios y reincorporación automática de Web1 a HAProxy, con 8/8 HTTP 200 y reparto 4/4 en la verificación posterior. Documento de apoyo a
+**Estado actualizado 22/10/2026:** ensayo multicontenedor ejecutado el 21/10/2026 y repetición de arranque limpio de volúmenes y lectura cruzada SHA-256 completada el 22/10/2026. Se comprobaron arranque de cuatro contenedores, MariaDB healthy, SQL desde ambos WordPress, instalación ficticia, volumen compartido con SHA-256, persistencia tras reiniciar los cuatro servicios y reincorporación automática de Web1 a HAProxy, con 8/8 HTTP 200 y reparto 4/4 en la verificación posterior. Documento de apoyo a
 [Entrega 3](ENTREGA3.md), [guía de reconstrucción](DESPLIEGUE-REPRODUCIBLE-E3.md)
 y [rúbrica](RUBRICA-E3.md).
+
+## Lectura cruzada confirmada en ensayo limpio (22/10/2026)
+
+Tras el arranque limpio automático documentado abajo, el operador
+ejecutó desde Fedora una prueba aislada de archivo temporal ficticio.
+Se validó mediante `docker inspect` que **ambos** contenedores pertenecen
+a `nodosur-e3-init-limpio` y montan el mismo volumen
+`nodosur-e3-init-limpio_shared_uploads`. Web1 creó y escribió
+un archivo como `www-data` (UID 33), y Web1/Web2 calcularon el SHA-256
+del mismo archivo; se contrastó con el esperado en Fedora.
+
+```text
+web1: AISLAMIENTO OK
+web2: AISLAMIENTO OK
+ESCRITURA WEB1: OK
+WEB1: f6690230650581d67ea9a943514fcd2dd00443be136726ce0de9f7f53290c6d2
+WEB2: f6690230650581d67ea9a943514fcd2dd00443be136726ce0de9f7f53290c6d2
+LOCAL: f6690230650581d67ea9a943514fcd2dd00443be136726ce0de9f7f53290c6d2
+RESULTADO: ESCRITURA Y LECTURA COMPARTIDA OK
+LIMPIEZA: OK
+```
+
+**Resultado:** el nuevo ensayo acredita la inicialización
+automática de `uploads-init`, permisos correctos de `www-data`,
+**escritura real y coherencia del archivo entre los dos backends**.
+Esta ejecución no requirió cambios de permisos manuales y eliminó
+el marcador temporal. Para evitar que `docker compose exec -T`
+consumiera el resto del *here-document* de Bash, las llamadas sin
+entrada de datos usaron `</dev/null`.
+
+[Registro de hash cruzado y limpieza](../evidencias/e3/lectura-cruzada-arranque-limpio-fedora-20261022.txt) ·
+[Arranque automático con volúmenes nuevos](../evidencias/e3/arranque-limpio-uploads-init-fedora-20261022.txt).
+
+**Límite:** se demostró reconstrucción de la capa Docker local
+del ensayo; no equivale a reconstruir iLab, replicar NFS/TLS ni
+recuperar datos productivos desde backup. El ensayo previo
+`nodosur-e3-ensayo` respalda por separado WordPress ficticio,
+persistencia tras reinicio y HAProxy.
 
 ## Diagnóstico de prueba de escritura en ensayo limpio (22/10/2026)
 
