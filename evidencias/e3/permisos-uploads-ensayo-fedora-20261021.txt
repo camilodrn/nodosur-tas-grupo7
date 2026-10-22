@@ -29,3 +29,33 @@ No ejecutar chmod 777, chown -R ni cambiar permisos de NFS productivo.
 Hallazgo real de reproducibilidad en el laboratorio aislado Fedora.
 Se preserva para justificar un ajuste minimo verificable y reversible;
 no demuestra defecto equivalente en VM263/VM310 (NFS productivo).
+
+=== DIAGNOSTICO CONFIRMADO POSTERIOR (21/10/2026) ===
+Docker volume inspect:
+  nodosur-e3-ensayo_shared_uploads Driver=local
+Contenedor web1:
+  mount nodosur-e3-ensayo_shared_uploads:true
+  id: uid=33(www-data) gid=33(www-data)
+  stat uploads: UID=0 GID=0 MODO=755
+  test -w uploads: ESCRITURA DENEGADA
+Contenedor web2:
+  mount nodosur-e3-ensayo_shared_uploads:true
+  id: uid=33(www-data) gid=33(www-data)
+  stat uploads: UID=0 GID=0 MODO=755
+  test -w uploads: ESCRITURA DENEGADA
+El segundo bloque termina tras el control de web2; NO hay salida
+posterior de estado FurgoPlus.
+
+CAUSA CONFIRMADA:
+  directorio de uploads root:root 0755 en volumen local de ensayo
+  impide escritura al usuario de aplicación www-data UID/GID 33.
+  No se ha documentado aún corrección aplicada.
+
+CORRECCION REPRODUCIBLE PROPUESTA EN GIT (NO APLICADA):
+  compose/e3-lab/compose.yaml añade servicio uploads-init,
+  de ejecución única, sin red y con permiso root para hacer
+  chown 33:33 /uploads y chmod 0755 /uploads (NO recursivo).
+  web1 y web2 dependen de su salida correcta con
+  service_completed_successfully, además de MariaDB healthy.
+  Debe validarse con config --quiet y después probarse
+  explícitamente en el laboratorio. No afirmar que está desplegado.
