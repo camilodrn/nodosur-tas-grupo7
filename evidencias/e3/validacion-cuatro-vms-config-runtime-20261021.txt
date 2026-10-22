@@ -1,0 +1,81 @@
+# Nodo Sur E3 — Cuatro VMs Docker: repositorios, Compose y runtime
+# Observaciones aportadas por operador el 21/10/2026 vía Fedora SSH.
+# Consultas de solo lectura. No hubo cambios a producción ni a Git de las VMs.
+
+=== VM279 MariaDB ===
+Usuario SSH: tas_revision (contraseñas NO copiadas).
+Git: rama e3/database; HEAD 488cb27; git status --short: vacío.
+sudo docker compose -f compose/db-stage/compose.prod.yaml config --quiet:
+  COMPOSE: OK
+sudo docker inspect nodosur-db-staging:
+  Estado=running
+  Salud=healthy
+  Volumen /var/lib/mysql=nodosur-db-staging_db_stage_data
+
+=== VM308 HAProxy ===
+Usuario SSH: nodosur-g7-proxy.
+Git: rama e3/proxy; HEAD fdaba39; git status --short: vacío.
+sudo docker compose -f compose/proxy/compose.prod.yaml config --quiet:
+  COMPOSE: OK
+sudo docker inspect nodosur-haproxy:
+  Estado=running
+  Imagen=haproxy:3.2.23-alpine
+Validación posterior de sintaxis con resultado explícito:
+  sudo docker exec nodosur-haproxy haproxy -c -f /usr/local/etc/haproxy/haproxy.cfg
+  HAPROXY_CONFIG_EXIT=0
+NOTA: durante la primera consulta no se capturó código de salida;
+la segunda sí demuestra éxito.
+
+=== VM263 Web1 ===
+Usuario SSH: tas_revision.
+Git: rama e3/backend1; HEAD 8b067ef.
+git status --short: M compose/web1/compose.yaml
+git diff --check: sin salida de error.
+sudo docker compose -f compose/web1/compose.yaml config --quiet:
+  COMPOSE_EXIT=0
+sudo docker inspect nodosur-web1:
+  Estado=running
+  Imagen=wordpress:7.1.2-php8.3-apache
+findmnt -M /srv/nodosur/nfs/uploads -o SOURCE,FSTYPE,TARGET:
+  10.33.199.59:/srv/nodosur/uploads nfs4 /srv/nodosur/nfs/uploads
+sudo docker exec nodosur-web1 apache2ctl -t:
+  AH00558: Apache no tiene ServerName global, usa 172.18.0.2.
+  Syntax OK
+  APACHE_EXIT=0
+
+=== VM310 Web2 ===
+Usuario SSH: nodosur-g7-web2.
+Git: rama e3/backend2; HEAD 667d7d9.
+git status --short: M compose/web2/compose.yaml
+git diff --check: sin salida de error.
+sudo docker compose -f compose/web2/compose.yaml config --quiet:
+  COMPOSE_EXIT=0
+sudo docker inspect nodosur-web2:
+  Estado=running
+  Imagen=wordpress:7.1.2-php8.3-apache
+findmnt -M /srv/nodosur/nfs/uploads -o SOURCE,FSTYPE,TARGET:
+  10.33.199.59:/srv/nodosur/uploads nfs4 /srv/nodosur/nfs/uploads
+sudo docker exec nodosur-web2 apache2ctl -t:
+  AH00558: Apache no tiene ServerName global, usa 172.18.0.2.
+  Syntax OK
+  APACHE_EXIT=0
+
+=== INTERPRETACIÓN TÉCNICA ===
+- Los cuatro Compose por rol son válidos en las VMs y los
+  cuatro contenedores consultados están en estado running.
+- MariaDB está healthy y conserva el volumen histórico exacto.
+- HAProxy y ambos Apache pasan verificación de sintaxis.
+- Ambos backends mantienen NFSv4 montado desde VM268.
+- ServerName de Apache: advertencia no fatal, APACHE_EXIT=0.
+- La imagen wordpress:7.1.2-php8.3-apache es una etiqueta
+  de contenedor; WordPress en HTML persistente ya había sido
+  comprobado como 7.1.3 mediante wp-load.php.
+- Se conservaron cambios locales de los Compose de Web1/Web2,
+  que incorporan el hardening Apache probado; NO hacer pull,
+  reset, stash, clean ni actualizar contenedores a ciegas.
+- Evidencia previa: huellas semánticas de ambos Compose web
+  coincidentes entre Fedora y los dos hosts.
+- VALIDACIÓN DEL ESTADO EXISTENTE: no es un rebuild
+  de cinco VMs, no despliega DNS/NFS/TLS desde cero ni prueba
+  recuperación integral de datos y secretos en infraestructura
+  independiente.
