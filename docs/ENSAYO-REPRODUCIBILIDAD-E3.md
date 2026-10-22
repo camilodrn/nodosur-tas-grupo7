@@ -1,6 +1,6 @@
 # Plan de ensayo aislado de reproducibilidad — Nodo Sur E3
 
-**Estado:** ensayo en ejecución (21/10/2026); arranque y pruebas HTTP/SQL confirmadas; volumen compartido aún pendiente. Documento de apoyo a
+**Estado:** ensayo multicontenedor ejecutado el 21/10/2026; arranque, MariaDB healthy, HTTP/SQL, volumen compartido, instalación WordPress y balanceo 3/3 confirmados. Persistencia tras reiniciar únicamente el ensayo aún pendiente. Documento de apoyo a
 [Entrega 3](ENTREGA3.md), [guía de reconstrucción](DESPLIEGUE-REPRODUCIBLE-E3.md)
 y [rúbrica](RUBRICA-E3.md).
 
