@@ -12,10 +12,10 @@
 | 5:00–7:00 | Dos backends | `/tienda/` e imagen NFS en web1/web2: HTTP 200 |
 | 7:00–9:00 | Persistencia | MariaDB shared y volumen existente, digest idéntico de la misma imagen vía dos web; evidencia histórica de carrito |
 | 9:00–10:30 | Seguridad | `DOCKER-USER`, origen solo proxy, secretos fuera de repo, `uploads` deniega ruta PHP y permite imágenes |
-| 10:30–14:30 | Falla/recuperación | Detener **únicamente web2** (con autorización), observar web1 HTTP 200, evento de salud DOWN; recuperar web2, verificar balanceo y UP |
+| 10:30–14:30 | Falla/recuperación | **Opción predeterminada sin interrupción:** mostrar la evidencia del 21/10 con logs `DOWN/UP`, 8/8 HTTPS 200 vía web1 y posterior balanceo 4/4. **Solo si docente/equipo autorizan y hay tiempo:** ejecutar nueva falla controlada de web2 con recuperación |
 | 14:30–15:00 | Límites | HAProxy/DB/DNS/NFS siguen siendo SPOF; `HEAD /` no certifica salud integral |
 
-La duración es aproximada; si el docente concede menos tiempo, priorizar **TLS + reparto + falla/recuperación + persistencia**.
+La duración es aproximada; si el docente concede menos tiempo, priorizar **TLS + reparto + evidencia de falla/recuperación + persistencia**. La caída en vivo no es requisito para recrear una falla que ya quedó documentada: será una opción únicamente si es solicitada y autorizada.
 
 ## Comandos de lectura para la demostración
 
@@ -83,7 +83,9 @@ findmnt -M /srv/nodosur/nfs/uploads -o SOURCE,FSTYPE,OPTIONS
 
 No modificar políticas de firewall, NAT o rutas durante la defensa.
 
-## Falla de web2 y reintegración (requiere autorización, no ensayar casualmente)
+## Falla de web2 y reintegración (solo si docente/equipo autorizan otra prueba)
+
+**Prueba histórica ya ejecutada el 21/10/2026:** [evento `DOWN` y continuidad 8/8 vía web1](../evidencias/e3/prueba-falla-web2-haproxy-web1-20261021.txt); [reincorporación `UP` y 8/8 HTTPS 200 repartidas 4/4](../evidencias/e3/wordpress713-recuperacion-web2-haproxy-20261021.txt). Estas evidencias pueden mostrarse sin volver a interrumpir web2. No se han medido RTO/RPO formales.
 
 **Condiciones de inicio:** web1 HTTP 200 estable, HAProxy sano, DB healthy, NFS montado en ambos, acceso SSH a VM310 y plan de reversión acordado. Mantener una terminal abierta en VM310 y otra en VM308. Tener tiempo disponible; si una condición falla, **NO iniciar ensayo**.
 
