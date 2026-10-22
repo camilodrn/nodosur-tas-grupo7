@@ -44,6 +44,10 @@ Datos observados del operador:
 
 **Preflight completado el 21/10/2026 (sin desplegar):** [registro de Docker Engine, memoria, puerto libre, secretos ficticios, `config --quiet`, cuatro servicios declarados y tres imágenes descargadas](../evidencias/e3/preflight-ensayo-fedora-20261021.txt). Los seis contenedores de FurgoPlus continuaban `healthy`. Aún no hay evidencia de que arranquen los servicios del ensayo ni de que responda el proxy.
 
+## Prueba posterior: balanceo HTTP y conexiones SQL (21/10/2026)
+
+La [evidencia del segundo control](../evidencias/e3/balanceo-sql-ensayo-fedora-20261021.txt) confirmó seis respuestas `302` alternando web1/web2 **3/3**, con redirección al instalador inicial de WordPress. Tanto web1 como web2 ejecutaron `SELECT 1` satisfactoriamente contra la MariaDB de ensayo usando el usuario `www-data` y secreto ficticio sin mostrar. **El script terminó sin imprimir los pasos de archivo compartido y estado posterior de FurgoPlus**, por lo que esos controles siguen pendientes. No se atribuye una causa sin comprobar el estado de salida.
+
 ## Primer arranque ejecutado en Fedora (21/10/2026)
 
 El [registro del primer arranque](../evidencias/e3/primer-arranque-ensayo-fedora-20261021.txt) confirma **cuatro contenedores levantados desde el Compose de laboratorio**, con MariaDB healthy, redes y cuatro volúmenes creados y puerto local 127.0.0.1:19090; la respuesta HTTP inicial fue **302**. Los seis contenedores FurgoPlus seguían healthy. **No se ha acreditado todavía el balanceo de ambos WordPress, su conexión SQL individual, estado de la instalación WordPress ni la lectura compartida del volumen de uploads.** Esta comprobación no modifica datos productivos.
