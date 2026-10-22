@@ -53,6 +53,31 @@ al profesor, verificar usuario WordPress administrativo, comprobar si
 existen llaves SSH E2 aún autorizadas ni validar sesión docente desde
 su red. No borrar HOME E2 ni cambiar usuarios operativos del equipo.
 
+## Confirmación del administrador WordPress E3 (22/10/2026)
+
+Nueva comprobación de solo lectura ejecutada por el equipo en VM263 Web1
+dentro del contenedor `nodosur-web1`:
+```text
+tas_revision_e3: administrator
+tas_revision: administrator
+```
+
+**Probado:** la nueva cuenta E3 existe en la base de datos compartida
+WordPress y tiene rol administrador; la cuenta E2 sigue siendo
+administradora. **No probado todavía:** autenticación real de E3
+por el proxy HTTPS, acceso a usuarios/WooCommerce y retiro de E2.
+
+**Siguiente acción condicionada:** probar la sesión E3 por
+`https://nodosur07.tas/wp-admin/` antes de desprivilegiar E2.
+Después, si fue exitosa y no hay otras dependencias, convertir
+`tas_revision` a rol sin privilegios administrativos (p. ej.
+`subscriber`), invalidar sus sesiones WordPress y rotar a
+contraseña aleatoria **sin exponerla**. Esto preserva el registro
+y la autoría, aunque no equivale a eliminar definitivamente la
+cuenta. Si el correo antiguo puede recuperar contraseña, evaluar
+su control antes de dar por retirado todo acceso. **No ejecutar
+esta acción sin confirmar primero login E3.**
+
 ## Auditoría de cuentas WordPress E2/E3 (22/10/2026)
 
 En VM263, dentro del contenedor `nodosur-web1` como `www-data`,
