@@ -4,6 +4,42 @@
 [Entrega 3](ENTREGA3.md), [guía de reconstrucción](DESPLIEGUE-REPRODUCIBLE-E3.md)
 y [rúbrica](RUBRICA-E3.md).
 
+## Ensayo nuevo de arranque automático con volúmenes limpios (22/10/2026)
+
+Se inició un **segundo proyecto de Docker Compose en Fedora**, distinto del
+ensayo previo: `nodosur-e3-init-limpio`. Antes del arranque no tenía
+contenedores ni volúmenes; Docker usaba contexto `default`, Compose
+v5.5.1 y validación `config --quiet` correcta.
+
+El operador ejecutó `docker compose -p nodosur-e3-init-limpio
+-f compose/e3-lab/compose.yaml up -d --no-build web1 web2`,
+**sin invocar manualmente `uploads-init`**. Compose creó dos redes y
+cuatro volúmenes nuevos; inició MariaDB `healthy` y ambos WordPress
+`running`. `uploads-init` concluyó `Exited (0)` y registró
+`UPLOADS_INIT_OK`. Desde **ambas webs** se comprobó
+`UID=33 GID=33 MODO=755` y `UPLOADS_WRITE_OK` al evaluar
+`test -w` como `www-data`. Los seis contenedores FurgoPlus
+seguían `Up (healthy)`.
+
+**Interpretación probada:** la dependencia
+`condition: service_completed_successfully` logró inicializar
+automáticamente la propiedad/permisos del volumen compartido recién
+creado, sin `chown` manual posterior. Se satisfizo la **brecha de
+arranque limpio de `uploads-init`** que quedaba tras la reparación
+del 21/10. El proyecto nuevo no arrancó `proxy` para evitar colisión
+del puerto local 19090 con el ensayo anterior.
+
+**Limitaciones honestas:** aún no se verificó escritura real ni SHA-256
+cruzado **en este proyecto nuevo**; `test -w` solo comprueba permisos
+efectivos. Se reutilizaron secretos ficticios externos ya preparados;
+el ejercicio no incluyó instalar de nuevo WordPress/WooCommerce ni
+reconstruir DNS, NFS, TLS, red iLab o cinco VMs. El ensayo anterior sí
+demostró instalación WordPress ficticia, persistencia y balanceo,
+documentados en esta misma guía. No se debe presentar ninguna de
+las dos pruebas como reconstrucción total de la infraestructura.
+
+[Transcripción saneada del nuevo ensayo](../evidencias/e3/arranque-limpio-uploads-init-fedora-20261022.txt).
+
 ## Qué exige demostrar el criterio
 
 El criterio literal de la rúbrica es **«Aplicación multicontenedor reproducible»**
