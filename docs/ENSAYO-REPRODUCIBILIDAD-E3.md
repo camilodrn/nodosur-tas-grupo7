@@ -27,6 +27,82 @@ orquestación/provisión de máquinas, red y NFS es externa.
 **Límite:** lo anterior demuestra funcionamiento y coherencia de
 configuraciones, pero no acredita por sí solo un despliegue desde cero.
 
+## Evaluación de factibilidad — Fedora (21/10/2026)
+
+Datos observados del operador:
+
+- Docker Engine actual: `default` por `/var/run/docker.sock` (no Docker Desktop).
+- Docker 29.9.1; Compose v5.5.1; 8 CPU y 16.485.978.112 bytes de RAM total.
+- Aproximadamente 398 GiB libres en `/home` al medir.
+- **Seis contenedores FurgoPlus running/healthy**, con puertos 127.0.0.1:18080
+  y 127.0.0.1:18081 ocupados. **No detener ni tocar FurgoPlus.**
+- Imágenes locales no equivalentes: `mariadb:12.3.3-noble` y
+  `wordpress:7.1.2-php8.2-apache`. Deben obtenerse las imágenes específicas
+  del ensayo; no etiquetar imágenes existentes para hacerlas parecer otras.
+- La memoria **disponible ahora** y puerto 19090 aún requieren revisión
+  antes de crear el proyecto.
+
+## Definición preparada, pendiente de ejecución
+
+Archivos exclusivos del ensayo:
+[`compose/e3-lab/compose.yaml`](../compose/e3-lab/compose.yaml) y
+[`compose/e3-lab/haproxy.cfg`](../compose/e3-lab/haproxy.cfg).
+
+Al ejecutarse únicamente en Fedora con proyecto `-p nodosur-e3-ensayo`,
+estos archivos definen **cuatro contenedores**:
+
+- `mariadb:10.11`, con datos y contraseñas exclusivamente de laboratorio.
+- Dos `wordpress:7.1.3-php8.3-apache`, versión efectiva alineada pero
+  **imagen diferente al tag histórico declarado en producción**.
+- `haproxy:3.2.23-alpine`, con **HTTP de laboratorio sin TLS**, no el
+  certificado ni la configuración pública de VM308.
+- Dos volúmenes HTML separados, un volumen de uploads compartido (Docker
+  local **no NFS**) y un volumen independiente de MariaDB.
+- Una red frontal y una red interna de base de datos propias del proyecto.
+- Solo un puerto publicado en Fedora: **127.0.0.1:19090**, a validar libre.
+  No se publican las webs ni el puerto 3306 del DB.
+- Contraseñas aleatorias de ensayo en archivos privados fuera de Git;
+  `WORDPRESS_DB_PASSWORD_FILE` y `MARIADB_*_PASSWORD_FILE` leen secretos
+  desde montajes de Compose sin colocarlos en `docker inspect` como texto.
+- La misma configuración Apache de prohibición PHP en uploads montada
+  con lectura sola, sin copiar configuraciones privadas.
+
+**No despliega WooCommerce ni restaura el WordPress productivo.** Al iniciar
+desde volúmenes nuevos, WordPress mostrará el instalador inicial hasta que
+se configure con **datos ficticios**. Los health checks HTTP aceptan 200/302
+durante la inicialización, a diferencia del `HEAD / = 200` productivo.
+
+**No ejecutar `docker compose down -v`**, ni borrar recursos de otros
+proyectos. Documentar toda creación/remoción de recursos del ensayo, con
+revisión explícita de nombres y etiquetas antes de limpiar.
+
+### Preflight sin crear contenedores
+
+1. Traer la nueva rama de cierre con `git fetch` y
+   `git merge --ff-only origin/e3/cierre-tecnico`, solo desde el clon Fedora
+   limpio; nunca sincronizar los checkouts de VMs para ejecutar este ensayo.
+2. Revisar `free -h`, estado y contexto Docker, puerto TCP 19090 y que no
+   exista proyecto etiquetado `nodosur-e3-ensayo`.
+3. Crear **solo una vez** dos contraseñas ficticias con `umask 077` en
+   `~/.local/share/nodosur-e3-ensayo`, permisos privados, sin mostrar valores.
+4. Exportar `NODOSUR_E3_LAB_SECRETS` con esa ruta, ejecutar
+   `docker compose -p nodosur-e3-ensayo -f compose/e3-lab/compose.yaml config --quiet`.
+5. Confirmar que `docker compose config` valida; aún **no** descargar imágenes
+   ni ejecutar `up` hasta evaluar el resultado de la inspección.
+
+### Puesta en marcha propuesta tras preflight satisfactorio
+
+En una siguiente fase **solo con recursos suficientes y verificación de puertos**:
+`docker compose -p nodosur-e3-ensayo -f compose/e3-lab/compose.yaml pull`
+seguido de `up -d` (mismo proyecto). Registrar errores/reintentos; no asumir
+que Docker Hub o la instalación inicial responderán correctamente sin probarlo.
+
+Comprobar `docker compose ... ps`, base saludable, resolución de servicios
+por nombre dentro de las redes, respuestas HTTP locales y cabecera
+`X-NodoSur-Lab-Backend`. La instalación WordPress necesitará datos
+**únicamente ficticios**; no introducir contraseñas de USM ni importar datos
+productivos. No confundir este ensayo con la reconstrucción de cinco VMs.
+
 ## Prueba propuesta: nuevo entorno aislado
 
 El ensayo deberá desplegar una **copia de laboratorio con datos ficticios**
