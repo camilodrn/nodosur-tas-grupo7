@@ -66,11 +66,11 @@ BIND9 contestó SOA autoritativo por UDP/TCP (`aa`, `NOERROR`). Inicialmente AXF
 
 ## Persistencia después de reinicio (ensayo Fedora, 21/10/2026)
 
-[Registro de la prueba](../evidencias/e3/persistencia-reinicio-ensayo-fedora-20261021.txt): tras reiniciar contenedores **solo** del proyecto de ensayo, MariaDB recuperó `healthy`, WordPress conservó instalación y administrador en Web1/Web2, y un archivo ficticio mantuvo su SHA-256 en ambos; después fue eliminado. HAProxy contestó HTTP 200, pero **las seis respuestas finales vinieron solamente de Web2**, así que el validador terminó en error y falta comprobar recuperación de ambos miembros del balanceo. Esta limitación no modifica la evidencia de balanceo y failover de las VMs iLab productivas.
+[Registro de la prueba y verificación posterior](../evidencias/e3/persistencia-reinicio-ensayo-fedora-20261021.txt): tras reiniciar **solo** los contenedores del ensayo, MariaDB recuperó `healthy`, WordPress conservó instalación/administrador en ambos servidores, y un archivo ficticio mantuvo el mismo SHA-256 desde ambas webs; después fue eliminado. Las primeras seis peticiones HTTP 200 del proxy pasaron solo por Web2 (el validador original salió con error). **Sin nuevos reinicios**, los logs de HAProxy mostraron Web1 `DOWN` por conexión rechazada y posteriormente `UP` tras health check Layer7 HTTP 200. En la comprobación posterior ambos WordPress devolvieron HTTP 200 y **ocho solicitudes se distribuyeron 4/4**. FurgoPlus permaneció saludable. El script se ajustó para esperar ambos nodos en futuras ejecuciones; no se midió RTO y este ensayo no sustituye la prueba de las cinco VMs del iLab.
 
 ## WordPress inicializado en el ensayo (21/10/2026)
 
-La [instalación ficticia con `wp_install()`](../evidencias/e3/wordpress-instalado-ensayo-fedora-20261021.txt) tuvo éxito (`WORDPRESS_LAB_INSTALL_OK`), y HAProxy respondió HTTP 200 en 6/6 solicitudes, repartidas 3/3 entre Web1 y Web2. La ausencia de `sendmail` no impidió terminar; el ensayo no incluye correo de producción. El siguiente control pendiente es la persistencia del WordPress ficticio después de reiniciar exclusivamente los contenedores de laboratorio.
+La [instalación ficticia con `wp_install()`](../evidencias/e3/wordpress-instalado-ensayo-fedora-20261021.txt) tuvo éxito (`WORDPRESS_LAB_INSTALL_OK`), y HAProxy respondió HTTP 200 en 6/6 solicitudes, repartidas 3/3 entre Web1 y Web2. La ausencia de `sendmail` no impidió terminar; el ensayo no incluye correo de producción. El estado persistente del WordPress ficticio quedó comprobado posteriormente en el reinicio controlado del propio laboratorio.
 
 ## Validación de uploads compartidos del ensayo (21/10/2026)
 
@@ -78,7 +78,7 @@ La [prueba de escritura/lectura cruzada](../evidencias/e3/volumen-compartido-ens
 
 ## Ensayo local de arranque multicontenedor (21/10/2026)
 
-Se levantó en Fedora el proyecto aislado `nodosur-e3-ensayo` a partir de `compose/e3-lab/compose.yaml`: MariaDB 10.11 healthy, WordPress web1/web2 y HAProxy 3.2.23 running; redes y volúmenes exclusivos, solo 127.0.0.1:19090 publicado, HTTP 302 y los seis contenedores FurgoPlus aún saludables ([evidencia](../evidencias/e3/primer-arranque-ensayo-fedora-20261021.txt)). Este primer resultado **no demuestra todavía** ambos backends sirviendo, conectividad SQL desde WordPress, configuración final del CMS ni NFS/TLS reales. No se levantó producción desde cero.
+Se levantó en Fedora el proyecto aislado `nodosur-e3-ensayo` a partir de `compose/e3-lab/compose.yaml`: MariaDB 10.11 healthy, WordPress web1/web2 y HAProxy 3.2.23 running; redes y volúmenes exclusivos, solo 127.0.0.1:19090 publicado, HTTP 302 y los seis contenedores FurgoPlus aún saludables ([evidencia](../evidencias/e3/primer-arranque-ensayo-fedora-20261021.txt)). Este era el resultado **inicial**; las pruebas posteriores sí demostraron ambos backends, SQL, instalación del CMS y volumen compartido local, **pero no NFS/TLS reales ni una reconstrucción productiva desde cero**.
 
 ## Verificación integral de lectura desde Fedora (21/10/2026)
 
