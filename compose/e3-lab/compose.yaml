@@ -1,0 +1,102 @@
+# ENSAYO AISLADO — NO es el Compose productivo ni una restauracion de WooCommerce.
+# Lanzar solo en Fedora con -p nodosur-e3-ensayo y secretos temporales externos.
+# No contiene IPs internas iLab ni referencias a volúmenes productivos.
+
+services:
+  database:
+    image: mariadb:10.11
+    restart: "no"
+    environment:
+      MARIADB_DATABASE: nodosur_lab
+      MARIADB_USER: nodosur_lab
+      MARIADB_PASSWORD_FILE: /run/secrets/db_password
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+    secrets:
+      - db_password
+      - db_root_password
+    volumes:
+      - database_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks:
+      - database_net
+
+  web1:
+    image: wordpress:7.1.3-php8.3-apache
+    restart: "no"
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: database:3306
+      WORDPRESS_DB_NAME: nodosur_lab
+      WORDPRESS_DB_USER: nodosur_lab
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_password
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME', 'http://127.0.0.1:19090');
+        define('WP_SITEURL', 'http://127.0.0.1:19090');
+    secrets:
+      - db_password
+    volumes:
+      - web1_html:/var/www/html
+      - shared_uploads:/var/www/html/wp-content/uploads
+    networks:
+      - frontend_net
+      - database_net
+
+  web2:
+    image: wordpress:7.1.3-php8.3-apache
+    restart: "no"
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: database:3306
+      WORDPRESS_DB_NAME: nodosur_lab
+      WORDPRESS_DB_USER: nodosur_lab
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_password
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME', 'http://127.0.0.1:19090');
+        define('WP_SITEURL', 'http://127.0.0.1:19090');
+    secrets:
+      - db_password
+    volumes:
+      - web2_html:/var/www/html
+      - shared_uploads:/var/www/html/wp-content/uploads
+    networks:
+      - frontend_net
+      - database_net
+
+  proxy:
+    image: haproxy:3.2.23-alpine
+    restart: "no"
+    depends_on:
+      - web1
+      - web2
+    ports:
+      - "127.0.0.1:19090:8080"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    networks:
+      - frontend_net
+
+networks:
+  frontend_net:
+  database_net:
+    internal: true
+
+volumes:
+  database_data:
+  web1_html:
+  web2_html:
+  shared_uploads:
+
+secrets:
+  db_password:
+    file: ${NODOSUR_E3_LAB_SECRETS:?Ruta de secretos de ensayo sin configurar}/db_password
+  db_root_password:
+    file: ${NODOSUR_E3_LAB_SECRETS:?Ruta de secretos de ensayo sin configurar}/db_root_password
