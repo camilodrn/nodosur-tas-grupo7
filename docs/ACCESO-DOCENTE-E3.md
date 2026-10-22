@@ -53,6 +53,18 @@ al profesor, verificar usuario WordPress administrativo, comprobar si
 existen llaves SSH E2 aún autorizadas ni validar sesión docente desde
 su red. No borrar HOME E2 ni cambiar usuarios operativos del equipo.
 
+## Verificación DNS, NFS, Web1 y unidades antiguas antes de revocar E2 (22/10/2026)
+
+Nueva evidencia por terminal, **sin cambios adicionales en hosts**:
+
+- Desde Fedora, `dig @10.33.195.205 nodosur07.tas A +short` devolvió `10.33.195.194`.
+- En VM263, `findmnt -M /srv/nodosur/nfs/uploads` identificó origen NFSv4 `10.33.199.59:/srv/nodosur/uploads`; `docker inspect nodosur-web1` indicó `running`.
+- Las unidades `nodosur-web1.service` (VM263, `active/enabled`), `nodosur-db-prod.service` (VM279, `active/enabled`) y `nodosur-db-stage.service` (VM279, `inactive/disabled`) mantienen `WorkingDirectory=/home/tas_revision/nodosur-tas-grupo7`.
+- No se encontró directiva `User=`/`Group=` en el texto filtrado de esas unidades, ni coincidencias literales `tas_revision` en las líneas `ExecStart/ExecStartPre/ExecStartPost` examinadas. **No constituye auditoría exhaustiva de dependencias indirectas.**
+- La cuenta E2 **solo está caducada en VM268** hasta este control. En VM263 y VM279 aún se espera la caducidad reversible y comprobación posterior de contenedores, respetando el directorio de trabajo.
+
+**Procedimiento futuro seguro:** caducar E2 por host con `usermod --expiredate 1970-01-02 tas_revision` usando la identidad E3 ya validada, comprobar `chage -l`, salud observable de servicios/containers y SSH nuevo de E3. No ejecutar `userdel -r`, no eliminar `/home/tas_revision`, no reiniciar ni recrear contenedores. Reversión si hace falta: `sudo usermod --expiredate -1 tas_revision`.
+
 ## Caducidad cuenta E2 en VM268 — verificación inicial (22/10/2026)
 
 Se ejecutó por SSH desde Fedora con la identidad nueva `tas_revision_e3`:
