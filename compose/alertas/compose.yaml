@@ -1,0 +1,52 @@
+name: nodosur-alertas
+
+services:
+  alertmanager:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    image: prom/alertmanager:v0.34.2
+    container_name: nodosur-alertmanager
+    restart: unless-stopped
+    mem_limit: 128m
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+    ports:
+      - "127.0.0.1:9093:9093"
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    networks:
+      - monitoreo
+
+  mailpit:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    image: axllent/mailpit:v1.32.0
+    container_name: nodosur-mailpit
+    restart: unless-stopped
+    mem_limit: 128m
+    environment:
+      MP_DATABASE: /data/mailpit.db
+      MP_MAX_MESSAGES: "500"
+    ports:
+      - "127.0.0.1:8025:8025"
+    volumes:
+      - mailpit_data:/data
+    networks:
+      - monitoreo
+
+networks:
+  monitoreo:
+    external: true
+    name: nodosur-monitoreo_default
+
+volumes:
+  alertmanager_data:
+  mailpit_data:
