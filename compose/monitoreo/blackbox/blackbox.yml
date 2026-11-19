@@ -1,0 +1,40 @@
+modules:
+  wordpress_https:
+    prober: http
+    timeout: 8s
+    http:
+      method: GET
+      valid_status_codes: [200]
+      preferred_ip_protocol: ip4
+      headers:
+        Host: nodosur07.tas
+      tls_config:
+        insecure_skip_verify: true
+
+  dns_nodosur_udp:
+    prober: dns
+    timeout: 5s
+    dns:
+      transport_protocol: udp
+      preferred_ip_protocol: ip4
+      recursion_desired: false
+      query_name: nodosur07.tas
+      query_type: A
+      valid_rcodes: [NOERROR]
+      validate_answer_rrs:
+        fail_if_none_matches_regexp:
+          - '10[.]33[.]195[.]194$'
+
+  dns_nodosur_tcp:
+    prober: dns
+    timeout: 5s
+    dns:
+      transport_protocol: tcp
+      preferred_ip_protocol: ip4
+      recursion_desired: false
+      query_name: nodosur07.tas
+      query_type: A
+      valid_rcodes: [NOERROR]
+      validate_answer_rrs:
+        fail_if_none_matches_regexp:
+          - '10[.]33[.]195[.]194$'

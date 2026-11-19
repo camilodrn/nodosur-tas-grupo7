@@ -1,0 +1,126 @@
+global:
+  scrape_interval: 30s
+  scrape_timeout: 10s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - prometheus:9090
+
+  - job_name: vm308_node
+    static_configs:
+      - targets:
+          - 172.19.0.1:9100
+        labels:
+          vm: VM308
+          rol: proxy
+
+  - job_name: vm263_node
+    static_configs:
+      - targets:
+          - 10.33.199.58:9100
+        labels:
+          vm: VM263
+          rol: web1
+
+  - job_name: vm310_node
+    static_configs:
+      - targets:
+          - 10.33.199.62:9100
+        labels:
+          vm: VM310
+          rol: web2
+
+  - job_name: vm279_node
+    static_configs:
+      - targets:
+          - 10.33.199.60:9100
+        labels:
+          vm: VM279
+          rol: db
+
+  - job_name: vm268_node
+    static_configs:
+      - targets:
+          - 10.33.199.59:9100
+        labels:
+          vm: VM268
+          rol: dns_nfs
+
+  - job_name: haproxy
+    static_configs:
+      - targets:
+          - nodosur-haproxy:8405
+        labels:
+          vm: VM308
+          rol: proxy_servicio
+
+  - job_name: nodosur_http
+    metrics_path: /probe
+    params:
+      module: [wordpress_https]
+    static_configs:
+      - targets:
+          - https://nodosur-haproxy:8443/
+          - https://nodosur-haproxy:8443/tienda/
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
+
+  - job_name: mariadb
+    static_configs:
+      - targets:
+          - 10.33.199.60:9104
+        labels:
+          vm: VM279
+          rol: db_servicio
+
+  - job_name: nodosur_dns_udp
+    metrics_path: /probe
+    params:
+      module: [dns_nodosur_udp]
+    static_configs:
+      - targets:
+          - 10.33.199.59:53
+        labels:
+          vm: VM268
+          rol: dns
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
+
+  - job_name: nodosur_dns_tcp
+    metrics_path: /probe
+    params:
+      module: [dns_nodosur_tcp]
+    static_configs:
+      - targets:
+          - 10.33.199.59:53
+        labels:
+          vm: VM268
+          rol: dns
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - nodosur-alertmanager:9093
