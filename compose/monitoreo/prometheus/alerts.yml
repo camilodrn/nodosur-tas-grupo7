@@ -84,3 +84,46 @@ groups:
         annotations:
           summary: "Disco sobre el 85% de uso"
           description: "Revisar capacidad de {{ $labels.instance }}."
+
+  - name: nodosur-salud-respaldos
+    interval: 30s
+    rules:
+      - alert: NodoSurBackupIntegrityFailed
+        expr: nodosur_backup_remote_integrity_ok{job="vm268_node"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          responsable: grupo7
+        annotations:
+          summary: "Fallo de integridad del respaldo {{ $labels.family }}"
+          description: "La copia remota no supera SHA-256 o no pudo verificarse."
+
+      - alert: NodoSurBackupTooOld
+        expr: (time() - nodosur_backup_latest_verified_timestamp_seconds{job="vm268_node"}) > 108000
+        for: 5m
+        labels:
+          severity: warning
+          responsable: grupo7
+        annotations:
+          summary: "Respaldo remoto atrasado: {{ $labels.family }}"
+          description: "La ultima copia verificada supera las 30 horas."
+
+      - alert: NodoSurBackupMonitorStale
+        expr: (time() - nodosur_backup_health_collector_last_run_timestamp_seconds{job="vm268_node"}) > 97200
+        for: 5m
+        labels:
+          severity: warning
+          responsable: grupo7
+        annotations:
+          summary: "Monitor de respaldos desactualizado"
+          description: "El monitor no publica una ejecucion nueva hace mas de 27 horas."
+
+      - alert: NodoSurBackupSeriesMissing
+        expr: (count(nodosur_backup_remote_integrity_ok{job="vm268_node"}) or vector(0)) < 4
+        for: 5m
+        labels:
+          severity: critical
+          responsable: grupo7
+        annotations:
+          summary: "Metricas de respaldos incompletas"
+          description: "No aparecen las cuatro familias esperadas."

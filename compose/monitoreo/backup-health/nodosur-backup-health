@@ -1,0 +1,143 @@
+#!/usr/bin/python3
+import hashlib
+import os
+import re
+import tempfile
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+REPO = Path("/var/backups/nodosur-remote")
+DEST = Path(
+    "/var/lib/prometheus/node-exporter/"
+    "nodosur_backup_health.prom"
+)
+
+FAMILIES = {
+    "mariadb": (
+        REPO / "archive",
+        r"nodo_sur_final-(\d{8})-(\d{6})\.sql\.gz"
+    ),
+    "web1": (
+        REPO / "web/web1",
+        r"wordpress-web1-(\d{8})T(\d{6})Z\.tar\.gz"
+    ),
+    "web2": (
+        REPO / "web/web2",
+        r"wordpress-web2-(\d{8})T(\d{6})Z\.tar\.gz"
+    ),
+    "uploads": (
+        REPO / "web",
+        r"nodosur-uploads-(\d{8})T(\d{6})Z\.tar\.gz"
+    ),
+}
+
+def verify_checksum(path):
+    check = path.with_name(path.name + ".sha256")
+
+    if not check.is_file():
+        return False
+
+    fields = check.read_text(
+        encoding="utf-8"
+    ).strip().split()
+
+    if len(fields) != 2:
+        return False
+
+    if fields[1].lstrip("*") != path.name:
+        return False
+
+    expected = fields[0].lower()
+
+    if not re.fullmatch(r"[0-9a-f]{64}", expected):
+        return False
+
+    digest = hashlib.sha256()
+
+    with path.open("rb") as stream:
+        for chunk in iter(
+            lambda: stream.read(1024 * 1024), b""
+        ):
+            digest.update(chunk)
+
+    return digest.hexdigest() == expected
+
+lines = [
+    "# HELP nodosur_backup_latest_verified_timestamp_seconds Last verified remote backup UTC timestamp.",
+    "# TYPE nodosur_backup_latest_verified_timestamp_seconds gauge",
+    "# HELP nodosur_backup_remote_integrity_ok Latest remote backup matches SHA256.",
+    "# TYPE nodosur_backup_remote_integrity_ok gauge",
+    "# HELP nodosur_backup_health_collector_last_run_timestamp_seconds Last metrics collection timestamp.",
+    "# TYPE nodosur_backup_health_collector_last_run_timestamp_seconds gauge",
+]
+
+for family, (folder, regex) in FAMILIES.items():
+    valid = 0
+    stamp = 0
+
+    try:
+        matches = [
+            (p.name, p)
+            for p in folder.iterdir()
+            if p.is_file()
+            and re.fullmatch(regex, p.name)
+        ]
+
+        if matches:
+            name, latest = max(matches)
+
+            groups = re.fullmatch(
+                regex, name
+            ).groups()
+
+            backup_dt = datetime.strptime(
+                "".join(groups),
+                "%Y%m%d%H%M%S"
+            ).replace(tzinfo=timezone.utc)
+
+            if verify_checksum(latest):
+                valid = 1
+                stamp = int(
+                    backup_dt.timestamp()
+                )
+
+    except (OSError, ValueError) as error:
+        print(
+            f"{family}: verification error "
+            f"({type(error).__name__})"
+        )
+
+    print(
+        f"{family}: integrity_ok={valid}, "
+        f"verified_timestamp={stamp}"
+    )
+
+    lines.append(
+        "nodosur_backup_latest_verified_timestamp_seconds"
+        f'{{family="{family}"}} {stamp}'
+    )
+
+    lines.append(
+        "nodosur_backup_remote_integrity_ok"
+        f'{{family="{family}"}} {valid}'
+    )
+
+lines.append(
+    "nodosur_backup_health_collector_last_run_timestamp_seconds "
+    f"{int(time.time())}"
+)
+
+with tempfile.NamedTemporaryFile(
+    mode="w",
+    encoding="utf-8",
+    dir=DEST.parent,
+    prefix=".nodosur-backup-",
+    suffix=".tmp",
+    delete=False
+) as output:
+    temp_name = output.name
+    output.write("\n".join(lines) + "\n")
+
+os.chmod(temp_name, 0o644)
+os.replace(temp_name, DEST)
