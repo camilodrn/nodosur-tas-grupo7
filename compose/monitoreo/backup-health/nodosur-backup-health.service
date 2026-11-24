@@ -1,0 +1,10 @@
+[Unit]
+Description=Nodo Sur E4 - Verificacion de salud de respaldos remotos
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+NoNewPrivileges=true
+UMask=0022
+ExecStart=/usr/local/sbin/nodosur-backup-health

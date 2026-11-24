@@ -1,0 +1,129 @@
+groups:
+  - name: nodosur-disponibilidad
+    interval: 30s
+    rules:
+      - alert: NodoSurTargetDown
+        expr: up{job=~"vm.*_node|haproxy|mariadb|prometheus"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          responsable: grupo7
+        annotations:
+          summary: "Objetivo sin respuesta: {{ $labels.job }}"
+          description: "Prometheus no puede consultar {{ $labels.instance }}."
+
+      - alert: NodoSurHTTPFailed
+        expr: probe_success{job="nodosur_http"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          responsable: grupo7
+        annotations:
+          summary: "Fallo HTTP en Nodo Sur"
+          description: "La ruta {{ $labels.instance }} no supera la sonda HTTPS."
+
+      - alert: NodoSurDNSFailed
+        expr: probe_success{job=~"nodosur_dns_udp|nodosur_dns_tcp"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          responsable: grupo7
+        annotations:
+          summary: "Fallo de resolucion DNS"
+          description: "La sonda {{ $labels.job }} no obtiene la respuesta esperada."
+
+      - alert: NodoSurMariaDBUnavailable
+        expr: mysql_up{job="mariadb"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          responsable: grupo7
+        annotations:
+          summary: "MariaDB no responde al exportador"
+          description: "Revisar autenticacion, servicio y logs en VM279."
+
+  - name: nodosur-recursos-y-nfs
+    interval: 30s
+    rules:
+      - alert: NodoSurNFSDeviceError
+        expr: node_filesystem_device_error{job=~"vm263_node|vm310_node",mountpoint="/srv/nodosur/nfs/uploads"} == 1
+        for: 2m
+        labels:
+          severity: critical
+          responsable: grupo7
+        annotations:
+          summary: "Error en el montaje NFS"
+          description: "Error reportado por {{ $labels.job }}."
+
+      - alert: NodoSurNFSReadOnly
+        expr: node_filesystem_readonly{job=~"vm263_node|vm310_node",mountpoint="/srv/nodosur/nfs/uploads"} == 1
+        for: 2m
+        labels:
+          severity: critical
+          responsable: grupo7
+        annotations:
+          summary: "Montaje NFS en solo lectura"
+          description: "Comprobar el cliente {{ $labels.job }}."
+
+      - alert: NodoSurNFSMountMissing
+        expr: up{job=~"vm263_node|vm310_node"} == 1 unless on(job) node_filesystem_readonly{job=~"vm263_node|vm310_node",mountpoint="/srv/nodosur/nfs/uploads"}
+        for: 2m
+        labels:
+          severity: critical
+          responsable: grupo7
+        annotations:
+          summary: "Montaje NFS no detectado"
+          description: "Node Exporter no informa el montaje esperado en {{ $labels.job }}."
+
+      - alert: NodoSurDiskSpaceHigh
+        expr: 100 * (1 - node_filesystem_avail_bytes{job=~"vm.*_node",mountpoint="/"} / node_filesystem_size_bytes{job=~"vm.*_node",mountpoint="/"}) > 85
+        for: 10m
+        labels:
+          severity: warning
+          responsable: grupo7
+        annotations:
+          summary: "Disco sobre el 85% de uso"
+          description: "Revisar capacidad de {{ $labels.instance }}."
+
+  - name: nodosur-salud-respaldos
+    interval: 30s
+    rules:
+      - alert: NodoSurBackupIntegrityFailed
+        expr: nodosur_backup_remote_integrity_ok{job="vm268_node"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          responsable: grupo7
+        annotations:
+          summary: "Fallo de integridad del respaldo {{ $labels.family }}"
+          description: "La copia remota no supera SHA-256 o no pudo verificarse."
+
+      - alert: NodoSurBackupTooOld
+        expr: (time() - nodosur_backup_latest_verified_timestamp_seconds{job="vm268_node"}) > 108000
+        for: 5m
+        labels:
+          severity: warning
+          responsable: grupo7
+        annotations:
+          summary: "Respaldo remoto atrasado: {{ $labels.family }}"
+          description: "La ultima copia verificada supera las 30 horas."
+
+      - alert: NodoSurBackupMonitorStale
+        expr: (time() - nodosur_backup_health_collector_last_run_timestamp_seconds{job="vm268_node"}) > 97200
+        for: 5m
+        labels:
+          severity: warning
+          responsable: grupo7
+        annotations:
+          summary: "Monitor de respaldos desactualizado"
+          description: "El monitor no publica una ejecucion nueva hace mas de 27 horas."
+
+      - alert: NodoSurBackupSeriesMissing
+        expr: (count(nodosur_backup_remote_integrity_ok{job="vm268_node"}) or vector(0)) < 4
+        for: 5m
+        labels:
+          severity: critical
+          responsable: grupo7
+        annotations:
+          summary: "Metricas de respaldos incompletas"
+          description: "No aparecen las cuatro familias esperadas."

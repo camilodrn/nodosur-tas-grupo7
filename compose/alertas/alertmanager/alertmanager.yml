@@ -1,0 +1,18 @@
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: nodosur-mailpit:1025
+  smtp_from: alertas@nodosur07.tas
+  smtp_require_tls: false
+
+route:
+  receiver: correo-laboratorio
+  group_by: ['alertname', 'job', 'severity']
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 4h
+
+receivers:
+  - name: correo-laboratorio
+    email_configs:
+      - to: grupo7@nodosur07.tas
+        send_resolved: true

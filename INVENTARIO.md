@@ -1,16 +1,16 @@
-# Inventario de infraestructura — Entrega 3
+# Inventario de infraestructura — cierre E1–E4
 
-Actualizado según terminales observadas el 20–21/10/2026. Las IPs `10.33.195.x` son de acceso/administración; el tráfico entre componentes se realiza principalmente por `10.33.199.56/29`.
+Direcciones IPv4, hostnames y sincronización horaria observados mediante SSH el 23/11/2026. Las definiciones y commits de octubre se conservan como antecedentes históricos. Las IPs `10.33.195.x` son de acceso/administración; el tráfico entre componentes se realiza principalmente por `10.33.199.56/29`.
 
 | VMID | Hostname observado | Rol | SSH/administración | IP interna | Imagen/servicio |
 |---|---|---|---|---|---|
-| 268 | `nodosur-g7` | DNS BIND9, NFS, copias de respaldo | `10.33.195.205` | `10.33.199.59` | BIND9 y NFS del host |
-| 263 | `nodosurtas07` | WordPress web1 | `10.33.195.202` | `10.33.199.58` | `nodosur-web1`, `wordpress:7.1.2-php8.3-apache` |
-| 310 | `nodosur-g7-web2` | WordPress web2 | `10.33.195.208` | `10.33.199.62` | `nodosur-web2`, `wordpress:7.1.2-php8.3-apache` |
+| 268 | `nodosur-g7` | DNS BIND9, NFS, copias de respaldo | `10.33.195.218` | `10.33.199.59` | BIND9 y NFS del host |
+| 263 | `nodosurtas07` | WordPress web1 | `10.33.195.183` | `10.33.199.58` | `nodosur-web1`, `wordpress:7.1.2-php8.3-apache` |
+| 310 | `nodosur-g7-web2` | WordPress web2 | `10.33.195.197` | `10.33.199.62` | `nodosur-web2`, `wordpress:7.1.2-php8.3-apache` |
 | 279 | `svr-db-nodosur07` | MariaDB y backups locales | `10.33.195.226` | `10.33.199.60` | `nodosur-db-staging`, `mariadb:10.11` |
-| 308 | `nodosur-g7-proxy` | HAProxy y entrada HTTPS | `10.33.195.194` | `10.33.199.61` | `nodosur-haproxy`, `haproxy:3.2.23-alpine` |
+| 308 | `nodosur-g7-proxy` | HAProxy, entrada HTTPS y observabilidad | `10.33.195.194` | `10.33.199.61` | `nodosur-haproxy`, `haproxy:3.2.23-alpine` |
 
-## Comprobaciones concretas
+## Comprobaciones históricas de E3 (20–21/10)
 
 | VM | HEAD del checkout instalado | Definición Compose comprobada | Runtime |
 |---|---|---|---|
@@ -30,9 +30,12 @@ En las cuatro VMs se ejecutó exitosamente `docker compose -f ARCHIVO config --q
 
 **Red:** `10.33.199.56/29` (red `.56`, gateway registrado `.57`, hosts `.58` a `.62`, broadcast `.63`); VPN USM `10.30.248.0/24` y red de laboratorio `10.33.21.0/24`, sujetas a filtros por origen.
 
-## Datos aún no capturados
+## Corte de noviembre y datos aún no capturados
 
-- Salida de `hostnamectl` y recursos efectivos de CPU/RAM/almacenamiento para las cinco VMs.
+- E42 (23/11): las cinco VM reportaron `Timezone=Etc/UTC`, `NTP=yes` y `NTPSynchronized=yes`. No se midió el desfase de reloj.
+- E43 (23/11): VM308 y VM310 declararon DHCP en ens18 y dirección interna fija en ens19. Las IP administrativas no están garantizadas tras reinicio.
+- A18 (18/11): cinco VM con 2 vCPU, aproximadamente 1,9 GiB de RAM y raíz de 97G según `df -h`. No es una prueba de capacidad bajo carga.
+- VM308 aloja Prometheus, Grafana, Alertmanager, Mailpit y exporters; consultar [estado E4](docs/ENTREGA4.md).
 - **Versiones efectivas verificadas el 21/10**: WordPress web1 **7.1.3** y web2 **7.1.3** tras actualización controlada de web2. Los cuatro árboles auditados (`wp-admin`, `wp-includes`, plugins y temas; **9.817 archivos**) tienen huellas SHA-256 idénticas entre ambas webs, igual que los archivos principales seleccionados de la raíz salvo `wp-config.php` ([comparación](evidencias/e3/comparacion-post-upgrade-web1-web2-20261021.txt), [raíz](evidencias/e3/wordpress-raiz-sha256-igual-web1-web2-20261021.txt)). WooCommerce 11.1.0 coincidía según auditoría anterior. Todavía falta verificar configuración dinámica, activaciones y equivalencia de sesiones; digests de imágenes Docker no capturados. Los Compose conservan el tag declarado `wordpress:7.1.2-php8.3-apache`, distinto de la versión efectiva persistida.
 - Versiones/configuración real de BIND9, exports NFS, ACL de todos los hosts y permisos de secretos; solo parte está contrastada.
 - Evidencia de reinicios completos y persistencia de todas las políticas después del arranque.

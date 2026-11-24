@@ -51,3 +51,13 @@
 - **Causa:** faltaba pertenencia a `ssh-nodosur`.
 - **Corrección:** agregar el usuario al grupo autorizado.
 - **Validación:** login SSH aceptado y registrado en journal.
+
+## 9. Cierre documental E4 (23/11/2026)
+
+- DNS del cliente VPN: BIND9 autoritativo responde directamente; los DNS institucionales devolvieron NXDOMAIN. La entrada local de hosts es una mitigación del cliente, no una integración DNS institucional.
+- TLS: negociación TLS 1.3 y SAN correcto; el certificado autofirmado no fue aceptado por el cliente Fedora sin confianza explícita.
+- Respaldos: se registró un ciclo SQL automático posterior a la corrección de selección de archivo, réplica e integridad; también un ciclo automático de monitor y retención. No se acredita una serie de 30 días sin huecos.
+- El ensayo de restauración funcional y el testigo en volumen separado se documentaron con sus límites. Falta medir interrupción y pérdida de datos de un incidente integral.
+- Informe acumulativo v4.24 y anexos entregados al aula. La defensa del 27/11 queda pendiente; no se declara ejecutada.
+
+Fuente: informe y anexos v4.24, E38–E46. Este resumen no sustituye las salidas originales. Consultar [estado E4](docs/ENTREGA4.md).

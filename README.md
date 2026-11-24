@@ -2,11 +2,25 @@
 
 **Taller de Administración de Sistemas (EIN-090B) · USM Sede Concepción · Segundo semestre 2026**
 
-Proyecto de infraestructura para una plataforma WordPress/WooCommerce con dos servidores web, balanceo de carga y estado compartido. Esta es la implementación correspondiente a la **Entrega 3: publicación resiliente, contenedores y seguridad**.
+Proyecto de infraestructura para una plataforma WordPress/WooCommerce con dos servidores web, balanceo de carga y estado compartido. Este repositorio conserva la implementación de E3 y el avance de E4: observabilidad, respaldos y continuidad.
 
-**Estado de las comprobaciones productivas: 21 de octubre de 2026; ensayos y accesos de revisión actualizados el 22/10.** El sistema está desplegado en el laboratorio iLab y se accede desde redes autorizadas. La mayoría de los cambios propuestos por Codex en la [auditoría separada](https://github.com/camilodrn/nodosur-tas-grupo7/pull/1) **no están desplegados**. Excepción comprobada: la protección Apache de `uploads` ya está activa en **web1 (VM263) y web2 (VM310)**; portada, tienda e imagen compartida HTTP 200 en ambos, ruta PHP inexistente HTTP 403 en ambos y HTTPS repartido 3/3 ([evidencia final](evidencias/e3/apache-uploads-web1-web2-final-20261021.txt)).
+## Entrega 4 — estado al 23/11/2026
 
-## Arquitectura implementada
+El informe acumulativo E1–E4 v4.24 y los anexos se enviaron al aula el 23/11. Esta rama reúne la configuración versionada de observabilidad y continuidad, junto con evidencias seleccionadas. La demostración del 27/11 todavía no se ha ejecutado.
+
+- [Estado E4 y evidencias de cierre](docs/ENTREGA4.md): resultados, fuentes y límites.
+- [Inventario actualizado](INVENTARIO.md) y [arquitectura](ARQUITECTURA.md).
+- Sitio: `https://nodosur07.tas/`; monitoreo: `https://nodosur07.tas/grafana/`, desde redes autorizadas y con resolución/configuración de confianza apropiadas.
+- Las IP de administración se observaron el 23/11; pueden variar por DHCP. No usar IP de octubre para iniciar nuevas sesiones sin verificar.
+- El contenido versionado no constituye una orden de despliegue. No reiniciar ni sustituir configuraciones de iLab solo para sincronizar Git.
+
+El informe y anexos exactos enviados al aula están identificados por huella en [el registro de entrega](docs/ENTREGA4.md#identificación-de-los-archivos-enviados-al-aula). El paquete completo se conserva fuera del repositorio público.
+
+## Antecedentes de E3 (octubre)
+
+**Corte histórico de E3: 21 de octubre de 2026; ensayos y accesos de revisión actualizados el 22/10.** El sistema está desplegado en el laboratorio iLab y se accede desde redes autorizadas. La mayoría de los cambios propuestos por Codex en la [auditoría separada](https://github.com/camilodrn/nodosur-tas-grupo7/pull/1) **no están desplegados**. Excepción comprobada: la protección Apache de `uploads` ya está activa en **web1 (VM263) y web2 (VM310)**; portada, tienda e imagen compartida HTTP 200 en ambos, ruta PHP inexistente HTTP 403 en ambos y HTTPS repartido 3/3 ([evidencia final](evidencias/e3/apache-uploads-web1-web2-final-20261021.txt)).
+
+## Arquitectura implementada e inventario de direcciones (23/11)
 
 `Cliente → DNS (VM268) → nombre del proxy (VM308) → WordPress web1 (VM263) / web2 (VM310) → MariaDB (VM279)`
 
@@ -14,11 +28,11 @@ El DNS resuelve el nombre; **no es un intermediario del tráfico HTTP**. Ambos W
 
 | VM | Rol | IP de acceso/administración | IP interna |
 |---|---|---|---|
-| 268 | BIND9, NFS y copia de respaldos | `10.33.195.205` | `10.33.199.59` |
-| 263 | WordPress/WooCommerce web1, Docker | `10.33.195.202` | `10.33.199.58` |
-| 310 | WordPress/WooCommerce web2, Docker | `10.33.195.208` | `10.33.199.62` |
+| 268 | BIND9, NFS y copia de respaldos | `10.33.195.218` | `10.33.199.59` |
+| 263 | WordPress/WooCommerce web1, Docker | `10.33.195.183` | `10.33.199.58` |
+| 310 | WordPress/WooCommerce web2, Docker | `10.33.195.197` | `10.33.199.62` |
 | 279 | MariaDB 10.11, Docker | `10.33.195.226` | `10.33.199.60` |
-| 308 | HAProxy 3.2, Docker y terminación HTTPS | `10.33.195.194` | `10.33.199.61` |
+| 308 | HAProxy 3.2, terminación HTTPS y observabilidad | `10.33.195.194` | `10.33.199.61` |
 
 - **DNS:** `nodosur07.tas` y `www.nodosur07.tas` apuntan al proxy `10.33.195.194`.
 - **Proxy:** HTTP 80 redirige a HTTPS 443; distribuye tráfico `roundrobin` a web1 `10.33.199.58:18081` y web2 `10.33.199.62:18080`. Usa health checks HTTP.
@@ -28,7 +42,7 @@ El DNS resuelve el nombre; **no es un intermediario del tráfico HTTP**. Ambos W
 
 Consulta [ARQUITECTURA.md](ARQUITECTURA.md) para el diagrama, protocolos y límites; e [INVENTARIO.md](INVENTARIO.md) para los identificadores efectivos de las VMs.
 
-## Modalidad de evaluación docente (informada por el equipo el 22/10/2026)
+## Modalidad de evaluación E3 (histórica, 22/10/2026)
 
 El profesor revisará **puesto por puesto**, preguntará **a integrantes elegidos al azar** y puede pedir **comandos de terminal** y localizar directorios y configuraciones reales (NFS, Docker, WordPress, HAProxy, BIND y firewall). **No se prepara una presentación formal a toda la sala.** Todos deben poder explicar y comprobar la implementación. Usar la [guía individual](docs/GUIA-ESTUDIO-INDIVIDUAL-E3.md) y la [tarjeta de comandos](docs/TARJETA-COMANDOS-E3.md). La automatización de creación de cinco VMs es una exploración **posterior** a E3, no un requisito ya implementado.
 
@@ -57,7 +71,7 @@ Se desplegó desde `compose/e3-lab/compose.yaml` un proyecto **separado de Furgo
 
 ## Cuentas de evaluación E3
 
-El 22/10 se creó y probó `tas_revision_e3` con SSH/sudo en las cinco VMs, con rotación interactiva de contraseñas. Las cuentas Linux de E2 quedaron **caducadas** (no eliminadas) en VM268, VM263 y VM279, preservando `/home/tas_revision` porque servicios systemd aún utilizan ese directorio. La cuenta WordPress E2 fue rebajada a suscriptor e invalidó sus sesiones; la cuenta WordPress E3 es administradora, fue probada por la ruta HTTPS del laboratorio y sus roles se verificaron desde Web2. **Pendiente entregar credenciales al docente por un canal privado y retirarlas cuando finalice la evaluación.** [Registro técnico sin secretos](docs/ACCESO-DOCENTE-E3.md).
+El 22/10 se creó y probó `tas_revision_e3` con SSH/sudo en las cinco VMs, con rotación interactiva de contraseñas. Las cuentas Linux de E2 quedaron **caducadas** (no eliminadas) en VM268, VM263 y VM279, preservando `/home/tas_revision` porque servicios systemd aún utilizan ese directorio. La cuenta WordPress E2 fue rebajada a suscriptor e invalidó sus sesiones; la cuenta WordPress E3 es administradora, fue probada por la ruta HTTPS del laboratorio y sus roles se verificaron desde Web2. **Mantener las credenciales de revisión por canal privado y revocar el acceso cuando termine la evaluación.** El 23/11 se observó la cuenta histórica del CMS con rol Suscriptor; no se acredita una nueva rotación de su contraseña. [Registro técnico sin secretos](docs/ACCESO-DOCENTE-E3.md).
 
 ## Organización del repositorio
 
@@ -100,16 +114,10 @@ Los validadores DNS y web son lecturas. En **VM279** (no en Fedora), el nuevo `b
 
 Se ha demostrado tolerancia a la caída **de un backend web** mientras el otro y las dependencias compartidas siguen disponibles. **No existe alta disponibilidad integral**: HAProxy, MariaDB, DNS y NFS son instancias únicas; VM268 concentra varios servicios importantes.
 
-Las imágenes, sesiones autenticadas y operaciones de compra concurrentes no se consideran exhaustivamente validadas por la prueba de un archivo o de un carrito. No se declara un RTO/RPO medido ni una restauración integrada de WordPress y MariaDB.
+Las imágenes, sesiones autenticadas y operaciones de compra concurrentes no se consideran exhaustivamente validadas por la prueba de un archivo o de un carrito. E4 documentó restauraciones funcionales aisladas de WordPress, MariaDB y uploads. No se declara RTO/RPO integral del servicio institucional ni disponibilidad mensual acreditada.
 
 ## Seguridad y operación
 
 Los accesos de administración son para cuentas autorizadas desde VPN/laboratorio. El certificado HTTPS es autofirmado y requiere confianza explícita para validar la identidad del servidor.
 
 **No ejecutar a ciegas** `docker compose down -v`, `docker volume prune`, cambios de firewall o migraciones de rutas systemd en esta infraestructura: pueden afectar datos o interrumpir la defensa. Las mejoras de Codex continúan aisladas en su PR de auditoría y requieren una adopción planificada.
-
-## Cierre del informe E1–E4 (23/11/2026)
-
-El informe acumulativo v4.24 se envió al aula el 23/11 junto con sus anexos. La documentación de E4 y el inventario actualizado se encuentran en el [PR #6](https://github.com/camilodrn/nodosur-tas-grupo7/pull/6) y en [Estado E4](https://github.com/camilodrn/nodosur-tas-grupo7/blob/e4/observabilidad-continuidad/docs/ENTREGA4.md). Las IP de octubre de esta rama son antecedentes históricos; consultar el inventario de noviembre antes de conectarse. No se ha fusionado el conjunto de configuraciones E4 ni se declara completada la defensa del 27/11.
-
-Los tres archivos entregados al aula se identifican en el registro de cierre de la rama E4; el paquete completo se conserva por separado, ya que incluye material académico y evidencias de acceso restringido.

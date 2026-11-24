@@ -1,0 +1,105 @@
+name: nodosur-monitoreo
+
+services:
+  prometheus:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    image: prom/prometheus:v3.13.2
+    restart: unless-stopped
+    mem_limit: 384m
+
+    networks:
+      - default
+      - proxy_monitoring
+
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+
+  grafana:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    image: grafana/grafana:13.2.5-slim
+    restart: unless-stopped
+    mem_limit: 512m
+
+    ports:
+      - "127.0.0.1:3000:3000"
+
+    networks:
+      - default
+      - proxy_monitoring
+
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin_password
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_SERVER_ROOT_URL: "https://nodosur07.tas/grafana/"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+
+    secrets:
+      - grafana_admin_password
+
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/datasources:ro
+      - ./dashboard-provisioning:/etc/grafana/provisioning/dashboards:ro
+      - ./dashboards:/etc/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+
+  node-exporter:
+    image: prom/node-exporter:v1.11.1
+    restart: unless-stopped
+    mem_limit: 128m
+    read_only: true
+    uts: "host"
+    network_mode: "host"
+
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/host'
+      - '--web.listen-address=172.19.0.1:9100'
+
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host:ro,rslave
+
+  blackbox:
+    image: prom/blackbox-exporter:v0.29.1
+    restart: unless-stopped
+    mem_limit: 128m
+    command:
+      - --config.file=/etc/blackbox_exporter/config.yml
+    volumes:
+      - ./blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    networks:
+      - default
+      - proxy_monitoring
+
+secrets:
+  grafana_admin_password:
+    file: /etc/nodosur/secrets/grafana_admin_password
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  default:
+  proxy_monitoring:
+    external: true
+    name: nodosur-proxy_default
