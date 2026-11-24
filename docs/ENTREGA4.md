@@ -41,3 +41,15 @@ Los identificadores se remiten a los anexos enviados por el aula. Salvo los dos 
 - No ejecutar operaciones destructivas en producción sin autorización, respaldo verificado, entorno identificado y reversión. No publicar secretos, archivos SQL reales, contraseñas o claves privadas.
 
 Documentación histórica de E3: [arquitectura](../ARQUITECTURA.md), [inventario](../INVENTARIO.md), [pruebas de E3](ENTREGA3.md).
+
+## Identificación de los archivos enviados al aula
+
+La entrega se realizó el 23/11/2026 a las 23:22 (Chile). Las tres copias entregadas se conservaron sin modificaciones y se identifican por SHA-256:
+
+| Archivo | SHA-256 |
+|---|---|
+| NodoSur_Informe_E1-E4_Grupo7.pdf | `8fa997f3a196d35229243623b7a30d3b2bd98dad984367b3f5ac64cd3d095339` |
+| NodoSur_Informe_E1-E4_Grupo7.docx | `0c3f646c921a31001c09639471d21e0f8136712e1a77308abf7302abf61572bb` |
+| NodoSur_Anexos_Grupo7.pdf | `526563dd6ebe79a4b66898a27fc04d59ffc41d27f0d227d65a2b07ec330c94ff` |
+
+Se reconstruyó localmente el paquete de respaldo de 66 archivos con estas tres versiones y un manifiesto actualizado de 65 entradas verificadas. El Word anterior de los anexos está identificado como referencia interna, no como una copia del PDF enviado. El ZIP no está publicado en GitHub: contiene material académico, evaluaciones internas y capturas que requieren revisión antes de su publicación abierta. El repositorio público conserva documentación técnica y referencias saneadas.
