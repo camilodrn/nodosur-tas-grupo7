@@ -107,3 +107,9 @@ Las imágenes, sesiones autenticadas y operaciones de compra concurrentes no se 
 Los accesos de administración son para cuentas autorizadas desde VPN/laboratorio. El certificado HTTPS es autofirmado y requiere confianza explícita para validar la identidad del servidor.
 
 **No ejecutar a ciegas** `docker compose down -v`, `docker volume prune`, cambios de firewall o migraciones de rutas systemd en esta infraestructura: pueden afectar datos o interrumpir la defensa. Las mejoras de Codex continúan aisladas en su PR de auditoría y requieren una adopción planificada.
+
+## Cierre del informe E1–E4 (23/11/2026)
+
+El informe acumulativo v4.24 se envió al aula el 23/11 junto con sus anexos. La documentación de E4 y el inventario actualizado se encuentran en el [PR #6](https://github.com/camilodrn/nodosur-tas-grupo7/pull/6) y en [Estado E4](https://github.com/camilodrn/nodosur-tas-grupo7/blob/e4/observabilidad-continuidad/docs/ENTREGA4.md). Las IP de octubre de esta rama son antecedentes históricos; consultar el inventario de noviembre antes de conectarse. No se ha fusionado el conjunto de configuraciones E4 ni se declara completada la defensa del 27/11.
+
+Los tres archivos entregados al aula se identifican en el registro de cierre de la rama E4; el paquete completo se conserva por separado, ya que incluye material académico y evidencias de acceso restringido.
