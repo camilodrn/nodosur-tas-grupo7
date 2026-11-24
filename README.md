@@ -12,7 +12,9 @@ El informe acumulativo E1–E4 v4.24 y los anexos se enviaron al aula el 23/11. 
 - [Inventario actualizado](INVENTARIO.md) y [arquitectura](ARQUITECTURA.md).
 - Sitio: `https://nodosur07.tas/`; monitoreo: `https://nodosur07.tas/grafana/`, desde redes autorizadas y con resolución/configuración de confianza apropiadas.
 - Las IP de administración se observaron el 23/11; pueden variar por DHCP. No usar IP de octubre para iniciar nuevas sesiones sin verificar.
-- La rama no constituye una orden de despliegue. No reiniciar ni sustituir configuraciones de iLab solo para sincronizar Git.
+- El contenido versionado no constituye una orden de despliegue. No reiniciar ni sustituir configuraciones de iLab solo para sincronizar Git.
+
+El informe y anexos exactos enviados al aula están identificados por huella en [el registro de entrega](docs/ENTREGA4.md#identificación-de-los-archivos-enviados-al-aula). El paquete completo se conserva fuera del repositorio público.
 
 ## Antecedentes de E3 (octubre)
 

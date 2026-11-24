@@ -31,7 +31,14 @@ La lectura del árbol Git confirma 12 definiciones de alertas y 22 paneles. No s
 | E42, E43 | Inventario de cinco VM, NTP sincronizado; DHCP administrativo y certificado autofirmado | No garantiza IP estable ni confianza TLS |
 | E46 | Cuenta histórica del CMS observada con rol Suscriptor | No acredita revocación de contraseña histórica |
 
-Los identificadores se remiten a los anexos enviados por el aula. Salvo los dos registros E21 y E37 enlazados, este índice no afirma que las salidas originales estén publicadas en Git. La revisión final de secretos e historial y la incorporación de las evidencias originales saneadas aún están pendientes.
+Los identificadores se remiten a los anexos enviados por el aula. Los registros originales de E21 y E37 están enlazados. Se incorporaron además los siguientes resúmenes públicos de evidencias del paquete académico, con las huellas de sus fuentes:
+
+- [E38: restauración con dato testigo](../evidencias/e4/E38-restauracion-testigo.md).
+- [E39–E40: respaldos y retención](../evidencias/e4/E39-E40-respaldos-y-retencion.md).
+- [E42–E43: inventario y TLS](../evidencias/e4/E42-E43-inventario-y-tls.md).
+- [E41, E44 y E45: pruebas del CMS](../evidencias/e2/E41-E44-E45-pruebas-cms.md).
+
+Los resúmenes no sustituyen los originales. Se revisaron heurísticamente 16 archivos técnicos del PR E4 sin candidatos en los patrones comprobados; no es una auditoría completa del historial ni una prueba de runtime.
 
 ## Límites operacionales y defensa
 
