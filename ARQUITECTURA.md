@@ -1,6 +1,6 @@
-# Arquitectura de Nodo Sur — Entrega 3
+# Arquitectura de Nodo Sur — E3 y E4
 
-**Estado implementado y comprobado al 21/10/2026.** Esta página describe el laboratorio en funcionamiento; no presupone que las modificaciones del PR de Codex estén instaladas.
+**Topología E3 comprobada en octubre, ampliada con observabilidad E4 y direcciones observadas el 23/11/2026.** Esta página describe el laboratorio en funcionamiento; no presupone que las modificaciones del PR de Codex estén instaladas.
 
 ## Vista general
 
@@ -27,13 +27,17 @@ flowchart LR
 
 **DNS no transporta solicitudes HTTP.** Resuelve el nombre para que el cliente contacte directamente con HAProxy. VM268 cumple dos funciones diferentes: DNS y servidor de archivos NFS; también aloja copias de respaldos.
 
-## Inventario y tráfico
+## Ampliación de E4
+
+VM308 recoge métricas de los cinco hosts y de servicios mediante Prometheus; Grafana presenta el tablero por HTTPS en `/grafana/`. Alertmanager entrega avisos a Mailpit de laboratorio. VM268 concentra copias y sus comprobaciones de integridad; existen segundas copias de determinadas familias fuera de su host de origen. Véase [estado de E4](docs/ENTREGA4.md). La observabilidad no elimina los SPOF de la arquitectura.
+
+## Inventario y tráfico (23/11)
 
 | Componente | IP administración | IP interna | Servicio |
 |---|---|---|---|
-| VM268 — DNS y NFS | `10.33.195.205` | `10.33.199.59` | DNS 53 UDP/TCP, NFSv4.1 TCP 2049 |
-| VM263 — web1 | `10.33.195.202` | `10.33.199.58` | WordPress HTTP 18081 |
-| VM310 — web2 | `10.33.195.208` | `10.33.199.62` | WordPress HTTP 18080 |
+| VM268 — DNS y NFS | `10.33.195.218` | `10.33.199.59` | DNS 53 UDP/TCP, NFSv4.1 TCP 2049 |
+| VM263 — web1 | `10.33.195.183` | `10.33.199.58` | WordPress HTTP 18081 |
+| VM310 — web2 | `10.33.195.197` | `10.33.199.62` | WordPress HTTP 18080 |
 | VM279 — MariaDB | `10.33.195.226` | `10.33.199.60` | MariaDB TCP 3306 |
 | VM308 — proxy | `10.33.195.194` | `10.33.199.61` | Entrada HTTP 80 y HTTPS 443 |
 
@@ -83,7 +87,7 @@ Esta protección es preventiva y no equivale a afirmar que se haya encontrado ma
 
 La arquitectura permite que HAProxy retire del balanceo un **backend web** defectuoso y atienda con el otro. En la prueba controlada del 21/10/2026 se verificó el evento original **DOWN** de web2 y **8/8 respuestas HTTPS 200 desde web1** después de la detección ([evidencia](evidencias/e3/prueba-falla-web2-haproxy-web1-20261021.txt)). Tras recuperar web2, HAProxy registró **UP** por health check Layer7 HTTP 200 y se observaron **8/8 respuestas HTTPS 200, repartidas 4/4** ([evidencia](evidencias/e3/wordpress713-recuperacion-web2-haproxy-20261021.txt)). Esto demuestra continuidad tras detectar la falla y reincorporación automática, **no** ausencia de errores durante los primeros segundos ni RTO medido.
 
-**SPOF pendientes:** hay una sola instancia de proxy, MariaDB, DNS y NFS. VM268 concentra DNS, NFS y una ubicación de respaldos. La caída de una dependencia compartida puede afectar a ambos WordPress; **balanceo no significa alta disponibilidad integral**. Tampoco se ha medido RPO/RTO ni ensayado un arranque funcional integrado del respaldo WordPress+DB.
+**SPOF pendientes:** hay una sola instancia de proxy, MariaDB, DNS y NFS. VM268 concentra DNS, NFS y una ubicación de respaldos. La caída de una dependencia compartida puede afectar a ambos WordPress; **balanceo no significa alta disponibilidad integral**. En E4 se ensayó recuperación funcional aislada de WordPress, MariaDB y uploads; RPO/RTO integral institucional sigue sin medirse.
 
 ## Evolución de E2 a E3
 

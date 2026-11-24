@@ -1,5 +1,13 @@
 # Evidencias de la entrega
 
+## E4 — noviembre de 2026
+
+- [Restauración SQL del 21/11](e4/RESTAURACION-MARIADB-2026-11-21.md).
+- [Trazabilidad HTTP del 22/11](e4/E37-LOGS-TRAZABILIDAD-2026-11-22.md).
+- [Índice de resultados y límites E4](../docs/ENTREGA4.md), reconstruido desde el informe y anexos v4.24 entregados al aula. Las demás pruebas referenciadas allí no se presentan como archivos originales ya publicados en Git.
+
+Las capturas originales y los registros complementarios deben sanearse antes de publicarlos. El informe y los anexos fueron entregados por el aula; no se incluyen automáticamente en este repositorio público.
+
 **Nota:** la lista histórica de abajo documenta evidencias de la implementación E2 (Apache/PHP-FPM nativo y LVM). Para E3, con Docker, HAProxy y NFS en cinco VMs, consultar [las pruebas reales de Entrega 3](../docs/ENTREGA3.md) y la carpeta [evidencias/e3](e3/). No utilizar como evidencia E3 los antiguos puertos web directos, logs Apache nativos ni el LV de uploads de E2.
 
 ---
