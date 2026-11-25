@@ -1,12 +1,12 @@
 # E5 — Comandos de demostración paso a paso
 
-**Grupo 7 · 27/11/2026 · v0.2 (25/11/2026)**
+**Grupo 7 · 27/11/2026 · v0.3 (25/11/2026)**
 
-Guía operativa basada en el [ensayo del 25/11](../evidencias/e5/ENSAYO-INCIDENTE-20261125.md). No es un script. Copiar un bloque a la vez, en la terminal indicada; detenerse si el resultado no coincide. Las comprobaciones y el temporizador propuestos no se han vuelto a ensayar. No ejecutar la interrupción ni la restauración sin autorización del docente y confirmación del entorno. No mostrar secretos.
+Guía operativa basada en el [ensayo del 25/11](../evidencias/e5/ENSAYO-INCIDENTE-20261125.md). No es un script. Copiar un bloque a la vez, en la terminal indicada; detenerse si el resultado no coincide. La pauta literal de seis etapas fue contrastada el 25/11 y el equipo confirmó autorización docente para intervenir en la demostración. Se verificaron las lecturas, rutas, autenticación SQL y accesos; no se repitieron la caída ni la importación. Confirmar ambiente, operador y reversión antes de cambiar el estado. No mostrar secretos.
 
 ## 0. Preparar las terminales
 
-En Fedora, conectado a la red/VPN institucional, verificar las IP actuales en iLab antes de abrir las sesiones. Son las últimas conocidas, no IP estáticas garantizadas.
+En Fedora, conectado a la red/VPN institucional, verificar las IP actuales en iLab antes de abrir las sesiones. DNS y proxy confirmados el 25/11; Web1/Web2 tienen último corte 23/11. No son IP estáticas garantizadas.
 
 **DNS — VM268**
 ```bash
@@ -34,6 +34,26 @@ hostname
 ip -br addr
 ```
 Comparar con [INVENTARIO.md](../INVENTARIO.md). Si difiere, no ejecutar cambios.
+
+**Acceso a observabilidad (Fedora, terminal adicional):** antes de abrir el túnel, comprobar en VM308 la IP de Prometheus:
+```bash
+sudo docker inspect -f '{{range $name, $net := .NetworkSettings.Networks}}{{println $name $net.IPAddress}}{{end}}' nodosur-monitoreo-prometheus-1
+```
+El 25/11 la red nodosur-monitoreo_default devolvió 172.19.0.2. Si cambia, ajustar el destino del túnel. Desde Fedora (prompt duran@duran), no desde VM308:
+```bash
+ssh -N -o ExitOnForwardFailure=yes \
+  -L 127.0.0.1:19090:172.19.0.2:9090 \
+  -L 127.0.0.1:19093:127.0.0.1:9093 \
+  -L 127.0.0.1:18025:127.0.0.1:8025 \
+  nodosur-g7-proxy@10.33.195.194
+```
+Dejar la terminal abierta: que no aparezca un prompt es normal. Abrir en Fedora:
+- Grafana: https://nodosur07.tas/grafana/ (no requiere túnel).
+- Prometheus: http://localhost:19090/targets
+- Alertmanager: http://localhost:19093/
+- Mailpit: http://localhost:18025/
+
+Accesos comprobados el 25/11. La variante con bind explícito a loopback es una precaución equivalente, no reensayada. Cerrar el túnel con Ctrl+C al terminar.
 
 ## 1. Mostrar el estado inicial
 
@@ -63,17 +83,19 @@ Esperado: 200 en ambas. Abrir la tienda desde el menú del CMS. La opción -k om
 
 **Fedora**
 ```bash
-dig @10.33.195.218 nodosur07.tas A
+dig @10.33.195.218 nodosur07.tas A +norecurse
 getent hosts nodosur07.tas
 curl -I https://nodosur07.tas/
 ```
 Esperado: NOERROR, aa, A hacia HAProxy (10.33.195.194 si no cambió); el cliente resuelve el mismo nombre. Si curl falla por certificado autofirmado, explicar la confianza y no confundirlo con una caída. No cambiar DNS del cliente sin autorización.
 
-**VM268:** localizar la configuración efectiva de la zona (lectura).
+**VM268:** mostrar la declaración y el registro A efectivos (lectura).
 ```bash
-sudo grep -R -n 'nodosur07.tas' /etc/bind
+sudo cat /etc/bind/named.conf.local
+sudo cat /etc/bind/db.nodosur07.tas
+sudo named-checkzone nodosur07.tas /etc/bind/db.nodosur07.tas
 ```
-Identificar el archivo de zona referenciado y mostrar su registro A; no editarlo. Si la IP cambió, detenerse y verificar inventario/resolución antes de seguir.
+Confirmado el 25/11: zona primary, serial 2026112201, @ y www A 10.33.195.194; actualizaciones y transferencias deshabilitadas. No editar. Si la IP cambia, verificar inventario/resolución antes de seguir.
 
 ## 3. Incidente autorizado de MariaDB
 
@@ -85,14 +107,14 @@ sudo docker inspect -f '{{.State.Health.Status}} {{range .Mounts}}{{.Name}} {{en
 ```
 Esperado: svr-db-nodosur07, active, healthy y volumen nodosur-db-staging_db_stage_data. Si no coincide, detenerse.
 
-**Solo si el docente autoriza interrumpir ese entorno:** acordar operador único, ventana, respaldo y reversión. El ensayo usó un temporizador de rescate de cinco minutos. Esta sintaxis de temporizador es propuesta y debe verificarse antes de detener MariaDB; no es una garantía de arranque.
+**Solo si el docente autoriza interrumpir ese entorno:** acordar operador único, ventana, respaldo y reversión. El ensayo usó un temporizador de rescate de cinco minutos. El 25/11 se comprobó systemd-run con una acción echo inocua a 15 s; el journal registró éxito y MariaDB permaneció healthy. El temporizador real de arranque se programa durante la defensa, no se probó de nuevo. Su vencimiento es aproximado y no garantiza recuperación.
 
 ```bash
 RESCATE="nodosur-e5-rescate-$(date +%s)"
-sudo systemd-run --unit="$RESCATE" --on-active=5min /usr/bin/systemctl start nodosur-db-prod.service
+sudo systemd-run --unit="$RESCATE" --on-active=5min --timer-property=AccuracySec=1s /usr/bin/systemctl start nodosur-db-prod.service
 systemctl list-timers "$RESCATE.timer" --no-pager
 ```
-Si no aparece el temporizador activo con próxima ejecución, NO detener MariaDB. Mantener abierta esta terminal.
+AccuracySec=1s reduce el margen de planificación (variante propuesta, no reensayada). Si falla la creación o no aparece el temporizador activo con próxima ejecución, NO detener MariaDB. Mantener abierta esta terminal.
 
 **VM279 — cambio de estado autorizado:**
 ```bash
@@ -105,7 +127,7 @@ Esperado: Exited; no se elimina el volumen. Nunca usar down -v.
 **Fedora — repetir la misma operación que al inicio:**
 ```bash
 date -u
-dig @10.33.195.218 nodosur07.tas A
+dig @10.33.195.218 nodosur07.tas A +norecurse
 curl -ksS -o /dev/null -w 'Producto HTTP %{http_code}\n' https://nodosur07.tas/wp-json/wc/store/v1/products/45
 ```
 Esperado tras detección: DNS sigue respondiendo, producto HTTP 503. Grafana: mysql_up=0, sondas HTTP=0 y DNS=1; Mailpit: FIRING. Si no aparece, registrar lo observado; no fabricar una alerta.
@@ -127,7 +149,7 @@ Esperar healthy; si falla, escalar y mantener la recuperación prioritaria. Solo
 ```bash
 test -n "$RESCATE" && sudo systemctl stop "$RESCATE.timer"
 ```
-No cancelar otros temporizadores.
+No cancelar otros temporizadores. Si el rescate ya se ejecutó y la unidad desapareció, comprobar su journal; no interpretar ese caso como caída del motor.
 
 ## 4. Restauración de datos — únicamente copia aislada
 
@@ -143,7 +165,7 @@ Esperado: red none, sin puertos, volumen de evaluación en /var/lib/mysql, healt
 ```text
 aeb7c21e64147c018070dd8c6378e839ec7ab3ed02a6b505a4cdc1c2e7550699
 ```
-Si no coincide, no continuar. El archivo es el respaldo específico de evaluación, no el backup automático original.
+Si no coincide, no continuar. El archivo es el respaldo específico de evaluación del 25/11 12:31 UTC, 384 KiB, permisos 600, no el backup automático original. GZIP y SHA-256 reconfirmados el 25/11.
 
 **Consultar el testigo (lectura):**
 ```bash
@@ -197,7 +219,7 @@ El CMS original y la copia SQL son entornos distintos; no afirmar que WordPress 
 **Fedora**
 ```bash
 date -u
-dig @10.33.195.218 nodosur07.tas A
+dig @10.33.195.218 nodosur07.tas A +norecurse
 curl -ksS -o /dev/null -w 'Portada HTTP %{http_code}\n' https://nodosur07.tas/
 curl -ksS -o /dev/null -w 'Producto HTTP %{http_code}\n' https://nodosur07.tas/wp-json/wc/store/v1/products/45
 ```
@@ -216,4 +238,13 @@ Referencia: 23 paneles, commit 34d8d06, SHA-256 589b6857241d80f0500820a3a6054fcd
 
 Explicar: DNS resuelve; HAProxy retira backends no saludables; ambos WordPress dependen de una MariaDB única. Prometheus distingue scrape de salud funcional; Alertmanager notifica a Mailpit. Reiniciar el servicio original recupera disponibilidad; importar el backup aislado recupera datos. El ensayo registró 42 s de detección, 112 s hasta el primer aviso, aproximadamente 4 min 45 s de recuperación funcional y 2,924 s de importación SQL. No equivalen al RTO/RPO integral.
 
-**Antes del viernes:** comprobar acceso vigente, temporizador, autorización de interrupción, ruta real de zona y accesos a observabilidad. Cotejar pauta original, especialmente si requiere verificar el dato restaurado desde un CMS conectado a la copia. No afirmar que esa última prueba está realizada. No se realizaron cambios en las VMs para redactar esta guía.
+## Registro de validación del 25/11 (posterior al ensayo)
+
+- VM279: original y copia healthy; red none, volumen de evaluación independiente; ruta, GZIP, SHA-256 y autenticación SQL comprobados. Testigo 8603 presente y 52 tablas.
+- VM268: named y NFS active; named-checkconf y named-checkzone OK; consulta autoritativa NOERROR. Fedora resolvió 10.33.195.194 y producto 45 HTTP 200 en 0,512672 s. TLS estricto rechazó el certificado autofirmado; -k solo prueba funcionalidad.
+- systemd-run: prueba inocua programada y ejecutada; journal 14:09:42 UTC, TEMPORIZADOR E5 OK. No se detuvo MariaDB.
+- VM308: siete contenedores activos; Prometheus ready, sum(up)=12, count(up)=12, mysql_up=1, cuatro probe_success=1, alertas vacías. Grafana 13.2.5 database ok; Alertmanager ready OK; Mailpit HTTP 200.
+- Navegador Fedora: Prometheus, Alertmanager, Mailpit y Grafana accesibles. Mailpit conservaba los FIRING y RESOLVED del incidente; Grafana mostraba ocho targets filtrados, no el total de doce.
+- Pauta: seis etapas cubiertas por el escenario preparado; exige dato recuperado en una copia de evaluación y operación CMS final, no un segundo WordPress. La defensa en vivo y las respuestas individuales siguen pendientes.
+
+**Antes de iniciar el viernes:** reconfirmar IP, estado, acceso al navegador, respaldo, aislamiento, operador y temporizador. No ejecutar cambios fuera del alcance. No se modificaron configuraciones persistentes de las VM durante estas comprobaciones.
