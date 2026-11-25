@@ -10,7 +10,7 @@
   ],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
   "time": {
     "from": "now-1h",
@@ -498,6 +498,119 @@
       }
     },
     {
+      "id": 23,
+      "type": "timeseries",
+      "title": "Disponibilidad funcional y dependencias",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 10,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "mysql_up{job=\"mariadb\"}",
+          "refId": "A",
+          "editorMode": "code",
+          "legendFormat": "MariaDB",
+          "instant": false,
+          "range": true,
+          "hide": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "probe_success{job=\"nodosur_http\",instance=\"https://nodosur-haproxy:8443/\"}",
+          "refId": "B",
+          "editorMode": "code",
+          "legendFormat": "Portada",
+          "instant": false,
+          "range": true,
+          "hide": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "probe_success{job=\"nodosur_http\",instance=\"https://nodosur-haproxy:8443/tienda/\"}",
+          "refId": "C",
+          "editorMode": "code",
+          "legendFormat": "Tienda",
+          "instant": false,
+          "range": true,
+          "hide": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "probe_success{job=\"nodosur_dns_udp\"}",
+          "refId": "D",
+          "editorMode": "code",
+          "legendFormat": "DNS UDP",
+          "instant": false,
+          "range": true,
+          "hide": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "probe_success{job=\"nodosur_dns_tcp\"}",
+          "refId": "E",
+          "editorMode": "code",
+          "legendFormat": "DNS TCP",
+          "instant": false,
+          "range": true,
+          "hide": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 1,
+          "decimals": 0,
+          "unit": "none",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "spanNulls": false,
+            "showPoints": "auto"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "description": "Disponibilidad de MariaDB, CMS y DNS. 1 = operativo; 0 = fallo. No confundir con la disponibilidad del exporter."
+    },
+    {
       "id": 9,
       "type": "timeseries",
       "title": "Latencia HTTP - WordPress y tienda",
@@ -507,7 +620,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 10,
+        "y": 19,
         "w": 12,
         "h": 8
       },
@@ -565,7 +678,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 10,
+        "y": 19,
         "w": 12,
         "h": 8
       },
@@ -623,7 +736,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 18,
+        "y": 27,
         "w": 12,
         "h": 8
       },
@@ -681,7 +794,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 18,
+        "y": 27,
         "w": 12,
         "h": 8
       },
@@ -739,7 +852,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 26,
+        "y": 35,
         "w": 12,
         "h": 8
       },
@@ -797,7 +910,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 26,
+        "y": 35,
         "w": 12,
         "h": 8
       },
@@ -855,7 +968,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 34,
+        "y": 43,
         "w": 12,
         "h": 8
       },
@@ -913,7 +1026,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 34,
+        "y": 43,
         "w": 12,
         "h": 8
       },
@@ -971,7 +1084,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 42,
+        "y": 51,
         "w": 12,
         "h": 8
       },
@@ -1018,7 +1131,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 42,
+        "y": 51,
         "w": 12,
         "h": 8
       },
@@ -1064,7 +1177,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 50,
+        "y": 59,
         "w": 12,
         "h": 8
       },
@@ -1110,7 +1223,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 50,
+        "y": 59,
         "w": 12,
         "h": 8
       },
@@ -1156,7 +1269,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 58,
+        "y": 67,
         "w": 12,
         "h": 8
       },
@@ -1198,7 +1311,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 58,
+        "y": 67,
         "w": 12,
         "h": 8
       },
