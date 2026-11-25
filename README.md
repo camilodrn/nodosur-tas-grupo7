@@ -4,6 +4,12 @@
 
 Proyecto de infraestructura para una plataforma WordPress/WooCommerce con dos servidores web, balanceo de carga y estado compartido. Este repositorio conserva la implementación de E3 y el avance de E4: observabilidad, respaldos y continuidad.
 
+## Entrega 5 — ensayo previo del 25/11/2026
+
+- [Registro técnico del ensayo E5](evidencias/e5/ENSAYO-INCIDENTE-20261125.md): incidente MariaDB, HTTP 503 → 200, alertas FIRING/RESOLVED y restauración del dato testigo en una copia aislada.
+- Grafana actualizado a 23 paneles: nuevo historial de disponibilidad funcional y dependencias, con huella idéntica a la instalada.
+- Defensa en vivo del 27/11 pendiente. Los tiempos corresponden al escenario ensayado; no prueban RPO/RTO general. El informe E1–E4 enviado al aula permanece sin cambios.
+
 ## Entrega 4 — estado al 23/11/2026
 
 El informe acumulativo E1–E4 v4.24 y los anexos se enviaron al aula el 23/11. Esta rama reúne la configuración versionada de observabilidad y continuidad, junto con evidencias seleccionadas. La demostración del 27/11 todavía no se ha ejecutado.
