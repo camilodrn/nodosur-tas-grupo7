@@ -6,6 +6,7 @@ Proyecto de infraestructura para una plataforma WordPress/WooCommerce con dos se
 
 ## Entrega 5 — ensayo previo del 25/11/2026
 
+- [Guía de comandos de demostración E5 v0.3](docs/COMANDOS-DEMOSTRACION-E5.md): recorrido por las seis etapas de la pauta, accesos y verificaciones del 25/11; ejecutar los cambios únicamente en la demostración acordada.
 - [Registro técnico del ensayo E5](evidencias/e5/ENSAYO-INCIDENTE-20261125.md): incidente MariaDB, HTTP 503 → 200, alertas FIRING/RESOLVED y restauración del dato testigo en una copia aislada.
 - Grafana actualizado a 23 paneles: nuevo historial de disponibilidad funcional y dependencias, con huella idéntica a la instalada.
 - Defensa en vivo del 27/11 pendiente. Los tiempos corresponden al escenario ensayado; no prueban RPO/RTO general. El informe E1–E4 enviado al aula permanece sin cambios.
