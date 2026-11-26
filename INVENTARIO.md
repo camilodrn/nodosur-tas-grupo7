@@ -1,14 +1,28 @@
-# Inventario de infraestructura — cierre E1–E4
+# Inventario de infraestructura — cierre E1–E4 y preparación E5
 
-Direcciones IPv4, hostnames y sincronización horaria observados mediante SSH el 23/11/2026. Las definiciones y commits de octubre se conservan como antecedentes históricos. Las IPs `10.33.195.x` son de acceso/administración; el tráfico entre componentes se realiza principalmente por `10.33.199.56/29`.
+Direcciones IPv4 y hostnames verificados mediante SSH el 26/11/2026; sincronización horaria observada el 23/11/2026. Las definiciones y commits de octubre se conservan como antecedentes históricos. Las IPs `10.33.195.x` son de acceso/administración; el tráfico entre componentes se realiza principalmente por `10.33.199.56/29`.
 
 | VMID | Hostname observado | Rol | SSH/administración | IP interna | Imagen/servicio |
 |---|---|---|---|---|---|
-| 268 | `nodosur-g7` | DNS BIND9, NFS, copias de respaldo | `10.33.195.218` | `10.33.199.59` | BIND9 y NFS del host |
-| 263 | `nodosurtas07` | WordPress web1 | `10.33.195.183` | `10.33.199.58` | `nodosur-web1`, `wordpress:7.1.2-php8.3-apache` |
-| 310 | `nodosur-g7-web2` | WordPress web2 | `10.33.195.197` | `10.33.199.62` | `nodosur-web2`, `wordpress:7.1.2-php8.3-apache` |
-| 279 | `svr-db-nodosur07` | MariaDB y backups locales | `10.33.195.226` | `10.33.199.60` | `nodosur-db-staging`, `mariadb:10.11` |
-| 308 | `nodosur-g7-proxy` | HAProxy, entrada HTTPS y observabilidad | `10.33.195.194` | `10.33.199.61` | `nodosur-haproxy`, `haproxy:3.2.23-alpine` |
+| 268 | `vm268-dns-nfs` | DNS BIND9, NFS, copias de respaldo | `10.33.195.218` | `10.33.199.59` | BIND9 y NFS del host |
+| 263 | `vm263-web1` | WordPress web1 | `10.33.195.183` | `10.33.199.58` | `nodosur-web1`, `wordpress:7.1.2-php8.3-apache` |
+| 310 | `vm310-web2` | WordPress web2 | `10.33.195.197` | `10.33.199.62` | `nodosur-web2`, `wordpress:7.1.2-php8.3-apache` |
+| 279 | `vm279-mariadb` | MariaDB y backups locales | `10.33.195.226` | `10.33.199.60` | `nodosur-db-staging`, `mariadb:10.11` |
+| 308 | `vm308-proxy-monitor` | HAProxy, entrada HTTPS y observabilidad | `10.33.195.194` | `10.33.199.61` | `nodosur-haproxy`, `haproxy:3.2.23-alpine` |
+
+## Estandarización de hostnames (26/11/2026)
+
+| VM | Nombre anterior (alias local) | Hostname actual | Usuario SSH utilizado |
+|---|---|---|---|
+| 263 | `nodosurtas07` | `vm263-web1` | `tas_revision_e3` |
+| 268 | `nodosur-g7` | `vm268-dns-nfs` | `tas_revision_e3` |
+| 279 | `svr-db-nodosur07` | `vm279-mariadb` | `tas_revision_e3` |
+| 308 | `nodosur-g7-proxy` | `vm308-proxy-monitor` | `nodosur-g7-proxy` |
+| 310 | `nodosur-g7-web2` | `vm310-web2` | `tas_revision_e3` |
+
+Se respaldaron `/etc/hostname` y `/etc/hosts` de cada VM en un directorio `/root/nodosur-hostname-*` con permisos 700; se cambió el hostname estático y la entrada local 127.0.1.1, conservando el nombre anterior como alias. Cloud-init reportó disabled en las cinco VM. No se cambiaron cuentas, rutas de systemd, contenedores ni direcciones; no se reiniciaron servicios ni VM.
+
+Validaciones posteriores: BIND9 autoritativo NOERROR para `nodosur07.tas` → 10.33.195.194; NFS activo, exportaciones y montajes conservados; MariaDB original y copia de evaluación healthy; ambos backends HTTP 200 en logs del proxy; 12/12 targets UP, 4/4 sondas exitosas, `mysql_up=1`, cinco `nodename` nuevos, Grafana `database=ok`, cero alertas activas en Prometheus. Desde Fedora, DNS y resolución del cliente correctos, producto 45 y login Grafana HTTP 200 tras seguir redirecciones con `curl -k -L` (sin acreditar confianza TLS). Temporizadores de respaldo conservados. Persistencia tras reinicio y ejecución posterior de respaldos pendientes; no se repitió incidente ni restauración.
 
 ## Comprobaciones históricas de E3 (20–21/10)
 
