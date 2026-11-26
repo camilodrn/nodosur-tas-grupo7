@@ -1,10 +1,54 @@
 # E5 — Demostración en vivo: guía fácil para todo el equipo
 
-**Grupo 7 · 27/11/2026 · v0.6 (26/11/2026)**
+**Grupo 7 · 27/11/2026 · v0.7 (26/11/2026)**
 
 Esta es la guía para usar delante del profesor. No es necesario memorizar comandos. Cada paso dice dónde hacerlo, qué copiar, qué hace el comando, qué esperar y qué mostrar al profesor. Ejecutar un bloque a la vez; no copiar toda la página. La pauta del profesor tiene seis etapas. La falla de MariaDB está autorizada según el equipo; coordinar el momento con el docente.
 
 [Versión técnica v0.3 (detalle y validaciones)](https://github.com/camilodrn/nodosur-tas-grupo7/blob/b1b32a64c965c31b43802b6bc7d39acfc8ef8b36/docs/COMANDOS-DEMOSTRACION-E5.md) · [Ensayo del 25/11](../evidencias/e5/ENSAYO-INCIDENTE-20261125.md) · [Inventario](../INVENTARIO.md)
+
+## 0. Arquitectura de Nodo Sur — mostrar al profesor al inicio
+
+```mermaid
+flowchart TB
+    C["Cliente Fedora / VPN<br/>nodosur07.tas"]
+    subgraph D["VM268 · vm268-dns-nfs"]
+        DNS["BIND9<br/>10.33.195.218 · DNS 53"]
+        NFS["NFS uploads y respaldos<br/>10.33.199.59"]
+    end
+    subgraph P["VM308 · vm308-proxy-monitor"]
+        H["HAProxy · TLS<br/>10.33.195.194 / 10.33.199.61"]
+        M["Prometheus · Grafana<br/>Alertmanager · Mailpit<br/>Blackbox Exporter"]
+    end
+    W1["VM263 · vm263-web1<br/>WordPress / Apache<br/>10.33.199.58:18081"]
+    W2["VM310 · vm310-web2<br/>WordPress / Apache<br/>10.33.199.62:18080"]
+    B[("VM279 · vm279-mariadb<br/>MariaDB · 10.33.199.60:3306")]
+    C -- "DNS UDP/TCP 53" --> DNS
+    DNS -. "A → 10.33.195.194" .-> C
+    C -- "HTTPS 443" --> H
+    H -- "HTTP 18081" --> W1
+    H -- "HTTP 18080" --> W2
+    W1 -- "TCP 3306" --> B
+    W2 -- "TCP 3306" --> B
+    W1 -- "NFSv4.1 / 2049" --> NFS
+    W2 -- "NFSv4.1 / 2049" --> NFS
+    M -. "Métricas HAProxy" .-> H
+    classDef client fill:#e2e8f0,stroke:#475569,color:#0f172a
+    classDef entry fill:#dbeafe,stroke:#2563eb,color:#172554
+    classDef web fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef data fill:#f3e8ff,stroke:#9333ea,color:#581c87
+    classDef shared fill:#fef3c7,stroke:#d97706,color:#78350f
+    class C client
+    class H,M entry
+    class W1,W2 web
+    class B data
+    class DNS,NFS shared
+```
+
+*Figura 1. Arquitectura lógica de las cinco VM, con hostnames verificados el 26/11/2026. Red interna: `10.33.199.56/29`. La observabilidad recoge métricas de los cinco hosts y de los servicios; se omiten sus enlaces de recolección individuales para facilitar la lectura.*
+
+**Explicación breve:** «El cliente consulta BIND9 para resolver el dominio. Después entra directamente por HTTPS a HAProxy, que distribuye solicitudes entre dos WordPress. Ambos comparten MariaDB y los archivos uploads por NFS. Prometheus recoge métricas, Grafana las muestra y Alertmanager envía notificaciones a Mailpit. Si cae la base de datos compartida, ambos WordPress pierden su dependencia, aunque DNS siga funcionando».
+
+[Arquitectura completa y protocolos](../ARQUITECTURA.md) · [Inventario de IP y hostnames](../INVENTARIO.md).
 
 ## Antes de empezar (hacerlo antes de que llegue el profesor)
 
