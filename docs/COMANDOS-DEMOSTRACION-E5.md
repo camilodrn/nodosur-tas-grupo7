@@ -1,8 +1,8 @@
 # E5 — Demostración en vivo: guía fácil para todo el equipo
 
-**Grupo 7 · 27/11/2026 · v0.5 (26/11/2026)**
+**Grupo 7 · 27/11/2026 · v0.6 (26/11/2026)**
 
-Esta es la guía para usar delante del profesor. No es necesario memorizar comandos. Cada paso dice dónde hacerlo, qué copiar y qué mostrar. Ejecutar un bloque a la vez; no copiar toda la página. La pauta del profesor tiene seis etapas. La falla de MariaDB está autorizada según el equipo; coordinar el momento con el docente.
+Esta es la guía para usar delante del profesor. No es necesario memorizar comandos. Cada paso dice dónde hacerlo, qué copiar, qué hace el comando, qué esperar y qué mostrar al profesor. Ejecutar un bloque a la vez; no copiar toda la página. La pauta del profesor tiene seis etapas. La falla de MariaDB está autorizada según el equipo; coordinar el momento con el docente.
 
 [Versión técnica v0.3 (detalle y validaciones)](https://github.com/camilodrn/nodosur-tas-grupo7/blob/b1b32a64c965c31b43802b6bc7d39acfc8ef8b36/docs/COMANDOS-DEMOSTRACION-E5.md) · [Ensayo del 25/11](../evidencias/e5/ENSAYO-INCIDENTE-20261125.md) · [Inventario](../INVENTARIO.md)
 
@@ -45,7 +45,7 @@ En cada pestaña SSH:
 hostname
 ip -br addr
 ```
-Si la identidad no coincide, detenerse. Cada integrante debe saber dónde está ejecutando comandos. No escribir contraseñas en la guía ni mostrarlas al profesor.
+**Qué hace y qué esperar:** `hostname` identifica la máquina y `ip -br addr` muestra sus interfaces e IP. Comparar con la tabla y el inventario. Si la identidad no coincide, detenerse. Cada integrante debe saber dónde está ejecutando comandos. No escribir contraseñas en la guía ni mostrarlas al profesor.
 
 ### B. Dejar listo el navegador
 
@@ -53,7 +53,7 @@ Si la identidad no coincide, detenerse. Cada integrante debe saber dónde está 
 ```bash
 sudo docker inspect -f '{{range $name, $net := .NetworkSettings.Networks}}{{println $name $net.IPAddress}}{{end}}' nodosur-monitoreo-prometheus-1
 ```
-El 25/11 la red nodosur-monitoreo_default tenía 172.19.0.2; el 26/11 se confirmó acceso a la API de Prometheus en esa IP. Si cambió, ajustar solo el destino Prometheus del túnel.
+**Qué hace:** consulta las IP del contenedor Prometheus para preparar el túnel, sin modificarlo. El 25/11 la red nodosur-monitoreo_default tenía 172.19.0.2; el 26/11 se confirmó acceso a la API de Prometheus en esa IP. Si cambió, ajustar solo el destino Prometheus del túnel.
 
 **FEDORA — pestaña nueva llamada TÚNEL (no dentro de una VM):**
 ```bash
@@ -63,7 +63,7 @@ ssh -N -o ExitOnForwardFailure=yes \
   -L 127.0.0.1:18025:127.0.0.1:8025 \
   nodosur-g7-proxy@10.33.195.194
 ```
-Ingresar contraseña. **Si la terminal queda en blanco, está bien.** No cerrarla. Abrir estas páginas desde el navegador de Fedora (no desde la VM):
+**Qué hace:** abre tres accesos locales protegidos por SSH, sin entrar a una shell remota. Ingresar contraseña. **Si la terminal queda en blanco, está bien.** No cerrarla. Abrir estas páginas desde el navegador de Fedora (no desde la VM):
 
 | Pestaña del navegador | Dirección | Qué se muestra |
 | --- | --- | --- |
@@ -89,20 +89,20 @@ Propuesta: operador BD (único que detiene, arranca y restaura), operador DNS, o
 ```bash
 systemctl is-active named nfs-kernel-server
 ```
-Debe aparecer active dos veces.
+**Qué hace:** consulta el estado de BIND9 (DNS) y NFS (archivos compartidos). **Esperamos y mostramos:** `active` dos veces, en el mismo orden.
 
 **1.2 — VM263 WEB1, VM310 WEB2, VM279 BD y VM308 PROXY:** copiar este mismo comando en cada una de esas cuatro pestañas, una por una.
 ```bash
 sudo docker ps
 ```
-Mostrar los contenedores correspondientes: WordPress web1/web2, MariaDB original healthy, proxy y observabilidad. No detener nada.
+**Qué hace:** lista los contenedores en ejecución. **Esperamos y mostramos:** WordPress web1/web2, MariaDB original healthy, proxy y observabilidad. No detener nada.
 
 **1.3 — FEDORA:** comprobar la operación del producto 45 (Taller de alfarería).
 ```bash
 date -u
 curl -ksS -o /dev/null -w 'HTTP %{http_code} | %{time_total} s\n' https://nodosur07.tas/wp-json/wc/store/v1/products/45
 ```
-Debe salir HTTP 200. Abrir también la tienda en el navegador. Esta consulta depende de MariaDB. Guardar la hora UTC. Se repetirá exactamente la misma consulta en los pasos 3 y 5. -k omite confianza TLS; no valida identidad.
+**Qué hace:** registra la hora UTC y consulta el producto 45 mediante la API de WooCommerce; imprime el código HTTP y el tiempo, sin mostrar todo el JSON. **Esperamos y mostramos:** HTTP 200. Abrir también la tienda en el navegador. Esta consulta depende de MariaDB. Guardar la hora UTC. Se repetirá exactamente la misma consulta en los pasos 3 y 5. -k omite confianza TLS; no valida identidad.
 
 **Explicar:** DNS resuelve; HAProxy recibe HTTPS y balancea entre dos WordPress. Ambos dependen de MariaDB y comparten uploads por NFS.
 
@@ -114,14 +114,14 @@ sudo cat /etc/bind/named.conf.local
 sudo cat /etc/bind/db.nodosur07.tas
 sudo named-checkzone nodosur07.tas /etc/bind/db.nodosur07.tas
 ```
-Señalar al profesor: @ IN A 10.33.195.194 y www IN A 10.33.195.194. La validación debe decir OK.
+**Qué hace:** los dos `cat` muestran la declaración y el archivo de zona; `named-checkzone` revisa su sintaxis e integridad. **Esperamos y mostramos:** @ IN A 10.33.195.194 y www IN A 10.33.195.194. La validación debe decir OK.
 
 **2.2 — FEDORA:**
 ```bash
 dig @10.33.195.218 nodosur07.tas A +norecurse
 getent hosts nodosur07.tas
 ```
-Buscar NOERROR, aa y 10.33.195.194. Abrir el CMS por https://nodosur07.tas/ en el navegador.
+**Qué hace:** `dig` pregunta directamente a BIND9 por el registro A y `getent` comprueba cómo resuelve Fedora. **Esperamos y mostramos:** NOERROR, aa y 10.33.195.194. Abrir el CMS por https://nodosur07.tas/ en el navegador.
 
 **Explicar:** la IP pertenece a HAProxy (VM308), no a WordPress. DNS no transporta el tráfico web.
 
@@ -129,7 +129,13 @@ Buscar NOERROR, aa y 10.33.195.194. Abrir el CMS por https://nodosur07.tas/ en e
 
 ### 3.1 — NAVEGADOR: mostrar antes de la caída
 
-Grafana: WordPress y tienda = 1; DNS = 1; MariaDB = 1; alertas activas = 0. Prometheus: 12 targets UP. Alertmanager: sin alertas activas. Mailpit conserva correos del ensayo anterior: distinguirlos por hora de los nuevos.
+**Qué mostrar, en este orden:**
+
+1. [Grafana](https://nodosur07.tas/grafana/): abrir el dashboard Nodo Sur y mostrar el gráfico «Disponibilidad funcional y dependencias». WordPress y tienda = 1; DNS = 1; MariaDB = 1. Alertas activas = 0.
+2. [Prometheus / Targets](http://localhost:19090/targets): 12 targets UP; en [Alerts](http://localhost:19090/alerts), revisar que no haya alertas pendientes o disparadas.
+3. [Alertmanager](http://localhost:19093/): sin alertas activas. [Mailpit](http://localhost:18025/): identificar correos antiguos por su hora, sin borrarlos.
+
+**Explicar al profesor:** el sistema está funcionando antes del incidente; esta es nuestra referencia para comparar la caída y recuperación.
 
 El panel de Grafana «Targets disponibles» cuenta 8 targets filtrados, no los 12 de Prometheus. Seleccionar un rango reciente (por ejemplo, últimos 15 minutos) y refresco de 30 s. Usar horas del incidente actual.
 
@@ -140,7 +146,7 @@ hostname
 systemctl is-active nodosur-db-prod.service
 sudo docker inspect -f '{{.State.Health.Status}} {{range .Mounts}}{{.Name}} {{end}}' nodosur-db-staging
 ```
-Debe ser vm279-mariadb, active, healthy, volumen nodosur-db-staging_db_stage_data. Si difiere, NO detener. Asegurar respaldo y que el docente indique el momento.
+**Qué hace:** verifica que estamos en la VM correcta, que el servicio está activo y que el contenedor original tiene su volumen esperado. **Esperamos y mostramos:** vm279-mariadb, active, healthy, volumen nodosur-db-staging_db_stage_data. Si difiere, NO detener. Asegurar respaldo y que el docente indique el momento.
 
 ### 3.3 — VM279 BD: programar el rescate de emergencia
 
@@ -149,7 +155,7 @@ RESCATE="nodosur-e5-rescate-$(date +%s)"
 sudo systemd-run --unit="$RESCATE" --on-active=5min --timer-property=AccuracySec=1s /usr/bin/systemctl start nodosur-db-prod.service
 systemctl list-timers "$RESCATE.timer" --no-pager
 ```
-Debe aparecer el temporizador con próxima ejecución en el futuro. Si no aparece o hay error, **NO detener MariaDB**. Mantener esta misma terminal abierta. Es un intento automático de arranque, no una garantía. El mecanismo se probó con echo; la variante AccuracySec=1s no se volvió a ensayar.
+**Qué hace:** programa un intento de arranque automático de MariaDB a los 5 minutos como medida de seguridad. **Esperamos y mostramos:** el temporizador con próxima ejecución en el futuro. Si no aparece o hay error, **NO detener MariaDB**. Mantener esta misma terminal abierta. Es un intento automático de arranque, no una garantía. El mecanismo se probó con echo; la variante AccuracySec=1s no se volvió a ensayar.
 
 ### 3.4 — VM279 BD: provocar la falla (solo operador BD)
 
@@ -158,7 +164,9 @@ date -u
 sudo systemctl stop nodosur-db-prod.service
 sudo docker ps -a --filter name=nodosur-db-staging
 ```
-Debe quedar Exited. No se borra el volumen. **No usar docker compose down -v.** Registrar hora.
+**Qué hace:** registra la hora, detiene el servicio MariaDB original y comprueba el estado del contenedor. **Esperamos y mostramos:** `Exited`. No se borra el volumen. **No usar docker compose down -v.** Registrar hora.
+
+**Ahora:** avisar al operador de observabilidad para que abra Grafana; no cerrar la terminal BD. El operador cliente pasa inmediatamente al paso 3.5 y el de observabilidad al 3.6. No hay que esperar cinco minutos para observar la caída.
 
 ### 3.5 — FEDORA: mostrar que la operación falla
 
@@ -167,19 +175,26 @@ date -u
 curl -ksS -o /dev/null -w 'HTTP %{http_code} | %{time_total} s\n' https://nodosur07.tas/wp-json/wc/store/v1/products/45
 dig @10.33.195.218 nodosur07.tas A +norecurse
 ```
-Esperar HTTP 503 después de que HAProxy retire los backends. DNS sigue NOERROR. Si la primera consulta todavía no falla, repetir tras unos segundos; registrar el resultado real.
+**Qué hace:** repite la misma consulta funcional del producto y comprueba si DNS sigue respondiendo. **Esperamos y mostramos:** HTTP 503 después de que HAProxy retire los backends. DNS sigue NOERROR. Si la primera consulta todavía no falla, repetir tras unos segundos; registrar el resultado real.
 
 ### 3.6 — NAVEGADOR y VM308 PROXY: explicar la causa
 
-- Grafana: mysql_up cae a 0, portada y tienda a 0; DNS sigue en 1.
-- Prometheus / Alerts y Alertmanager: observar alertas pendientes o FIRING.
-- Mailpit: buscar los nuevos mensajes FIRING de MariaDB y HTTP (por hora). En el ensayo llegaron en aproximadamente 2 y 3 minutos; no son plazos garantizados.
+**Qué mostrar al profesor mientras MariaDB está detenida:**
+
+| Abrir en el navegador | Mostrar | Resultado esperado |
+| --- | --- | --- |
+| [Grafana](https://nodosur07.tas/grafana/) | Dashboard Nodo Sur → «Disponibilidad funcional y dependencias» y paneles de estado | MariaDB (`mysql_up`), portada y tienda pasan de 1 a 0; DNS permanece en 1. |
+| [Prometheus / Alerts](http://localhost:19090/alerts) | Reglas del incidente | PENDING y luego FIRING si se cumple el tiempo de evaluación. |
+| [Alertmanager](http://localhost:19093/) | Alertas recibidas | Alertas activas cuando llegan las notificaciones de Prometheus. |
+| [Mailpit](http://localhost:18025/) | Abrir los nuevos correos FIRING y mostrar su hora | Avisos MariaDB y HTTP; en el ensayo llegaron en aproximadamente 2 y 3 minutos, no es un plazo garantizado. |
+
+Los gráficos y alertas no cambian instantáneamente: dependen de los intervalos de scrape, evaluación y notificación. Refrescar el dashboard y observar el rango reciente. Si aún no hay alertas o correos, registrar lo observado; no retrasar la recuperación para forzarlos.
 
 **VM308 PROXY — mostrar logs:**
 ```bash
 sudo docker logs --since 10m nodosur-haproxy 2>&1 | tail -n 60
 ```
-Buscar DOWN y HTTP 503. Ambos backends dependen de la misma BD. El exporter puede seguir UP aunque MariaDB esté caída. No esperar más de lo acordado solo para obtener alertas; recuperar a tiempo.
+**Qué hace:** lee los logs recientes de HAProxy. **Esperamos y mostramos:** eventos DOWN de los backends y respuestas HTTP 503 durante el incidente. Ambos backends dependen de la misma BD. El exporter puede seguir UP aunque MariaDB esté caída. No esperar más de lo acordado solo para obtener alertas; recuperar a tiempo.
 
 ### 3.7 — VM279 BD: recuperar el servicio
 
@@ -188,21 +203,23 @@ date -u
 sudo systemctl start nodosur-db-prod.service
 sudo docker ps --filter name=nodosur-db-staging
 ```
-Esperar healthy. Si no recupera, detener la demostración y diagnosticar; no borrar volúmenes ni reiniciar todo.
+**Qué hace:** vuelve a iniciar MariaDB con su servicio habitual y consulta el contenedor. **Esperamos y mostramos:** healthy. Si no recupera, detener la demostración y diagnosticar; no borrar volúmenes ni reiniciar todo.
 
 **FEDORA — comprobación rápida antes de restaurar datos:**
 ```bash
 curl -ksS -o /dev/null -w 'HTTP %{http_code}\n' https://nodosur07.tas/wp-json/wc/store/v1/products/45
 ```
-Esperar 200. Solo entonces, **VM279 BD**, en la misma terminal que creó RESCATE:
+**Qué hace:** verifica que el producto vuelve a responder desde el cliente, no solo que el contenedor arrancó. **Esperamos y mostramos:** HTTP 200. Solo entonces, **VM279 BD**, en la misma terminal que creó RESCATE:
 ```bash
 test -n "$RESCATE" && sudo systemctl stop "$RESCATE.timer"
 ```
-Si el temporizador ya se ejecutó y desapareció, consultar su journal. No cancelar otros temporizadores.
+**Qué hace:** cancela únicamente el temporizador de rescate creado para este incidente, una vez recuperada la operación. Si el temporizador ya se ejecutó y desapareció, consultar su journal. No cancelar otros temporizadores.
 
 ## 4. Restauración de datos (SOLO copia de evaluación)
 
 **Todos los comandos de esta etapa van en VM279 BD.** El servicio original nodosur-db-staging ya debe estar healthy. No importaremos ningún respaldo sobre producción.
+
+**Objetivo:** demostrar que podemos recuperar un dato desde un respaldo real sin afectar al CMS. La secuencia que se muestra al profesor es: dato presente → dato eliminado en la copia → restauración → dato recuperado. La MariaDB original permanece operativa.
 
 ### 4.1 — Revisar la copia y el respaldo
 
@@ -213,7 +230,7 @@ sudo ls -lh /root/nodosur-e5-evaluacion/respaldo-e5-20261125.sql.gz
 sudo gzip -t /root/nodosur-e5-evaluacion/respaldo-e5-20261125.sql.gz && echo 'GZIP OK'
 sudo sha256sum /root/nodosur-e5-evaluacion/respaldo-e5-20261125.sql.gz
 ```
-Debe salir nodosur-e5-evaluacion, red none, sin puertos, volumen nodosur-e5-evaluacion-data en /var/lib/mysql y healthy. Respaldo 25/11 12:31 UTC, 384 KiB, GZIP OK y SHA-256:
+**Qué hace cada comando (en orden):** comprueba el nombre, aislamiento de red y volumen de la copia; revisa su salud; lista el respaldo y su fecha/tamaño; comprueba la integridad GZIP; calcula su huella SHA-256. La huella debe coincidir con la registrada el 25/11. **Esperamos y mostramos:** nodosur-e5-evaluacion, red none, sin puertos, volumen nodosur-e5-evaluacion-data en /var/lib/mysql y healthy. Respaldo 25/11 12:31 UTC, 384 KiB, GZIP OK y SHA-256:
 ```text
 aeb7c21e64147c018070dd8c6378e839ec7ab3ed02a6b505a4cdc1c2e7550699
 ```
@@ -227,7 +244,7 @@ SELECT option_id, option_name, option_value
 FROM wp_options WHERE option_name = 'nodosur_e5_testigo';
 SQL
 ```
-Debe aparecer exactamente una fila: 8603, nodosur_e5_testigo, NODOSUR-E5-RECUPERACION-20261125. Si ya está ausente, confirmar 0 filas y pasar a 4.4; si aparece algo distinto, detenerse.
+**Qué hace:** ejecuta un SELECT dentro de la MariaDB de evaluación, sin cambiar datos. `docker exec -i` permite enviar el SQL al contenedor y la contraseña se lee del secreto sin imprimirla. **Esperamos y mostramos:** exactamente una fila: 8603, nodosur_e5_testigo, NODOSUR-E5-RECUPERACION-20261125. Si ya está ausente, confirmar 0 filas y pasar a 4.4; si aparece algo distinto, detenerse.
 
 ### 4.3 — Simular pérdida del dato (solo copia)
 
@@ -244,7 +261,7 @@ SELECT COUNT(*) AS testigos FROM wp_options
 WHERE option_name = 'nodosur_e5_testigo';
 SQL
 ```
-Mostrar al profesor: filas_eliminadas = 1, testigos = 0. Si no coincide, NO ampliar el DELETE.
+**Qué hace:** elimina exclusivamente el dato testigo identificado por ID, nombre y valor en la copia. Después cuenta las filas eliminadas y verifica que el dato ya no exista. **Esperamos y mostramos:** `filas_eliminadas = 1`, `testigos = 0`. Explicar: «Simulamos la pérdida de este dato, no de toda la base ni de producción». Si no coincide, NO ampliar el DELETE.
 
 ### 4.4 — Restaurar el respaldo
 
@@ -256,7 +273,7 @@ Confirmar nuevamente el destino: nodosur-e5-evaluacion. La importación sobrescr
   time sudo gzip -dc /root/nodosur-e5-evaluacion/respaldo-e5-20261125.sql.gz | sudo docker exec -i nodosur-e5-evaluacion sh -c 'export MYSQL_PWD="$(cat /run/secrets/root_password)"; exec mariadb -uroot nodo_sur_final'
 )
 ```
-Esperar sin errores. Registrar el tiempo real; el ensayo demoró 2,924 s. Si hay error, no afirmar éxito.
+**Qué hace:** `gzip -dc` descomprime el respaldo sin borrarlo y envía el SQL a MariaDB dentro de la copia; `pipefail` permite detectar errores del pipeline y `time` mide la duración de la importación. **Esperamos:** que vuelva el prompt sin errores, con código de salida exitoso y tiempo de ejecución. **Mostrar:** la salida real del tiempo y explicar que la recuperación del dato se demuestra en el siguiente paso, no solo con la importación. Registrar el tiempo real; el ensayo demoró 2,924 s. Si hay error, no afirmar éxito.
 
 ### 4.5 — Comprobar que reapareció el dato
 
@@ -268,12 +285,12 @@ SELECT COUNT(*) AS tablas FROM information_schema.tables
 WHERE table_schema = DATABASE() AND table_type = 'BASE TABLE';
 SQL
 ```
-Mostrar el mismo ID, nombre, valor y 52 tablas. Antes había 0 testigos y ahora 1: esa es la evidencia pedida.
+**Qué hace:** vuelve a consultar el dato testigo y cuenta las tablas de la base restaurada. **Esperamos y mostramos:** ID 8603, nombre `nodosur_e5_testigo`, valor `NODOSUR-E5-RECUPERACION-20261125` y 52 tablas. Antes había 0 testigos y ahora 1: esa es la evidencia pedida.
 
 ```bash
 sudo docker ps --filter name=nodosur-db-staging --filter name=nodosur-e5-evaluacion
 ```
-Ambos deben quedar healthy.
+**Qué hace:** consulta los dos contenedores MariaDB para comprobar que la instancia original y la copia de evaluación siguen funcionando. **Esperamos y mostramos:** ambos healthy.
 
 **Explicar:** recuperar el servicio original y restaurar datos en una copia aislada son pruebas distintas. La pauta exige la copia de evaluación; no se conectó otro WordPress a ella.
 
@@ -285,9 +302,18 @@ date -u
 dig @10.33.195.218 nodosur07.tas A +norecurse
 curl -ksS -o /dev/null -w 'HTTP %{http_code} | %{time_total} s\n' https://nodosur07.tas/wp-json/wc/store/v1/products/45
 ```
-Mostrar HTTP 200 y CMS por nombre, tienda operativa. Registrar hora.
+**Qué hace:** repite la operación inicial tras el incidente y la restauración en la copia, comprueba DNS y registra hora. **Esperamos y mostramos:** NOERROR, HTTP 200 y CMS por nombre, tienda operativa. Abrir en el navegador el producto [Taller de Alfarería](https://nodosur07.tas/producto/taller-de-alfareria/) y registrar hora.
 
-**5.2 — NAVEGADOR:** Grafana: mostrar gráfico «Disponibilidad funcional y dependencias» con la caída y recuperación. MariaDB, portada, tienda y DNS en 1. Prometheus: 12 targets UP. Alertmanager: sin alertas activas una vez normalizado. Mailpit: nuevos RESOLVED del incidente, distinguibles por hora. Pueden tardar; no confundir correos viejos con nuevos.
+**5.2 — NAVEGADOR: mostrar la recuperación.**
+
+| Abrir | Qué mostrar al profesor | Resultado esperado |
+| --- | --- | --- |
+| [Grafana](https://nodosur07.tas/grafana/) | Gráfico «Disponibilidad funcional y dependencias»; elegir un rango que incluya el incidente | MariaDB, portada y tienda vuelven a 1 después de la caída; DNS permanece en 1. |
+| [Prometheus / Targets](http://localhost:19090/targets) | Estado de recolección | 12 targets UP. |
+| [Alertmanager](http://localhost:19093/) | Alertas | Sin alertas activas una vez normalizado. |
+| [Mailpit](http://localhost:18025/) | Nuevos correos RESOLVED del incidente y su hora | Notificación de recuperación si se disparó la alerta; puede tardar. No confundir correos antiguos. |
+
+**Explicar:** tenemos evidencia del antes, durante y después; registrar lo que realmente ocurrió y no inventar tiempos ni alertas.
 
 **5.3 — VM279 BD:** mostrar que el dato recuperado sigue presente (repetir SELECT del paso 4.5 si lo solicita el profesor).
 
