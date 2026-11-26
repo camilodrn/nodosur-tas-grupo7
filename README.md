@@ -7,6 +7,7 @@ Proyecto de infraestructura para una plataforma WordPress/WooCommerce con dos se
 ## Entrega 5 — preparación al 26/11/2026
 
 - [Guía fácil de demostración E5 v0.5 (paso a paso)](docs/COMANDOS-DEMOSTRACION-E5.md): terminales identificadas, comandos por etapa, resultados esperados y puntos de parada; ejecutar los cambios únicamente en la demostración acordada.
+- [Copia TXT de la guía v0.5](docs/COMANDOS-DEMOSTRACION-E5.txt): mismos comandos y procedimiento en texto plano para consulta del equipo.
 - [Registro técnico del ensayo E5](evidencias/e5/ENSAYO-INCIDENTE-20261125.md): incidente MariaDB, HTTP 503 → 200, alertas FIRING/RESOLVED y restauración del dato testigo en una copia aislada.
 - Grafana actualizado a 23 paneles: nuevo historial de disponibilidad funcional y dependencias, con huella idéntica a la instalada.
 - El 26/11 se estandarizaron los cinco hostnames sin reinicios ni cambios de IP; validación posterior: 12/12 targets, 4/4 sondas, 5/5 nodenames nuevos, MariaDB operativa y CMS/login de Grafana HTTP 200 desde Fedora. Ver [inventario](INVENTARIO.md#estandarización-de-hostnames-26112026). No se repitió la falla.
