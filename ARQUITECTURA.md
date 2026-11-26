@@ -1,18 +1,18 @@
 # Arquitectura de Nodo Sur — E3 y E4
 
-**Topología E3 comprobada en octubre, ampliada con observabilidad E4 y direcciones observadas el 23/11/2026.** Esta página describe el laboratorio en funcionamiento; no presupone que las modificaciones del PR de Codex estén instaladas.
+**Topología E3 comprobada en octubre, ampliada con observabilidad E4 y direcciones y hostnames verificados el 26/11/2026.** Esta página describe el laboratorio en funcionamiento; no presupone que las modificaciones del PR de Codex estén instaladas.
 
 ## Vista general
 
 ```mermaid
 flowchart LR
     Cliente["Cliente VPN / laboratorio"]
-    DNS["VM268 · BIND9"]
-    Proxy["VM308 · HAProxy"]
-    Web1["VM263 · WordPress web1"]
-    Web2["VM310 · WordPress web2"]
-    BD[("VM279 · MariaDB")]
-    NFS[("VM268 · NFS uploads")]
+    DNS["vm268-dns-nfs · BIND9"]
+    Proxy["vm308-proxy-monitor · HAProxy"]
+    Web1["vm263-web1 · WordPress"]
+    Web2["vm310-web2 · WordPress"]
+    BD[("vm279-mariadb · MariaDB")]
+    NFS[("vm268-dns-nfs · NFS uploads")]
 
     Cliente -- "DNS UDP/TCP 53" --> DNS
     DNS -. "A nodosur07.tas → 10.33.195.194" .-> Cliente
@@ -31,17 +31,17 @@ flowchart LR
 
 VM308 recoge métricas de los cinco hosts y de servicios mediante Prometheus; Grafana presenta el tablero por HTTPS en `/grafana/`. Alertmanager entrega avisos a Mailpit de laboratorio. VM268 concentra copias y sus comprobaciones de integridad; existen segundas copias de determinadas familias fuera de su host de origen. Véase [estado de E4](docs/ENTREGA4.md). La observabilidad no elimina los SPOF de la arquitectura.
 
-## Inventario y tráfico (23/11)
+## Inventario y tráfico (26/11)
 
 | Componente | IP administración | IP interna | Servicio |
 |---|---|---|---|
-| VM268 — DNS y NFS | `10.33.195.218` | `10.33.199.59` | DNS 53 UDP/TCP, NFSv4.1 TCP 2049 |
-| VM263 — web1 | `10.33.195.183` | `10.33.199.58` | WordPress HTTP 18081 |
-| VM310 — web2 | `10.33.195.197` | `10.33.199.62` | WordPress HTTP 18080 |
-| VM279 — MariaDB | `10.33.195.226` | `10.33.199.60` | MariaDB TCP 3306 |
-| VM308 — proxy | `10.33.195.194` | `10.33.199.61` | Entrada HTTP 80 y HTTPS 443 |
+| VM268 — `vm268-dns-nfs` | `10.33.195.218` | `10.33.199.59` | DNS 53 UDP/TCP, NFSv4.1 TCP 2049 |
+| VM263 — `vm263-web1` | `10.33.195.183` | `10.33.199.58` | WordPress HTTP 18081 |
+| VM310 — `vm310-web2` | `10.33.195.197` | `10.33.199.62` | WordPress HTTP 18080 |
+| VM279 — `vm279-mariadb` | `10.33.195.226` | `10.33.199.60` | MariaDB TCP 3306 |
+| VM308 — `vm308-proxy-monitor` | `10.33.195.194` | `10.33.199.61` | Entrada HTTP 80 y HTTPS 443 |
 
-La subred interna es `10.33.199.56/29`. Los enlaces internos y el número de IPs disponibles limitan la ampliación directa sin modificar el direccionamiento. Ver [inventario](INVENTARIO.md) y [matriz de flujos](docs/MATRIZ-FLUJOS-E3.md).
+El 26/11 se cambiaron únicamente los hostnames del sistema operativo y su resolución local; la topología, los usuarios SSH, las IP y las rutas de servicios permanecen sin cambios. La subred interna es `10.33.199.56/29`. Los enlaces internos y el número de IPs disponibles limitan la ampliación directa sin modificar el direccionamiento. Ver [inventario](INVENTARIO.md) y [matriz de flujos](docs/MATRIZ-FLUJOS-E3.md).
 
 ## Capa de entrada: DNS, HAProxy y TLS
 
