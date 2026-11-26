@@ -1,6 +1,6 @@
 # E5 — Demostración en vivo: guía fácil para todo el equipo
 
-**Grupo 7 · 27/11/2026 · v0.4 (26/11/2026)**
+**Grupo 7 · 27/11/2026 · v0.5 (26/11/2026)**
 
 Esta es la guía para usar delante del profesor. No es necesario memorizar comandos. Cada paso dice dónde hacerlo, qué copiar y qué mostrar. Ejecutar un bloque a la vez; no copiar toda la página. La pauta del profesor tiene seis etapas. La falla de MariaDB está autorizada según el equipo; coordinar el momento con el docente.
 
@@ -10,15 +10,15 @@ Esta es la guía para usar delante del profesor. No es necesario memorizar coman
 
 ### A. Abrir las terminales
 
-Desde Fedora, abrir una pestaña por VM y ponerle el nombre de la primera columna. Mantener también una terminal Fedora libre, sin SSH. No cambiar hostnames reales. Verificar las IP en iLab: son las últimas conocidas, pueden cambiar por DHCP.
+Desde Fedora, abrir una pestaña por VM y ponerle el nombre de la primera columna. Mantener también una terminal Fedora libre, sin SSH. Los cinco hostnames reales se estandarizaron el 26/11; no volver a cambiarlos durante la defensa. Las IP se verificaron el 26/11, pero pueden variar por DHCP: confirmar en iLab.
 
 | Pestaña | Hostname que debe aparecer al ejecutar hostname | Acceso desde Fedora |
 | --- | --- | --- |
-| VM263 WEB1 | nodosurtas07 | ssh tas_revision_e3@10.33.195.183 |
-| VM268 DNS | nodosur-g7 | ssh tas_revision_e3@10.33.195.218 |
-| VM279 BD | svr-db-nodosur07 | ssh tas_revision_e3@10.33.195.226 |
-| VM308 PROXY | nodosur-g7-proxy | ssh nodosur-g7-proxy@10.33.195.194 |
-| VM310 WEB2 | nodosur-g7-web2 | ssh tas_revision_e3@10.33.195.197 |
+| VM263 WEB1 | vm263-web1 | ssh tas_revision_e3@10.33.195.183 |
+| VM268 DNS | vm268-dns-nfs | ssh tas_revision_e3@10.33.195.218 |
+| VM279 BD | vm279-mariadb | ssh tas_revision_e3@10.33.195.226 |
+| VM308 PROXY | vm308-proxy-monitor | ssh nodosur-g7-proxy@10.33.195.194 |
+| VM310 WEB2 | vm310-web2 | ssh tas_revision_e3@10.33.195.197 |
 
 **FEDORA → pestaña VM263 WEB1**
 ```bash
@@ -53,7 +53,7 @@ Si la identidad no coincide, detenerse. Cada integrante debe saber dónde está 
 ```bash
 sudo docker inspect -f '{{range $name, $net := .NetworkSettings.Networks}}{{println $name $net.IPAddress}}{{end}}' nodosur-monitoreo-prometheus-1
 ```
-El 25/11 la red nodosur-monitoreo_default tenía 172.19.0.2. Si cambió, ajustar solo el destino Prometheus del túnel.
+El 25/11 la red nodosur-monitoreo_default tenía 172.19.0.2; el 26/11 se confirmó acceso a la API de Prometheus en esa IP. Si cambió, ajustar solo el destino Prometheus del túnel.
 
 **FEDORA — pestaña nueva llamada TÚNEL (no dentro de una VM):**
 ```bash
@@ -140,7 +140,7 @@ hostname
 systemctl is-active nodosur-db-prod.service
 sudo docker inspect -f '{{.State.Health.Status}} {{range .Mounts}}{{.Name}} {{end}}' nodosur-db-staging
 ```
-Debe ser svr-db-nodosur07, active, healthy, volumen nodosur-db-staging_db_stage_data. Si difiere, NO detener. Asegurar respaldo y que el docente indique el momento.
+Debe ser vm279-mariadb, active, healthy, volumen nodosur-db-staging_db_stage_data. Si difiere, NO detener. Asegurar respaldo y que el docente indique el momento.
 
 ### 3.3 — VM279 BD: programar el rescate de emergencia
 
@@ -304,6 +304,8 @@ Cada integrante ejecuta o interpreta una comprobación y responde una pregunta. 
 - Riesgo: HAProxy, MariaDB, DNS y NFS son puntos únicos de falla.
 
 ## Cierre y límites
+
+- Validación posterior al cambio de hostname (26/11): cinco nodenames correctos en `node_uname_info`, 12/12 targets `up=1`, 4/4 `probe_success=1`, `mysql_up=1`, ambos backends HTTP 200, Grafana `database=ok`, cero alertas activas en Prometheus. Desde Fedora: DNS correcto, página del producto 45 e inicio de sesión Grafana HTTP 200 siguiendo redirecciones con `curl -k -L`. No se repitió la falla ni la restauración. Se conservan usuarios SSH, rutas, contenedores, IP y alias locales; persistencia tras reinicio y siguientes respaldos automáticos pendientes de comprobar.
 
 - Ensayo 25/11: 42 s detección, 112 s primera notificación interna, aprox. 4 min 45 s recuperación funcional, 2,924 s importación SQL. No equivalen a RTO/RPO integral. La defensa del 27/11 tendrá sus propios tiempos.
 - Lecturas, rutas, autenticación, checksum, DNS, métricas y accesos se comprobaron el 25/11. El túnel con bind explícito y el temporizador AccuracySec=1s son variantes propuestas; no se reensayaron. Las acciones de detención/importación no se repitieron después del ensayo. No afirmar que se verificó el ensayo del 26/11: el equipo reportó dificultades de uso sin detallar sus resultados.
