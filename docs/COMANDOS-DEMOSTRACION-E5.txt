@@ -1,6 +1,6 @@
 E5 — Demostración en vivo: guía fácil para todo el equipo
 
-Grupo 7 · 27/11/2026 · v0.7 (26/11/2026)
+Grupo 7 · 27/11/2026 · v0.8 (26/11/2026)
 
 Esta es la guía para usar delante del profesor. No es necesario memorizar comandos. Cada paso dice dónde hacerlo, qué copiar, qué hace el comando, qué esperar y qué mostrar al profesor. Ejecutar un bloque a la vez; no copiar toda la página. La pauta del profesor tiene seis etapas. La falla de MariaDB está autorizada según el equipo; coordinar el momento con el docente.
 
@@ -8,7 +8,7 @@ Versión técnica v0.3 (detalle y validaciones) (https://github.com/camilodrn/no
 
 0. Arquitectura de Nodo Sur — mostrar al profesor al inicio
 
-Ver figura gráfica: https://github.com/camilodrn/nodosur-tas-grupo7/blob/main/docs/COMANDOS-DEMOSTRACION-E5.md#0-arquitectura-de-nodo-sur--mostrar-al-profesor-al-inicio
+Ver figura gráfica: https://github.com/camilodrn/nodosur-tas-grupo7/blob/main/docs/figuras/nodosur-arquitectura-e5.svg
 
 Cliente Fedora / VPN
   |-- DNS 53 UDP/TCP --> VM268 vm268-dns-nfs (BIND9)
