@@ -1,10 +1,46 @@
 E5 — Demostración en vivo: guía fácil para todo el equipo
 
-Grupo 7 · 27/11/2026 · v0.6 (26/11/2026)
+Grupo 7 · 27/11/2026 · v0.7 (26/11/2026)
 
 Esta es la guía para usar delante del profesor. No es necesario memorizar comandos. Cada paso dice dónde hacerlo, qué copiar, qué hace el comando, qué esperar y qué mostrar al profesor. Ejecutar un bloque a la vez; no copiar toda la página. La pauta del profesor tiene seis etapas. La falla de MariaDB está autorizada según el equipo; coordinar el momento con el docente.
 
 Versión técnica v0.3 (detalle y validaciones) (https://github.com/camilodrn/nodosur-tas-grupo7/blob/b1b32a64c965c31b43802b6bc7d39acfc8ef8b36/docs/COMANDOS-DEMOSTRACION-E5.md) · Ensayo del 25/11 (https://github.com/camilodrn/nodosur-tas-grupo7/blob/main/evidencias/e5/ENSAYO-INCIDENTE-20261125.md) · Inventario (https://github.com/camilodrn/nodosur-tas-grupo7/blob/main/INVENTARIO.md)
+
+0. Arquitectura de Nodo Sur — mostrar al profesor al inicio
+
+Ver figura gráfica: https://github.com/camilodrn/nodosur-tas-grupo7/blob/main/docs/COMANDOS-DEMOSTRACION-E5.md#0-arquitectura-de-nodo-sur--mostrar-al-profesor-al-inicio
+
+Cliente Fedora / VPN
+  |-- DNS 53 UDP/TCP --> VM268 vm268-dns-nfs (BIND9)
+  |                       10.33.195.218
+  |<-- A: 10.33.195.194
+  |
+  +-- HTTPS 443 --> VM308 vm308-proxy-monitor (HAProxy)
+                    10.33.195.194 / 10.33.199.61
+                      |                 |
+                    HTTP 18081        HTTP 18080
+                      |                 |
+                   VM263 web1        VM310 web2
+                   10.33.199.58      10.33.199.62
+                      |                 |
+                      +-- TCP 3306 -----+
+                      |                 |
+                      v                 v
+                    VM279 vm279-mariadb
+                    10.33.199.60 (MariaDB)
+
+Ambos WordPress montan uploads desde VM268 (10.33.199.59)
+por NFSv4.1 TCP 2049. VM268 también concentra respaldos.
+VM308 aloja Prometheus, Grafana, Blackbox Exporter,
+Alertmanager y Mailpit, con métricas de las cinco VM y servicios.
+
+Red interna: 10.33.199.56/29.
+
+Explicación breve: DNS resuelve el dominio; el cliente entra directamente
+por HTTPS a HAProxy, que balancea entre ambos WordPress. Los dos usan
+MariaDB y NFS compartidos. Prometheus recoge métricas, Grafana las muestra
+y Alertmanager envía notificaciones a Mailpit. Si cae MariaDB, los dos
+WordPress pierden acceso a su base de datos, aunque DNS siga funcionando.
 
 Antes de empezar (hacerlo antes de que llegue el profesor)
 
