@@ -4,11 +4,12 @@
 
 Proyecto de infraestructura para una plataforma WordPress/WooCommerce con dos servidores web, balanceo de carga y estado compartido. Este repositorio conserva la implementación de E3 y el avance de E4: observabilidad, respaldos y continuidad.
 
-## Entrega 5 — ensayo previo del 25/11/2026
+## Entrega 5 — preparación al 26/11/2026
 
-- [Guía fácil de demostración E5 v0.4 (paso a paso)](docs/COMANDOS-DEMOSTRACION-E5.md): terminales identificadas, comandos por etapa, resultados esperados y puntos de parada; ejecutar los cambios únicamente en la demostración acordada.
+- [Guía fácil de demostración E5 v0.5 (paso a paso)](docs/COMANDOS-DEMOSTRACION-E5.md): terminales identificadas, comandos por etapa, resultados esperados y puntos de parada; ejecutar los cambios únicamente en la demostración acordada.
 - [Registro técnico del ensayo E5](evidencias/e5/ENSAYO-INCIDENTE-20261125.md): incidente MariaDB, HTTP 503 → 200, alertas FIRING/RESOLVED y restauración del dato testigo en una copia aislada.
 - Grafana actualizado a 23 paneles: nuevo historial de disponibilidad funcional y dependencias, con huella idéntica a la instalada.
+- El 26/11 se estandarizaron los cinco hostnames sin reinicios ni cambios de IP; validación posterior: 12/12 targets, 4/4 sondas, 5/5 nodenames nuevos, MariaDB operativa y CMS/login de Grafana HTTP 200 desde Fedora. Ver [inventario](INVENTARIO.md#estandarización-de-hostnames-26112026). No se repitió la falla.
 - Defensa en vivo del 27/11 pendiente. Los tiempos corresponden al escenario ensayado; no prueban RPO/RTO general. El informe E1–E4 enviado al aula permanece sin cambios.
 
 ## Entrega 4 — estado al 23/11/2026
@@ -18,7 +19,7 @@ El informe acumulativo E1–E4 v4.24 y los anexos se enviaron al aula el 23/11. 
 - [Estado E4 y evidencias de cierre](docs/ENTREGA4.md): resultados, fuentes y límites.
 - [Inventario actualizado](INVENTARIO.md) y [arquitectura](ARQUITECTURA.md).
 - Sitio: `https://nodosur07.tas/`; monitoreo: `https://nodosur07.tas/grafana/`, desde redes autorizadas y con resolución/configuración de confianza apropiadas.
-- Las IP de administración se observaron el 23/11; pueden variar por DHCP. No usar IP de octubre para iniciar nuevas sesiones sin verificar.
+- Las IP de administración se verificaron el 26/11; pueden variar por DHCP. No usar IP de octubre para iniciar nuevas sesiones sin verificar.
 - El contenido versionado no constituye una orden de despliegue. No reiniciar ni sustituir configuraciones de iLab solo para sincronizar Git.
 
 El informe y anexos exactos enviados al aula están identificados por huella en [el registro de entrega](docs/ENTREGA4.md#identificación-de-los-archivos-enviados-al-aula). El paquete completo se conserva fuera del repositorio público.
@@ -27,19 +28,19 @@ El informe y anexos exactos enviados al aula están identificados por huella en 
 
 **Corte histórico de E3: 21 de octubre de 2026; ensayos y accesos de revisión actualizados el 22/10.** El sistema está desplegado en el laboratorio iLab y se accede desde redes autorizadas. La mayoría de los cambios propuestos por Codex en la [auditoría separada](https://github.com/camilodrn/nodosur-tas-grupo7/pull/1) **no están desplegados**. Excepción comprobada: la protección Apache de `uploads` ya está activa en **web1 (VM263) y web2 (VM310)**; portada, tienda e imagen compartida HTTP 200 en ambos, ruta PHP inexistente HTTP 403 en ambos y HTTPS repartido 3/3 ([evidencia final](evidencias/e3/apache-uploads-web1-web2-final-20261021.txt)).
 
-## Arquitectura implementada e inventario de direcciones (23/11)
+## Arquitectura implementada e inventario de direcciones (26/11)
 
 `Cliente → DNS (VM268) → nombre del proxy (VM308) → WordPress web1 (VM263) / web2 (VM310) → MariaDB (VM279)`
 
 El DNS resuelve el nombre; **no es un intermediario del tráfico HTTP**. Ambos WordPress usan una base de datos común y montan el directorio `uploads` desde NFS en VM268.
 
-| VM | Rol | IP de acceso/administración | IP interna |
-|---|---|---|---|
-| 268 | BIND9, NFS y copia de respaldos | `10.33.195.218` | `10.33.199.59` |
-| 263 | WordPress/WooCommerce web1, Docker | `10.33.195.183` | `10.33.199.58` |
-| 310 | WordPress/WooCommerce web2, Docker | `10.33.195.197` | `10.33.199.62` |
-| 279 | MariaDB 10.11, Docker | `10.33.195.226` | `10.33.199.60` |
-| 308 | HAProxy 3.2, terminación HTTPS y observabilidad | `10.33.195.194` | `10.33.199.61` |
+| VM | Hostname actual | Rol | IP de acceso/administración | IP interna |
+|---|---|---|---|---|
+| 268 | `vm268-dns-nfs` | BIND9, NFS y copia de respaldos | `10.33.195.218` | `10.33.199.59` |
+| 263 | `vm263-web1` | WordPress/WooCommerce web1, Docker | `10.33.195.183` | `10.33.199.58` |
+| 310 | `vm310-web2` | WordPress/WooCommerce web2, Docker | `10.33.195.197` | `10.33.199.62` |
+| 279 | `vm279-mariadb` | MariaDB 10.11, Docker | `10.33.195.226` | `10.33.199.60` |
+| 308 | `vm308-proxy-monitor` | HAProxy 3.2, terminación HTTPS y observabilidad | `10.33.195.194` | `10.33.199.61` |
 
 - **DNS:** `nodosur07.tas` y `www.nodosur07.tas` apuntan al proxy `10.33.195.194`.
 - **Proxy:** HTTP 80 redirige a HTTPS 443; distribuye tráfico `roundrobin` a web1 `10.33.199.58:18081` y web2 `10.33.199.62:18080`. Usa health checks HTTP.
