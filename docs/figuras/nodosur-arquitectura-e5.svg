@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 746" width="1160" height="746" role="img" aria-labelledby="title desc">
+  <title id="title">Nodo Sur | Arquitectura lógica E5</title>
+  <desc id="desc">Cinco máquinas virtuales. El cliente consulta DNS en VM268 y entra por HTTPS al proxy VM308, que balancea entre VM263 y VM310. Ambos WordPress usan NFS en VM268 y MariaDB en VM279. La observabilidad reside en VM308.</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#475569"/></marker><marker id="amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#b45309"/></marker></defs>
+  <rect width="1160" height="746" rx="18" fill="#fff"/>
+  <g font-family="Arial, Helvetica, sans-serif" fill="#172b43">
+    <text x="32" y="39" font-size="12" font-weight="700" letter-spacing="2" fill="#2563a6">NODO SUR  /  GRUPO 7</text>
+    <text x="32" y="70" font-size="28" font-weight="700">Arquitectura lógica E5</text>
+    <text x="1128" y="39" font-size="13" text-anchor="end" fill="#52647b">USM · 27/11/2026</text>
+    <text x="1128" y="60" font-size="13" text-anchor="end" fill="#52647b">5 VM · Red interna 10.33.199.56/29</text>
+    <!-- Client and separate DNS/HTTPS paths -->
+    <rect x="355" y="91" width="410" height="66" rx="12" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+    <text x="560" y="117" font-size="18" font-weight="700" text-anchor="middle">Cliente Fedora / VPN</text>
+    <text x="560" y="140" font-size="15" text-anchor="middle" fill="#52647b">nodosur07.tas</text>
+    <path d="M355 124H158V194" fill="none" stroke="#b45309" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#amber)"/>
+    <text x="255" y="114" font-size="13" font-weight="700" text-anchor="middle" fill="#92400e">DNS · UDP/TCP 53</text>
+    <path d="M560 157V194" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <text x="575" y="181" font-size="13" font-weight="700" fill="#334155">HTTPS 443</text>
+    <!-- VM268: DNS and shared files -->
+    <rect x="32" y="195" width="252" height="357" rx="13" fill="#fffbeb" stroke="#e4b25a" stroke-width="1.5"/>
+    <text x="48" y="221" font-size="12" font-weight="700" fill="#92400e" letter-spacing="1">VM268</text>
+    <text x="48" y="242" font-size="17" font-weight="700">vm268-dns-nfs</text>
+    <rect x="48" y="256" width="220" height="104" rx="9" fill="#fff" stroke="#e4b25a"/>
+    <text x="62" y="280" font-size="17" font-weight="700">BIND9</text>
+    <text x="62" y="301" font-size="14" fill="#52647b">10.33.195.218</text>
+    <text x="62" y="323" font-size="13" fill="#52647b">Resuelve el dominio a:</text>
+    <text x="62" y="344" font-size="15" font-weight="700" fill="#92400e">A → 10.33.195.194</text>
+    <text x="48" y="389" font-size="13" fill="#92400e">Misma VM, otro servicio</text>
+    <rect x="48" y="407" width="220" height="128" rx="9" fill="#fff" stroke="#e4b25a"/>
+    <text x="62" y="432" font-size="17" font-weight="700">NFS y respaldos</text>
+    <text x="62" y="454" font-size="14" fill="#52647b">10.33.199.59</text>
+    <text x="62" y="478" font-size="14" font-weight="700" fill="#92400e">NFSv4.1 · TCP 2049</text>
+    <text x="62" y="500" font-size="13" fill="#52647b">Uploads compartidos</text>
+    <text x="62" y="520" font-size="13" fill="#52647b">y copias de respaldo</text>
+    <!-- VM308: entry and monitoring in one VM -->
+    <rect x="326" y="195" width="802" height="150" rx="13" fill="#eff6ff" stroke="#8fb4e2" stroke-width="1.5"/>
+    <text x="344" y="222" font-size="12" font-weight="700" fill="#1d4f91" letter-spacing="1">VM308</text>
+    <text x="410" y="222" font-size="17" font-weight="700">vm308-proxy-monitor</text>
+    <rect x="344" y="238" width="432" height="90" rx="9" fill="#fff" stroke="#8fb4e2"/>
+    <text x="360" y="261" font-size="17" font-weight="700">HAProxy · TLS</text>
+    <text x="360" y="283" font-size="14" fill="#52647b">10.33.195.194 (entrada) · 10.33.199.61 (interna)</text>
+    <text x="360" y="306" font-size="14" font-weight="700" fill="#1d4f91">Balanceo roundrobin · health checks HTTP</text>
+    <rect x="790" y="238" width="320" height="90" rx="9" fill="#fff" stroke="#8fb4e2"/>
+    <text x="806" y="260" font-size="16" font-weight="700">Observabilidad</text>
+    <text x="806" y="281" font-size="13" fill="#334155">Prometheus · Grafana · Blackbox</text>
+    <text x="806" y="300" font-size="13" fill="#334155">Alertmanager · Mailpit</text>
+    <text x="806" y="318" font-size="12" fill="#1d4f91">Métricas de las 5 VM y servicios</text>
+    <!-- Balanceo to both web servers -->
+    <path d="M560 345V370H440V402 M560 370H680V402" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <text x="440" y="362" font-size="13" text-anchor="middle" font-weight="700" fill="#334155">HTTP 18081</text>
+    <text x="680" y="362" font-size="13" text-anchor="middle" font-weight="700" fill="#334155">HTTP 18080</text>
+    <!-- Two web VMs grouped only as a logical tier -->
+    <rect x="326" y="403" width="468" height="149" rx="13" fill="#f0fdf4" stroke="#99cbb0" stroke-width="1.5"/>
+    <rect x="342" y="418" width="212" height="99" rx="9" fill="#fff" stroke="#99cbb0"/>
+    <rect x="566" y="418" width="212" height="99" rx="9" fill="#fff" stroke="#99cbb0"/>
+    <text x="356" y="441" font-size="12" font-weight="700" fill="#166534">VM263 · BACKEND 1</text>
+    <text x="356" y="462" font-size="17" font-weight="700">vm263-web1</text>
+    <text x="356" y="482" font-size="14" fill="#52647b">WordPress / Apache</text>
+    <text x="356" y="503" font-size="14" font-weight="700">10.33.199.58:18081</text>
+    <text x="580" y="441" font-size="12" font-weight="700" fill="#166534">VM310 · BACKEND 2</text>
+    <text x="580" y="462" font-size="17" font-weight="700">vm310-web2</text>
+    <text x="580" y="482" font-size="14" fill="#52647b">WordPress / Apache</text>
+    <text x="580" y="503" font-size="14" font-weight="700">10.33.199.62:18080</text>
+    <text x="560" y="539" font-size="13" text-anchor="middle" font-weight="700" fill="#166534">Los dos backends comparten archivos y base de datos</text>
+    <path d="M326 480H284" fill="none" stroke="#b45309" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#amber)"/>
+    <path d="M560 552V607" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <text x="574" y="584" font-size="13" font-weight="700" fill="#334155">TCP 3306</text>
+    <!-- Shared database -->
+    <rect x="326" y="608" width="468" height="89" rx="13" fill="#f5f3ff" stroke="#b6a4e4" stroke-width="1.5"/>
+    <text x="344" y="631" font-size="12" font-weight="700" fill="#6d28a0" letter-spacing="1">VM279 · DATOS</text>
+    <text x="344" y="654" font-size="18" font-weight="700">vm279-mariadb</text>
+    <text x="344" y="677" font-size="14" fill="#52647b">MariaDB compartida · 10.33.199.60:3306</text>
+    <!-- Reading aid -->
+    <rect x="818" y="403" width="310" height="149" rx="12" fill="#f8fafc" stroke="#cbd5e1"/>
+    <text x="834" y="429" font-size="15" font-weight="700">Cómo leer la figura</text>
+    <text x="834" y="451" font-size="13" fill="#334155">1. DNS resuelve; no transporta HTTP.</text>
+    <text x="834" y="473" font-size="13" fill="#334155">2. HAProxy distribuye las solicitudes.</text>
+    <text x="834" y="495" font-size="13" fill="#334155">3. Ambos WordPress usan NFS y BD.</text>
+    <text x="834" y="523" font-size="13" font-weight="700" fill="#334155">E5: caída de BD afecta a ambos web.</text>
+    <line x1="32" y1="720" x2="1128" y2="720" stroke="#e2e8f0"/>
+    <text x="32" y="737" font-size="12" fill="#64748b">Vista lógica · Hostnames e IP verificados el 26/11/2026 · Enlaces individuales de métricas omitidos.</text>
+  </g>
+</svg>
